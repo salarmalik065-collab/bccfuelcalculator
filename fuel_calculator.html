@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bcc Fuel Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #d9534f;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c9302c;
+        }
+        .result {
+            margin-top: 20px;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 5px solid #d9534f;
+        }
+        .result p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🚚 Bcc Fuel Calculator</h2>
+    
+    <div class="form-group">
+        <label for="fromCity">Kahan Se (Origin City):</label>
+        <select id="fromCity">
+            <option value="Karachi">Karachi</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Nawabshah">Nawabshah</option>
+            <option value="Ranipur">Ranipur</option>
+            <option value="Khairpur">Khairpur</option>
+            <option value="Sukkur" selected>Sukkur</option>
+            <option value="Gambat">Gambat</option>
+            <option value="Rohri">Rohri</option>
+            <option value="Ghotki">Ghotki</option>
+            <option value="Sadiqabad">Sadiqabad</option>
+            <option value="Rahim Yar Khan">Rahim Yar Khan</option>
+            <option value="Khanpur">Khanpur</option>
+            <option value="Bahawalpur">Bahawalpur</option>
+            <option value="Multan">Multan</option>
+            <option value="Depalpur">Depalpur</option>
+            <option value="Sahiwal">Sahiwal</option>
+            <option value="Faisalabad">Faisalabad</option>
+            <option value="Lahore">Lahore</option>
+            <option value="Sargodha">Sargodha</option>
+            <option value="Gujranwala">Gujranwala</option>
+            <option value="Rawalpindi">Rawalpindi</option>
+            <option value="Islamabad">Islamabad</option>
+            <option value="Peshawar">Peshawar</option>
+            <option value="Quetta">Quetta</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="toCity">Kahan Tak (Destination City):</label>
+        <select id="toCity">
+            <option value="Karachi">Karachi</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Nawabshah">Nawabshah</option>
+            <option value="Ranipur">Ranipur</option>
+            <option value="Khairpur">Khairpur</option>
+            <option value="Sukkur">Sukkur</option>
+            <option value="Gambat">Gambat</option>
+            <option value="Rohri">Rohri</option>
+            <option value="Ghotki">Ghotki</option>
+            <option value="Sadiqabad">Sadiqabad</option>
+            <option value="Rahim Yar Khan">Rahim Yar Khan</option>
+            <option value="Khanpur">Khanpur</option>
+            <option value="Bahawalpur">Bahawalpur</option>
+            <option value="Multan">Multan</option>
+            <option value="Depalpur">Depalpur</option>
+            <option value="Sahiwal">Sahiwal</option>
+            <option value="Faisalabad" selected>Faisalabad</option>
+            <option value="Lahore">Lahore</option>
+            <option value="Sargodha">Sargodha</option>
+            <option value="Gujranwala">Gujranwala</option>
+            <option value="Rawalpindi">Rawalpindi</option>
+            <option value="Islamabad">Islamabad</option>
+            <option value="Peshawar">Peshawar</option>
+            <option value="Quetta">Quetta</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="dieselRate">Current Diesel Rate (Per Litre - Rs):</label>
+        <input type="number" id="dieselRate" value="360">
+    </div>
+
+    <div class="form-group">
+        <label for="tareWeight">Khali Gari ka Vazan (Tare Weight in Tons):</label>
+        <input type="number" id="tareWeight" value="12" placeholder="Maslan: 12 Tons">
+    </div>
+
+    <div class="form-group">
+        <label for="grossWeight">Kul Vazan sath Load (Gross Weight in Tons):</label>
+        <input type="number" id="grossWeight" value="35" placeholder="Maslan: 35 Tons">
+    </div>
+
+    <button onclick="calculateBccFuel()">Calculate Bcc Fuel</button>
+
+    <div class="result" id="resultBox" style="display: none;">
+        <h3>Nataij (Results):</h3>
+        <p><strong>Route:</strong> <span id="resRouteName">-</span></p>
+        <p><strong>Kul Faasla (Distance):</strong> <span id="resDist">0</span> KM</p>
+        <p><strong>Net Cargo Load:</strong> <span id="resNetLoad">0</span> Tons</p>
+        <p><strong>Andazan Average:</strong> <span id="resAvg">0</span> KM / Litre</p>
+        <p><strong>Zarori Diesel:</strong> <span id="resFuel">0</span> Litres</p>
+        <p><strong>Kul Kharcha (Total Cost):</strong> Rs. <span id="resCost">0</span></p>
+    </div>
+</div>
+
+<script>
+// Pakistan ke chotay aur baray shehron ka mukammal distance chart (KM mein)
+const distanceChart = {
+    "Karachi-Hyderabad": 160,
+    "Karachi-Nawabshah": 290,
+    "Karachi-Ranipur": 420,
+    "Karachi-Sukkur": 480,
+    "Karachi-Gambat": 450,
+    "Karachi-Ghotki": 570,
+    "Karachi-Sadiqabad": 620,
+    "Karachi-Rahim Yar Khan": 550,
+    "Karachi-Multan": 900,
+    "Karachi-Depalpur": 1150,
+    "Karachi-Faisalabad": 1050,
+    "Karachi-Lahore": 1200,
+    "Karachi-Islamabad": 1400,
+    "Karachi-Peshawar": 1580,
+    "Karachi-Quetta": 700,
+
+    "Hyderabad-Sukkur": 320,
+    "Hyderabad-Nawabshah": 130,
+    "Hyderabad-Multan": 740,
+    "Hyderabad-Faisalabad": 890,
+    "Hyderabad-Lahore": 1040,
+
+    "Sukkur-Gambat": 70,
+    "Sukkur-Ranipur": 90,
+    "Sukkur-Khairpur": 30,
+    "Sukkur-Ghotki": 90,
+    "Sukkur-Sadiqabad": 140,
+    "Sukkur-Rahim Yar Khan": 250,
+    "Sukkur-Bahawalpur": 330,
+    "Sukkur-Multan": 380,
+    "Sukkur-Depalpur": 750,
+    "Sukkur-Faisalabad": 650,
+    "Sukkur-Lahore": 800,
+    "Sukkur-Islamabad": 1000,
+
+    "Multan-Depalpur": 280,
+    "Multan-Sahiwal": 170,
+    "Multan-Faisalabad": 270,
+    "Multan-Lahore": 350,
+    "Multan-Islamabad": 530,
+    "Multan-Peshawar": 710,
+
+    "Faisalabad-Depalpur": 110,
+    "Faisalabad-Lahore": 130,
+    "Faisalabad-Islamabad": 330,
+    "Faisalabad-Sargodha": 110,
+    "Faisalabad-Peshawar": 510,
+
+    "Lahore-Islamabad": 380,
+    "Lahore-Gujranwala": 75,
+    "Lahore-Peshawar": 550,
+    "Lahore-Rawalpindi": 370,
+    "Lahore-Depalpur": 140,
+
+    "Islamabad-Peshawar": 180,
+    "Islamabad-Rawalpindi": 15,
+    "Islamabad-Sargodha": 200,
+
+    "Depalpur-Sahiwal": 60,
+    "Depalpur-Islamabad": 420
+};
+
+function calculateBccFuel() {
+    var from = document.getElementById('fromCity').value;
+    var to = document.getElementById('toCity').value;
+    var dieselRate = parseFloat(document.getElementById('dieselRate').value);
+    var tareWeight = parseFloat(document.getElementById('tareWeight').value);
+    var grossWeight = parseFloat(document.getElementById('grossWeight').value);
+
+    if (from === to) {
+        alert("Shuruat aur Manzil ka sheher aik jaisa nahi ho sakta!");
+        return;
+    }
+
+    var key = from + "-" + to;
+    var reverseKey = to + "-" + from;
+    var distance = 500; // Default safety distance
+
+    if (distanceChart[key]) {
+        distance = distanceChart[key];
+    } else if (distanceChart[reverseKey]) {
+        distance = distanceChart[reverseKey];
+    } else {
+        distance = 600; // Agar direct entry na ho toh default
+    }
+
+    // Net cargo weight calculate karna
+    var netLoad = grossWeight - tareWeight;
+    if (netLoad < 0) netLoad = 0;
+
+    // Average formula (Khali gari ki 4.8, load barhne par kam hogi)
+    var baseAvg = 4.8;
+    var adjustedAvg = baseAvg - (netLoad * 0.05);
+    
+    if (adjustedAvg < 1.8) {
+        adjustedAvg = 1.8;
+    }
+
+    var totalFuel = distance / adjustedAvg;
+    var totalCost = totalFuel * dieselRate;
+
+    // Results screen par show karna
+    document.getElementById('resRouteName').innerText = from + " se " + to;
+    document.getElementById('resDist').innerText = distance;
+    document.getElementById('resNetLoad').innerText = netLoad;
+    document.getElementById('resAvg').innerText = adjustedAvg.toFixed(2);
+    document.getElementById('resFuel').innerText = totalFuel.toFixed(1);
+    document.getElementById('resCost').innerText = totalCost.toLocaleString('en-PK', {maximumFractionDigits: 0});
+    
+    document.getElementById('resultBox').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
