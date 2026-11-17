@@ -62,6 +62,36 @@
             color: #666;
             margin-top: 4px;
         }
+        
+        /* Custom Autocomplete Suggestions Dropdown */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 180px;
+            overflow-y: auto;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+            font-size: 14px;
+            color: #333;
+        }
+        .autocomplete-items div:hover {
+            background-color: #ffeef0;
+            color: #d9534f;
+            font-weight: 600;
+        }
+
         .return-box {
             background: #fff8f8;
             border: 1px solid #f5c6cb;
@@ -254,173 +284,16 @@
     </div>
 
     <div class="row">
-        <div class="col form-group">
+        <div class="col form-group autocomplete">
             <label for="fromCity">Kahan Se (Origin):</label>
-            <input type="text" id="fromCity" list="pakistan-cities" placeholder="Shehar select karein ya type karein..." autocomplete="off" oninput="autoCalculateDistance()">
+            <input type="text" id="fromCity" placeholder="Shehar select karein ya type karein..." autocomplete="off">
         </div>
 
-        <div class="col form-group">
+        <div class="col form-group autocomplete">
             <label for="toCity">Kahan Tak (Destination):</label>
-            <input type="text" id="toCity" list="pakistan-cities" placeholder="Shehar select karein ya type karein..." autocomplete="off" oninput="autoCalculateDistance()">
+            <input type="text" id="toCity" placeholder="Shehar select karein ya type karein..." autocomplete="off">
         </div>
     </div>
-
-    <!-- Pakistan ke Tamam Chotay Bary Shehar, Mandiyan & Industrial Hubs ki Datalist -->
-    <datalist id="pakistan-cities">
-        <!-- Sindh -->
-        <option value="Karachi">
-        <option value="Hyderabad">
-        <option value="Sukkur">
-        <option value="Larkana">
-        <option value="Nawabshah">
-        <option value="Mirpur Khas">
-        <option value="Shikarpur">
-        <option value="Jacobabad">
-        <option value="Khairpur">
-        <option value="Dadu">
-        <option value="Tando Adam">
-        <option value="Kotri">
-        <option value="Jamshoro">
-        <option value="Thatta">
-        <option value="Badin">
-        <option value="Ghotki">
-        <option value="Daharki">
-        <option value="Mirpur Mathelo">
-        <option value="Pano Aqil">
-        <option value="Rohri">
-        <option value="Sehwan">
-        <option value="Moro">
-        <option value="Naushahro Feroze">
-        <option value="Kandiaro">
-        <option value="Ranipur">
-        <option value="Umerkot">
-        <option value="Mithi">
-        <option value="Sanghar">
-        <option value="Tando Allahyar">
-        <option value="Tando Muhammad Khan">
-        <option value="Kashmore">
-        <option value="Kandhkot">
-        <option value="Shahdadkot">
-        <option value="Mehar">
-        <option value="Hala">
-        <option value="Matiari">
-
-        <!-- Punjab -->
-        <option value="Lahore">
-        <option value="Faisalabad">
-        <option value="Rawalpindi">
-        <option value="Multan">
-        <option value="Gujranwala">
-        <option value="Sialkot">
-        <option value="Bahawalpur">
-        <option value="Sargodha">
-        <option value="Sheikhupura">
-        <option value="Rahim Yar Khan">
-        <option value="Sadiqabad">
-        <option value="Khanpur">
-        <option value="Jhang">
-        <option value="Gujrat">
-        <option value="Mardan">
-        <option value="Kasur">
-        <option value="Sahiwal">
-        <option value="Okara">
-        <option value="Depalpur">
-        <option value="Wah Cantonment">
-        <option value="Dera Ghazi Khan">
-        <option value="Chiniot">
-        <option value="Kamoke">
-        <option value="Hafizabad">
-        <option value="Sadiqabad">
-        <option value="Bhalwal">
-        <option value="Muzaffargarh">
-        <option value="Khanewal">
-        <option value="Kabirwala">
-        <option value="Mian Channu">
-        <option value="Lodhran">
-        <option value="Dunyapur">
-        <option value="Jalalpur Pirwala">
-        <option value="Shujabad">
-        <option value="Ahmadpur East">
-        <option value="Liaquatpur">
-        <option value="Zahid Pir">
-        <option value="Vehari">
-        <option value="Burewala">
-        <option value="Hasilpur">
-        <option value="Arifwala">
-        <option value="Pakpattan">
-        <option value="Chichawatni">
-        <option value="Renala Khurd">
-        <option value="Pattoki">
-        <option value="Phunga">
-        <option value="Muridke">
-        <option value="Narowal">
-        <option value="Shakargarh">
-        <option value="Pasrur">
-        <option value="Daska">
-        <option value="Wazirabad">
-        <option value="Kharian">
-        <option value="Jhelum">
-        <option value="Dina">
-        <option value="Gujar Khan">
-        <option value="Attock">
-        <option value="Taxila">
-        <option value="Hassan Abdal">
-        <option value="Fateh Jang">
-        <option value="Talagang">
-        <option value="Chakwal">
-        <option value="Khushab">
-        <option value="Jauharabad">
-        <option value="Bhakkar">
-        <option value="Mianwali">
-        <option value="Leiah">
-        <option value="Kot Adu">
-        <option value="Taunsa Sharif">
-        <option value="Rajanpur">
-        <option value="Jampur">
-        <option value="Ryk Bypass">
-
-        <!-- KPK & Islamabad -->
-        <option value="Islamabad">
-        <option value="Peshawar">
-        <option value="Abbottabad">
-        <option value="Swat">
-        <option value="Mingora">
-        <option value="Nowshera">
-        <option value="Charsadda">
-        <option value="Mardan">
-        <option value="Swabi">
-        <option value="Haripur">
-        <option value="Mansehra">
-        <option value="Kohat">
-        <option value="Bannu">
-        <option value="Dera Ismail Khan">
-        <option value="Timergara">
-        <option value="Chitral">
-        <option value="Battagram">
-        <option value="Hangu">
-        <option value="Karak">
-        <option value="Lakki Marwat">
-
-        <!-- Balochistan & Azad Kashmir / Northern Areas -->
-        <option value="Quetta">
-        <option value="Gwadar">
-        <option value="Turbat">
-        <option value="Hub">
-        <option value="Khuzdar">
-        <option value="Sibi">
-        <option value="Chaman">
-        <option value="Zhob">
-        <option value="Loralai">
-        <option value="Noshki">
-        <option value="Dera Murad Jamali">
-        <option value="Muzaffarabad">
-        <option value="Mirpur">
-        <option value="Rawalakot">
-        <option value="Kotli">
-        <option value="Gilgit">
-        <option value="Skardu">
-        <option value="Chilas">
-    </datalist>
 
     <div class="row">
         <div class="col form-group">
@@ -549,6 +422,7 @@
 
 <script>
     const cityCoords = {
+        // Sindh
         "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
         "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
         "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Khairpur": [27.5295, 68.7592],
@@ -557,27 +431,140 @@
         "Ghotki": [28.0060, 69.3161], "Daharki": [28.0467, 69.6719], "Mirpur Mathelo": [28.0211, 69.5494],
         "Pano Aqil": [27.8561, 69.1111], "Rohri": [27.6920, 68.8950], "Sehwan": [26.4249, 67.8613],
         "Moro": [26.6631, 68.0001], "Naushahro Feroze": [26.8401, 68.1227], "Kandiaro": [27.0592, 68.2102],
-        
+        "Ranipur": [27.2795, 68.4981], "Umerkot": [25.3547, 69.7372], "Mithi": [24.2568, 69.7997],
+        "Sanghar": [26.0465, 68.9481], "Tando Allahyar": [25.4667, 68.7167], "Tando Muhammad Khan": [25.1222, 68.5361],
+        "Kashmore": [28.4367, 69.5781], "Kandhkot": [28.2433, 69.1769], "Shahdadkot": [27.8483, 67.9083],
+        "Mehar": [27.1772, 67.8214], "Hala": [25.8258, 68.4189], "Matiari": [25.5972, 68.4469],
+
+        // Punjab
         "Lahore": [31.5497, 74.3436], "Faisalabad": [31.4504, 73.1350], "Rawalpindi": [33.5651, 73.0169],
         "Multan": [30.1575, 71.5249], "Gujranwala": [32.1877, 74.1945], "Sialkot": [32.4945, 74.5229],
         "Bahawalpur": [29.3544, 71.6911], "Sargodha": [32.0836, 72.6711], "Sheikhupura": [31.7145, 73.9850],
         "Rahim Yar Khan": [28.4212, 70.2989], "Sadiqabad": [28.3062, 70.1307], "Khanpur": [28.6453, 70.6567],
         "Jhang": [31.2751, 72.3308], "Gujrat": [32.5731, 74.0787], "Kasur": [31.1170, 74.4446],
         "Sahiwal": [30.6682, 73.1114], "Okara": [30.8138, 73.4534], "Depalpur": [30.6736, 73.6617],
-        "Dera Ghazi Khan": [30.0456, 70.6419], "Chiniot": [31.7200, 72.9789], "Kamoke": [31.9754, 74.2163],
-        "Hafizabad": [32.0707, 73.6882], "Muzaffargarh": [30.0703, 71.1933], "Khanewal": [30.3017, 71.9321],
-        "Lodhran": [29.5339, 71.6324], "Vehari": [30.0436, 72.3556], "Burewala": [30.1578, 72.6892],
-        "Pakpattan": [30.3433, 73.3931], "Chichawatni": [30.5283, 72.7031], "Pattoki": [31.0200, 73.8542],
-        "Jhelum": [32.9333, 73.7333], "Attock": [33.7667, 72.3667], "Chakwal": [32.9333, 72.8500],
-        
+        "Wah Cantonment": [33.7744, 72.7153], "Dera Ghazi Khan": [30.0456, 70.6419], "Chiniot": [31.7200, 72.9789],
+        "Kamoke": [31.9754, 74.2163], "Hafizabad": [32.0707, 73.6882], "Bhalwal": [32.2619, 72.8953],
+        "Muzaffargarh": [30.0703, 71.1933], "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4072, 71.8617],
+        "Mian Channu": [30.4406, 72.3556], "Lodhran": [29.5339, 71.6324], "Dunyapur": [29.8058, 71.7289],
+        "Jalalpur Pirwala": [29.5036, 71.9250], "Shujabad": [29.8828, 71.2936], "Ahmadpur East": [29.4147, 71.2581],
+        "Liaquatpur": [28.9167, 70.7333], "Vehari": [30.0436, 72.3556], "Burewala": [30.1578, 72.6892],
+        "Hasilpur": [29.6978, 72.5539], "Arifwala": [30.2925, 73.0658], "Pakpattan": [30.3433, 73.3931],
+        "Chichawatni": [30.5283, 72.7031], "Renala Khurd": [30.8858, 73.5997], "Pattoki": [31.0200, 73.8542],
+        "Muridke": [31.8100, 74.2533], "Narowal": [32.1025, 74.8731], "Shakargarh": [32.2631, 75.1611],
+        "Pasrur": [32.2667, 74.6667], "Daska": [32.3242, 74.8731], "Wazirabad": [32.4431, 74.1281],
+        "Kharian": [32.7417, 73.8642], "Jhelum": [32.9333, 73.7333], "Dina": [33.0294, 73.5756],
+        "Gujar Khan": [33.2608, 73.3086], "Attock": [33.7667, 72.3667], "Taxila": [33.7456, 72.8089],
+        "Hassan Abdal": [33.8197, 72.6864], "Fateh Jang": [33.5744, 72.6433], "Talagang": [32.9253, 72.4189],
+        "Chakwal": [32.9333, 72.8500], "Khushab": [32.2956, 72.3525], "Jauharabad": [32.4967, 72.4833],
+        "Bhakkar": [31.6247, 71.0653], "Mianwali": [32.5858, 71.5436], "Leiah": [30.9678, 70.9431],
+        "Kot Adu": [30.4667, 70.9667], "Taunsa Sharif": [30.7039, 70.6542], "Rajanpur": [29.1042, 70.3283],
+        "Jampur": [29.6425, 70.5906],
+
+        // KPK & Islamabad
         "Islamabad": [33.6844, 73.0479], "Peshawar": [34.0151, 71.5249], "Abbottabad": [34.1463, 73.2116],
-        "Mardan": [34.1989, 72.0406], "Nowshera": [34.0158, 71.9793], "Charsadda": [34.1539, 71.7424],
-        "Kohat": [33.5889, 71.4429], "Bannu": [32.9855, 70.6042], "Dera Ismail Khan": [31.8311, 70.9014],
-        
+        "Swat": [34.7500, 72.3500], "Mingora": [34.7717, 72.3600], "Nowshera": [34.0158, 71.9793],
+        "Charsadda": [34.1539, 71.7424], "Mardan": [34.1989, 72.0406], "Swabi": [34.1167, 72.4667],
+        "Haripur": [33.9961, 72.9331], "Mansehra": [34.3333, 73.2000], "Kohat": [33.5889, 71.4429],
+        "Bannu": [32.9855, 70.6042], "Dera Ismail Khan": [31.8311, 70.9014], "Timergara": [34.8258, 71.8436],
+        "Chitral": [35.8518, 71.7864], "Battagram": [34.6778, 73.0222], "Hangu": [33.5281, 71.0583],
+        "Karak": [33.1114, 71.0911], "Lakki Marwat": [32.6078, 70.9114],
+
+        // Balochistan & Azad Kashmir / Northern Areas
         "Quetta": [30.1798, 66.9750], "Gwadar": [25.1216, 62.3254], "Turbat": [26.0012, 63.0456],
         "Hub": [25.0267, 66.8864], "Khuzdar": [27.7384, 66.6434], "Sibi": [29.5450, 67.8797],
-        "Muzaffarabad": [34.3700, 73.4711], "Mirpur": [33.1478, 73.7519], "Gilgit": [35.9208, 74.3093], "Skardu": [35.2971, 75.6333]
+        "Chaman": [30.9216, 66.4476], "Zhob": [31.3456, 69.4489], "Loralai": [30.3697, 68.5981],
+        "Noshki": [29.5542, 66.0125], "Dera Murad Jamali": [28.5467, 68.2231],
+        "Muzaffarabad": [34.3700, 73.4711], "Mirpur": [33.1478, 73.7519], "Rawalakot": [33.8584, 73.7563],
+        "Kotli": [33.5156, 73.9028], "Gilgit": [35.9208, 74.3093], "Skardu": [35.2971, 75.6333], "Chilas": [35.4122, 74.1042]
     };
+
+    // Custom Autocomplete JavaScript Logic
+    function setupAutocomplete(inp, arr) {
+        var currentFocus;
+        inp.addEventListener("input", function(e) {
+            var a, b, i, val = this.value;
+            closeAllLists();
+            if (!val) { return false; }
+            currentFocus = -1;
+            
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(a);
+            
+            for (i = 0; i < arr.length; i++) {
+                // Match if city starts with or contains typed letters (case-insensitive)
+                if (arr[i].toLowerCase().indexOf(val.toLowerCase()) > -1) {
+                    b = document.createElement("DIV");
+                    // Highlight the matched part
+                    let idx = arr[i].toLowerCase().indexOf(val.toLowerCase());
+                    let matchedText = arr[i].substr(idx, val.length);
+                    let restText = arr[i].substr(idx + val.length);
+                    let prefixText = arr[i].substr(0, idx);
+                    
+                    b.innerHTML = prefixText + "<strong>" + matchedText + "</strong>" + restText;
+                    b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                    
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                        autoCalculateDistance();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        });
+
+        inp.addEventListener("keydown", function(e) {
+            var x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) { // Arrow DOWN
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) { // Arrow UP
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) { // ENTER
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    if (x) x[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    // Initialize cities array
+    var cityNames = Object.keys(cityCoords);
+    setupAutocomplete(document.getElementById("fromCity"), cityNames);
+    setupAutocomplete(document.getElementById("toCity"), cityNames);
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         var R = 6371;
@@ -604,7 +591,6 @@
             var coord2 = cityCoords[to];
             var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
             
-            // Road factor multiplier
             var multiplier = 1.25;
             if(routeType === 'gt') multiplier = 1.30;
             if(routeType === 'motorway') multiplier = 1.15;
@@ -706,7 +692,6 @@
         
         var perTon = netLoad > 0 ? Math.round(grandTotal / netLoad) : 0;
 
-        // Populate slip
         var now = new Date();
         document.getElementById("slipDate").innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         document.getElementById("slipVehicle").innerText = vehicleNo;
