@@ -271,14 +271,14 @@
     <div class="row">
         <div class="col form-group">
             <label for="vehicleNo">Gaari Number (Optional):</label>
-            <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990">
+            <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990" value="JT-5697">
         </div>
         <div class="col form-group">
             <label for="routeType">Rasta (Route Type):</label>
             <select id="routeType" onchange="autoCalculateDistance()">
                 <option value="gt">GT Road / N-5 (Toll Plazas)</option>
                 <option value="motorway">Motorway / M-9 / M-5</option>
-                <option value="mix">Mix Route (Motorway + GT)</option>
+                <option value="mix" selected>Mix Route (Motorway + GT)</option>
             </select>
         </div>
     </div>
@@ -286,37 +286,37 @@
     <div class="row">
         <div class="col form-group autocomplete">
             <label for="fromCity">Kahan Se (Origin):</label>
-            <input type="text" id="fromCity" placeholder="Shehar select karein ya type karein..." autocomplete="off">
+            <input type="text" id="fromCity" placeholder="Shehar select karein ya type karein..." value="Karachi" autocomplete="off">
         </div>
 
         <div class="col form-group autocomplete">
             <label for="toCity">Kahan Tak (Destination):</label>
-            <input type="text" id="toCity" placeholder="Shehar select karein ya type karein..." autocomplete="off">
+            <input type="text" id="toCity" placeholder="Shehar select karein ya type karein..." value="Faisalabad" autocomplete="off">
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
             <label for="distanceKM">Ek Side Faasla (KM):</label>
-            <input type="number" step="any" inputmode="decimal" id="distanceKM" placeholder="Auto fill ya khud likhein" onfocus="this.select()" oninput="estimatePlazasFromKM()">
+            <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()" oninput="estimatePlazasFromKM()">
             <div class="hint" id="distHint">Shehar select karein ya khud KM likhein.</div>
         </div>
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
-            <input type="number" step="any" inputmode="decimal" id="dieselRate" value="360" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="dieselRate" value="344" onfocus="this.select()">
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
             <label for="plazaCount">Toll Plazas (Ek Side Tadaad):</label>
-            <input type="number" step="1" inputmode="numeric" id="plazaCount" value="0" min="0" onfocus="this.select()" oninput="updateTollFromPlazas()">
+            <input type="number" step="1" inputmode="numeric" id="plazaCount" value="16" min="0" onfocus="this.select()" oninput="updateTollFromPlazas()">
             <div class="hint" id="plazaHint">Raste ke mutabiq plazas ki ginti (khud likhein).</div>
         </div>
         <div class="col form-group">
             <label for="plazaRate">Per Plaza Rate (Rs):</label>
             <input type="number" step="any" inputmode="decimal" id="plazaRate" value="750" onfocus="this.select()" oninput="updateTollFromPlazas()">
-            <div class="hint" id="totalTollPreview">Ek side total toll: Rs. 0</div>
+            <div class="hint" id="totalTollPreview">Ek side total toll: Rs. 12,000</div>
         </div>
     </div>
 
@@ -384,7 +384,7 @@
                 <span><span id="resAvg">0</span> KM/L</span>
             </div>
             <div class="slip-row">
-                <span>Zarori Diesel (@ Rs.<span id="resRate">0</span>):</span>
+                <span>Zاروری Diesel (@ Rs.<span id="resRate">0</span>):</span>
                 <span><span id="resFuel">0</span> Litres</span>
             </div>
             <div class="slip-row">
@@ -494,10 +494,8 @@
             this.parentNode.appendChild(a);
             
             for (i = 0; i < arr.length; i++) {
-                // Match if city starts with or contains typed letters (case-insensitive)
                 if (arr[i].toLowerCase().indexOf(val.toLowerCase()) > -1) {
                     b = document.createElement("DIV");
-                    // Highlight the matched part
                     let idx = arr[i].toLowerCase().indexOf(val.toLowerCase());
                     let matchedText = arr[i].substr(idx, val.length);
                     let restText = arr[i].substr(idx + val.length);
@@ -519,13 +517,13 @@
         inp.addEventListener("keydown", function(e) {
             var x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
-            if (e.keyCode == 40) { // Arrow DOWN
+            if (e.keyCode == 40) { 
                 currentFocus++;
                 addActive(x);
-            } else if (e.keyCode == 38) { // Arrow UP
+            } else if (e.keyCode == 38) { 
                 currentFocus--;
                 addActive(x);
-            } else if (e.keyCode == 13) { // ENTER
+            } else if (e.keyCode == 13) { 
                 e.preventDefault();
                 if (currentFocus > -1) {
                     if (x) x[currentFocus].click();
@@ -561,7 +559,6 @@
         });
     }
 
-    // Initialize cities array
     var cityNames = Object.keys(cityCoords);
     setupAutocomplete(document.getElementById("fromCity"), cityNames);
     setupAutocomplete(document.getElementById("toCity"), cityNames);
