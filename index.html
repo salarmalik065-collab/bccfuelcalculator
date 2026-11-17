@@ -123,44 +123,130 @@
         .btn-main:hover {
             background-color: #c9302c;
         }
-        .result {
-            margin-top: 20px;
-            background: #f8f9fa;
-            padding: 16px;
+
+        /* Official Slip Styling with BCC Watermark */
+        .slip-wrapper {
+            margin-top: 22px;
+            display: none;
+        }
+        .slip-box {
+            position: relative;
+            background: #ffffff;
+            border: 2px dashed #444;
             border-radius: 8px;
-            border-left: 5px solid #d9534f;
+            padding: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        .result h3 {
-            margin-top: 0;
-            color: #222;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 8px;
+        /* Halka sa BCC Watermark background mein */
+        .slip-box::before {
+            content: "BCC";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 110px;
+            font-weight: 900;
+            color: rgba(217, 83, 79, 0.08);
+            letter-spacing: 12px;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
         }
-        .result p {
-            margin: 7px 0;
-            font-size: 15px;
+        .slip-content {
+            position: relative;
+            z-index: 1;
+        }
+        .slip-header {
+            text-align: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .slip-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #d9534f;
+            letter-spacing: 1px;
+        }
+        .slip-header p {
+            margin: 3px 0 0 0;
+            font-size: 12px;
+            color: #555;
+        }
+        .slip-meta {
             display: flex;
             justify-content: space-between;
+            font-size: 12px;
+            color: #444;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #bbb;
+            padding-bottom: 6px;
         }
-        .total-highlight {
-            background: #ffeaea;
-            padding: 8px 10px;
-            border-radius: 5px;
+        .slip-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            border-bottom: 1px dotted #e0e0e0;
+        }
+        .slip-row span:first-child {
+            color: #444;
+        }
+        .slip-row span:last-child {
+            font-weight: 600;
+            color: #111;
+        }
+        .slip-total {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(217, 83, 79, 0.1);
+            border-top: 2px solid #d9534f;
+            border-bottom: 2px solid #d9534f;
+            display: flex;
+            justify-content: space-between;
+            font-size: 17px;
             font-weight: bold;
             color: #b52b27;
-            font-size: 16px !important;
         }
+        .slip-footer {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            padding-top: 15px;
+        }
+        .sig-line {
+            border-top: 1px solid #555;
+            width: 120px;
+            text-align: center;
+            padding-top: 4px;
+        }
+
+        /* Action Buttons */
         .action-btns {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 14px;
+        }
+        .btn-print {
+            flex: 1;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
         }
         .btn-whatsapp {
             flex: 1;
             background-color: #25D366;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 11px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
@@ -171,14 +257,34 @@
             background-color: #217346;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 11px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
         }
+
+        /* Print Settings: Sirf Slip Print Hogi */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableSlip, #printableSlip * {
+                visibility: visible;
+            }
+            #printableSlip {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: 2px solid #000;
+                box-shadow: none;
+            }
+        }
+
         @media (max-width: 500px) {
             .row { flex-direction: column; gap: 0; }
+            .action-btns { flex-direction: column; }
         }
     </style>
 </head>
@@ -189,6 +295,21 @@
 
     <div class="row">
         <div class="col form-group">
+            <label for="vehicleNo">Gaari Number (Optional):</label>
+            <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990">
+        </div>
+        <div class="col form-group">
+            <label for="routeType">Rasta (Route Type):</label>
+            <select id="routeType" onchange="autoCalculateDistance()">
+                <option value="motorway">Motorway / M-9 (Alag KM & Toll)</option>
+                <option value="gt">GT Road / N-5 (Alag KM & Toll)</option>
+                <option value="mix">Mix Route (Motorway + GT)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
             <label for="fromCity">Kahan Se (Origin):</label>
             <input type="text" id="fromCity" placeholder="Type karein (maslan: Karachi)..." autocomplete="off" oninput="filterCities('from')" onfocus="filterCities('from')">
             <div id="fromSuggestions" class="suggestions"></div>
@@ -196,7 +317,7 @@
 
         <div class="col form-group">
             <label for="toCity">Kahan Tak (Destination):</label>
-            <input type="text" id="toCity" placeholder="Type karein (maslan: Depalpur)..." autocomplete="off" oninput="filterCities('to')" onfocus="filterCities('to')">
+            <input type="text" id="toCity" placeholder="Type karein (maslan: Lahore)..." autocomplete="off" oninput="filterCities('to')" onfocus="filterCities('to')">
             <div id="toSuggestions" class="suggestions"></div>
         </div>
     </div>
@@ -205,31 +326,20 @@
         <div class="col form-group">
             <label for="distanceKM">Ek Side Faasla (KM):</label>
             <input type="number" id="distanceKM" placeholder="Auto fill ya khud likhein" oninput="updateAutoToll()">
-            <div class="hint" id="distHint">Shehar select karte hi KM aa jayenge.</div>
+            <div class="hint" id="distHint">Raste ke mutabiq KM khud badal jayenge.</div>
         </div>
         <div class="col form-group">
-            <label for="routeType">Rasta (Route Type):</label>
-            <select id="routeType">
-                <option value="motorway">Motorway / M-9 (Behtar Average)</option>
-                <option value="mix">Mix Route (Motorway + GT Road)</option>
-                <option value="gt">Pure GT Road / Pahari (Kam Average)</option>
-            </select>
+            <label for="tollTax">Auto Toll Tax (Ek Side - Rs):</label>
+            <input type="number" id="tollTax" value="0" placeholder="Auto calculate hoga">
+            <div class="hint" id="tollHint">Motorway aur GT Road ka alag toll.</div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col form-group">
-            <label for="tollTax">Auto Toll Tax (Ek Side - Rs):</label>
-            <input type="number" id="tollTax" value="0" placeholder="Auto calculate hoga">
-            <div class="hint">Heavy truck NHA/Motorway andaza.</div>
-        </div>
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
             <input type="number" id="dieselRate" value="360">
         </div>
-    </div>
-
-    <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
             <input type="number" id="tareWeight" value="12">
@@ -252,23 +362,76 @@
         </div>
     </div>
 
-    <button class="btn-main" onclick="calculateFuel()">Calculate Distance, Toll & Fuel</button>
+    <button class="btn-main" onclick="calculateFuel()">Generate Fuel & Trip Slip</button>
 
-    <div class="result" id="resultBox" style="display: none;">
-        <h3>📊 Trip Summary</h3>
-        <p><span><strong>Route:</strong></span> <span id="resRouteName">-</span></p>
-        <p><span><strong>Kul Faasla (Total KM):</strong></span> <span><strong id="resDist">0</strong> KM</span></p>
-        <p><span><strong>Net Cargo Load (Jaate Hue):</strong></span> <span><strong id="resNetLoad">0</strong> Tons</span></p>
-        <p><span><strong>Andazan Average:</strong></span> <span><strong id="resAvg">0</strong> KM/L</span></p>
-        <p><span><strong>Zarori Diesel:</strong></span> <span><strong id="resFuel">0</strong> Litres</span></p>
-        <p><span><strong>Diesel Kharcha:</strong></span> <span>Rs. <strong id="resFuelCost">0</strong></span></p>
-        <p><span><strong>Kul Toll Tax:</strong></span> <span>Rs. <strong id="resTollCost">0</strong></span></p>
-        <p class="total-highlight"><span>Kul Kharcha (Diesel + Toll):</span> <span>Rs. <span id="resGrandTotal">0</span></span></p>
-        <p id="perTonRow" style="display:none; font-size:13px; color:#555;"><span>Per Ton Kharcha:</span> <span>Rs. <strong id="resPerTon">0</strong> / Ton</span></p>
+    <!-- Official BCC Slip Result -->
+    <div class="slip-wrapper" id="resultWrapper">
+        <div class="slip-box" id="printableSlip">
+            <div class="slip-content">
+                <div class="slip-header">
+                    <h3>BCC FLEET & LOGISTICS</h3>
+                    <p>Official Diesel & Trip Estimate Slip</p>
+                </div>
+
+                <div class="slip-meta">
+                    <span><strong>Date:</strong> <span id="slipDate">-</span></span>
+                    <span><strong>Vehicle:</strong> <span id="slipVehicle">N/A</span></span>
+                </div>
+
+                <div class="slip-row">
+                    <span>Route:</span>
+                    <span id="resRouteName">-</span>
+                </div>
+                <div class="slip-row">
+                    <span>Rasta (Corridor):</span>
+                    <span id="resRouteType">-</span>
+                </div>
+                <div class="slip-row">
+                    <span>Kul Faasla (Distance):</span>
+                    <span><span id="resDist">0</span> KM</span>
+                </div>
+                <div class="slip-row">
+                    <span>Vazan (Tare / Gross / Net):</span>
+                    <span><span id="resWeights">-</span></span>
+                </div>
+                <div class="slip-row">
+                    <span>Andazan Average:</span>
+                    <span><span id="resAvg">0</span> KM/L</span>
+                </div>
+                <div class="slip-row">
+                    <span>Zarori Diesel (@ Rs.<span id="resRate">0</span>):</span>
+                    <span><span id="resFuel">0</span> Litres</span>
+                </div>
+                <div class="slip-row">
+                    <span>Diesel Kharcha:</span>
+                    <span>Rs. <span id="resFuelCost">0</span></span>
+                </div>
+                <div class="slip-row">
+                    <span>Kul Toll Tax:</span>
+                    <span>Rs. <span id="resTollCost">0</span></span>
+                </div>
+
+                <div class="slip-total">
+                    <span>TOTAL TRIP COST:</span>
+                    <span>Rs. <span id="resGrandTotal">0</span></span>
+                </div>
+
+                <div class="slip-row" id="perTonRow" style="border:none; font-size:12px; color:#666; margin-top:4px;">
+                    <span>Per Ton Kharcha:</span>
+                    <span>Rs. <span id="resPerTon">0</span> / Ton</span>
+                </div>
+
+                <div class="slip-footer">
+                    <div class="sig-line">Prepared By (BCC)</div>
+                    <div class="sig-line">Driver Signature</div>
+                </div>
+            </div>
+        </div>
 
         <div class="action-btns">
-            <button class="btn-whatsapp" onclick="shareWhatsApp()">📲 WhatsApp Bhejein</button>
-            <button class="btn-excel" onclick="copyForExcel()">📋 Excel ke liye Copy</button>
+            <button class="btn-print" onclick="window.print()">🖨️ Print Slip</button>
+            <button class="btn-whatsapp" onclick="shareWhatsApp()">📲 WhatsApp Share</button>
+            <button class="btn-excel" onclick="copyForExcel()">📋 Excel Copy</button>
         </div>
     </div>
 </div>
@@ -333,11 +496,19 @@
         "Gilgit": [35.9208, 74.3089], "Skardu": [35.2971, 75.6333], "Hunza": [36.3167, 74.6500]
     };
 
-    const exactOverrides = {
-        "karachi-quetta": 690, "karachi-lahore": 1265, "karachi-islamabad": 1420,
-        "karachi-faisalabad": 1190, "karachi-depalpur": 1130, "karachi-multan": 925,
-        "karachi-sukkur": 475, "karachi-moro bypass": 330, "karachi-hyderabad": 165,
-        "lahore-islamabad": 375, "multan-lahore": 340, "multan-faisalabad": 250
+    // Motorway vs GT Road ke alag-alag KM (Main Corridors)
+    const routeCorridorKM = {
+        "karachi-lahore": { motorway: 1240, gt: 1285, mix: 1265 },
+        "karachi-islamabad": { motorway: 1420, gt: 1455, mix: 1435 },
+        "karachi-faisalabad": { motorway: 1175, gt: 1215, mix: 1190 },
+        "karachi-multan": { motorway: 910, gt: 950, mix: 925 },
+        "karachi-sukkur": { motorway: 465, gt: 495, mix: 475 },
+        "karachi-depalpur": { motorway: 1120, gt: 1150, mix: 1130 },
+        "lahore-islamabad": { motorway: 375, gt: 300, mix: 340 },
+        "faisalabad-islamabad": { motorway: 325, gt: 350, mix: 335 },
+        "multan-lahore": { motorway: 345, gt: 340, mix: 342 },
+        "multan-faisalabad": { motorway: 245, gt: 260, mix: 250 },
+        "karachi-quetta": { motorway: 690, gt: 690, mix: 690 }
     };
 
     const sortedCityNames = Object.keys(cityCoords).sort();
@@ -384,168 +555,6 @@
         document.getElementById('returnFields').style.display = checked ? 'block' : 'none';
     }
 
+    // Route Type (Motorway vs GT) ke mutabiq alag Toll Tax
     function updateAutoToll() {
-        const km = parseFloat(document.getElementById('distanceKM').value) || 0;
-        const estimatedToll = Math.round((km * 15) / 50) * 50;
-        document.getElementById('tollTax').value = estimatedToll;
-    }
-
-    function autoCalculateDistance() {
-        const rawFrom = document.getElementById('fromCity').value.trim();
-        const rawTo = document.getElementById('toCity').value.trim();
-        const distInput = document.getElementById('distanceKM');
-        const hint = document.getElementById('distHint');
-
-        if (!rawFrom || !rawTo) return;
-
-        const city1 = sortedCityNames.find(c => c.toLowerCase() === rawFrom.toLowerCase());
-        const city2 = sortedCityNames.find(c => c.toLowerCase() === rawTo.toLowerCase());
-
-        if (!city1 || !city2) {
-            hint.innerText = "✍️ Custom stop — khud KM likh dein.";
-            hint.style.color = "#d9534f";
-            return;
-        }
-
-        const key1 = city1.toLowerCase() + "-" + city2.toLowerCase();
-        const key2 = city2.toLowerCase() + "-" + city1.toLowerCase();
-
-        if (exactOverrides[key1] || exactOverrides[key2]) {
-            const km = exactOverrides[key1] || exactOverrides[key2];
-            distInput.value = km;
-            hint.innerText = "✅ Exact Highway: " + km + " KM";
-            hint.style.color = "green";
-            updateAutoToll();
-            return;
-        }
-
-        if (city1 === city2) {
-            distInput.value = 0;
-            updateAutoToll();
-            return;
-        }
-
-        const [lat1, lon1] = cityCoords[city1];
-        const [lat2, lon2] = cityCoords[city2];
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const roadKM = Math.round(R * c * 1.22);
-
-        distInput.value = roadKM;
-        hint.innerText = "✅ Estimated Road: " + roadKM + " KM";
-        hint.style.color = "green";
-        updateAutoToll();
-    }
-
-    function getAverage(netLoad, routeType) {
-        // Base formula: 4.8 - (load * 0.05)
-        let baseAvg = 4.8 - (netLoad * 0.05);
-
-        // Route type ke hisab se average adjust karna
-        if (routeType === 'motorway') {
-            baseAvg += 0.3; // Motorway par smooth chalti hai to average behtar hoti hai
-        } else if (routeType === 'gt') {
-            baseAvg -= 0.4; // GT Road / Pahari par bar bar gear lagne se average kam hoti hai
-        }
-        // Mix route par default baseAvg hi rahe gi
-
-        return baseAvg < 1.6 ? 1.6 : baseAvg;
-    }
-
-    function calculateFuel() {
-        const origin = document.getElementById('fromCity').value.trim();
-        const destination = document.getElementById('toCity').value.trim();
-        const oneWayKM = parseFloat(document.getElementById('distanceKM').value);
-        const routeType = document.getElementById('routeType').value;
-        const oneWayToll = parseFloat(document.getElementById('tollTax').value) || 0;
-        const dieselRate = parseFloat(document.getElementById('dieselRate').value) || 0;
-        const tareWeight = parseFloat(document.getElementById('tareWeight').value) || 0;
-        const grossWeight = parseFloat(document.getElementById('grossWeight').value) || 0;
-        const isReturn = document.getElementById('isReturn').checked;
-        const returnGross = parseFloat(document.getElementById('returnGrossWeight').value) || tareWeight;
-
-        if (!origin || !destination || isNaN(oneWayKM) || oneWayKM <= 0) {
-            alert("Barah-e-karam shehar aur sahi KM likhein!");
-            return;
-        }
-
-        let netLoadOut = Math.max(0, grossWeight - tareWeight);
-        let avgOut = getAverage(netLoadOut, routeType);
-        let fuelOut = oneWayKM / avgOut;
-
-        let totalKM = oneWayKM;
-        let totalFuel = fuelOut;
-        let totalToll = oneWayToll;
-        let avgDisplay = avgOut.toFixed(2);
-        let routeTitle = origin + " ➔ " + destination;
-
-        if (isReturn) {
-            let netLoadRet = Math.max(0, returnGross - tareWeight);
-            let avgRet = getAverage(netLoadRet, routeType);
-            let fuelRet = oneWayKM / avgRet;
-
-            totalKM = oneWayKM * 2;
-            totalFuel = fuelOut + fuelRet;
-            totalToll = oneWayToll * 2;
-            avgDisplay = (totalKM / totalFuel).toFixed(2) + " (Round Avg)";
-            routeTitle = origin + " ⇄ " + destination + " (Return)";
-        }
-
-        const fuelCost = totalFuel * dieselRate;
-        const grandTotal = fuelCost + totalToll;
-
-        document.getElementById('resRouteName').innerText = routeTitle;
-        document.getElementById('resDist').innerText = totalKM.toFixed(1);
-        document.getElementById('resNetLoad').innerText = netLoadOut;
-        document.getElementById('resAvg').innerText = avgDisplay;
-        document.getElementById('resFuel').innerText = totalFuel.toFixed(1);
-        document.getElementById('resFuelCost').innerText = Math.round(fuelCost).toLocaleString('en-PK');
-        document.getElementById('resTollCost').innerText = Math.round(totalToll).toLocaleString('en-PK');
-        document.getElementById('resGrandTotal').innerText = Math.round(grandTotal).toLocaleString('en-PK');
-
-        if (netLoadOut > 0) {
-            document.getElementById('perTonRow').style.display = 'flex';
-            document.getElementById('resPerTon').innerText = Math.round(grandTotal / netLoadOut).toLocaleString('en-PK');
-        } else {
-            document.getElementById('perTonRow').style.display = 'none';
-        }
-
-        document.getElementById('resultBox').style.display = 'block';
-
-        let routeTypeName = "Mix Route";
-        if (routeType === 'motorway') routeTypeName = "Motorway";
-        if (routeType === 'gt') routeTypeName = "GT Road";
-
-        lastReportText = `*🚚 Bcc Trip Estimate*\n` +
-                         `Route: ${routeTitle} (${routeTypeName})\n` +
-                         `Distance: ${totalKM.toFixed(0)} KM\n` +
-                         `Cargo Load: ${netLoadOut} Tons\n` +
-                         `Average: ${avgDisplay} KM/L\n` +
-                         `Diesel: ${totalFuel.toFixed(1)} Ltr (@ Rs.${dieselRate})\n` +
-                         `Diesel Cost: Rs. ${Math.round(fuelCost).toLocaleString('en-PK')}\n` +
-                         `Toll Tax: Rs. ${Math.round(totalToll).toLocaleString('en-PK')}\n` +
-                         `*Total Cost: Rs. ${Math.round(grandTotal).toLocaleString('en-PK')}*`;
-
-        const today = new Date().toLocaleDateString('en-GB');
-        lastExcelRow = `${today}\t${routeTitle} (${routeTypeName})\t${totalKM.toFixed(0)}\t${netLoadOut}\t${totalFuel.toFixed(1)}\t${dieselRate}\t${Math.round(totalToll)}\t${Math.round(grandTotal)}`;
-    }
-
-    function shareWhatsApp() {
-        const url = "https://wa.me/?text=" + encodeURIComponent(lastReportText);
-        window.open(url, '_blank');
-    }
-
-    function copyForExcel() {
-        navigator.clipboard.writeText(lastExcelRow).then(() => {
-            alert("✅ Excel ke liye copy ho gaya! Ab Excel sheet mein ja kar Ctrl+V (Paste) karein.");
-        });
-    }
-</script>
-
-</body>
-</html>
+        const km = parseFloat(document.getElementById('distanceKM').value
