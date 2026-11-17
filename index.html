@@ -457,10 +457,107 @@
         "Khairpur": [27.5295, 68.7592], "Rohri": [27.6920, 68.8950], "Sukkur": [27.7131, 68.8492],
         "Pano Aqil": [27.8561, 69.1111], "Ghotki": [28.0060, 69.3161], "Mirpur Mathelo": [28.0211, 69.5494],
         "Daharki": [28.0467, 69.6719], "Ubauro": [28.1650, 69.7311], 
-        // M-5 / M-4 Interchanges & Nearby Towns
         "Khanbela": [28.5300, 70.3800], "Uch Sharif": [29.2230, 71.2580], "Zahir Pir": [28.9800, 70.7800],
         "Jalalpur Pirwala": [29.5067, 71.2222], "Abdul Hakeem": [30.5528, 72.0625],
         "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Kashmore": [28.4326, 69.5836],
         "Kandhkot": [28.2439, 69.1823], "Larkana": [27.5570, 68.2028], "Shahdadkot": [27.8473, 67.9068],
         "Mehar": [27.1803, 67.8206], "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613],
-        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.645
+        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.6450, 70.6580]
+    };
+
+    // Autocomplete Filtering Function
+    function filterCities(type) {
+        const inputId = type === 'from' ? 'fromCity' : 'toCity';
+        const suggestionsId = type === 'from' ? 'fromSuggestions' : 'toSuggestions';
+        const query = document.getElementById(inputId).value.toLowerCase();
+        const suggestionsBox = document.getElementById(suggestionsId);
+
+        suggestionsBox.innerHTML = '';
+
+        if (query.length === 0) {
+            suggestionsBox.style.display = 'none';
+            return;
+        }
+
+        const matches = Object.keys(cityCoords).filter(city => city.toLowerCase().includes(query));
+
+        if (matches.length > 0) {
+            suggestionsBox.style.display = 'block';
+            matches.forEach(city => {
+                const div = document.createElement('div');
+                div.textContent = city;
+                div.onclick = function() {
+                    document.getElementById(inputId).value = city;
+                    suggestionsBox.style.display = 'none';
+                    autoCalculateDistance();
+                };
+                suggestionsBox.appendChild(div);
+            });
+        } else {
+            suggestionsBox.style.display = 'none';
+        }
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.form-group')) {
+            document.getElementById('fromSuggestions').style.display = 'none';
+            document.getElementById('toSuggestions').style.display = 'none';
+        }
+    });
+
+    // Distance & Coordinates Calculation Logic (Placeholder for your existing math)
+    function autoCalculateDistance() {
+        let from = document.getElementById('fromCity').value.trim();
+        let to = document.getElementById('toCity').value.trim();
+        if (cityCoords[from] && cityCoords[to]) {
+            // Simple dummy estimation or your distance matrix logic
+            // Yahan aapka distance calculate karne ka pehle wala code ajayega
+            document.getElementById('distanceKM').value = 450; // Masalan default
+            estimatePlazasFromKM();
+        }
+    }
+
+    function estimatePlazasFromKM() {
+        let km = parseFloat(document.getElementById('distanceKM').value) || 0;
+        let estimatedPlazas = Math.round(km / 65); // Farzi hisaab
+        document.getElementById('plazaCount').value = estimatedPlazas;
+        updateTollFromPlazas();
+    }
+
+    function updateTollFromPlazas() {
+        let count = parseInt(document.getElementById('plazaCount').value) || 0;
+        let rate = parseFloat(document.getElementById('plazaRate').value) || 0;
+        let total = count * rate;
+        document.getElementById('totalTollPreview').innerText = "Ek side total toll: Rs. " + total;
+    }
+
+    function toggleReturn() {
+        let isReturn = document.getElementById('isReturn').checked;
+        document.getElementById('returnFields').style.display = isReturn ? 'block' : 'none';
+    }
+
+    function calculateFuel() {
+        document.getElementById('resultWrapper').style.display = 'block';
+        document.getElementById('slipDate').innerText = new Date().toLocaleDateString();
+        document.getElementById('slipVehicle').innerText = document.getElementById('vehicleNo').value || "N/A";
+        document.getElementById('resRouteName').innerText = document.getElementById('fromCity').value + " to " + document.getElementById('toCity').value;
+        document.getElementById('resRouteType').innerText = document.getElementById('routeType').value.toUpperCase();
+        document.getElementById('resDist').innerText = document.getElementById('distanceKM').value;
+        document.getElementById('resRate').innerText = document.getElementById('dieselRate').value;
+        
+        // Baki calculations...
+        document.getElementById('resGrandTotal').innerText = "125,000"; // Sample
+    }
+
+    function shareWhatsApp() {
+        alert("WhatsApp sharing triggered!");
+    }
+
+    function copyForExcel() {
+        alert("Copied for Excel!");
+    }
+</script>
+
+</body>
+</html>
