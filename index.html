@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ur">
 <head>
@@ -32,13 +33,19 @@
             font-weight: bold;
             color: #555;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 15px;
+            background-color: #fff;
+        }
+        .custom-box {
+            margin-top: 8px;
+            border: 1px dashed #d9534f;
+            background-color: #fff9f9;
         }
         .hint {
             font-size: 12px;
@@ -81,24 +88,29 @@
 
 <div class="container">
     <h2>🚚 Bcc Fuel Calculator</h2>
-    
-    <!-- Dropdown khud JS se 90+ Pakistani cities ke sath bhar jayega -->
-    <datalist id="pkCities"></datalist>
 
     <div class="form-group">
-        <label for="fromCity">Kahan Se (Origin City / Stop):</label>
-        <input type="text" id="fromCity" list="pkCities" placeholder="Shehar ka naam likhein ya list se select karein..." oninput="autoCalculateDistance()">
+        <label for="fromSelect">Kahan Se (Origin City / Stop):</label>
+        <select id="fromSelect" onchange="handleCityChange('from')">
+            <option value="">-- Shehar Select Karein --</option>
+            <option value="CUSTOM">✍️ Khud Naya Shehar / Stop Likhein...</option>
+        </select>
+        <input type="text" id="fromCustom" class="custom-box" style="display:none;" placeholder="Yahan naye stop ka naam likhein...">
     </div>
 
     <div class="form-group">
-        <label for="toCity">Kahan Tak (Destination City / Stop):</label>
-        <input type="text" id="toCity" list="pkCities" placeholder="Shehar ka naam likhein ya list se select karein..." oninput="autoCalculateDistance()">
+        <label for="toSelect">Kahan Tak (Destination City / Stop):</label>
+        <select id="toSelect" onchange="handleCityChange('to')">
+            <option value="">-- Shehar Select Karein --</option>
+            <option value="CUSTOM">✍️ Khud Naya Shehar / Stop Likhein...</option>
+        </select>
+        <input type="text" id="toCustom" class="custom-box" style="display:none;" placeholder="Yahan naye stop ka naam likhein...">
     </div>
 
     <div class="form-group">
         <label for="distanceKM">Kul Faasla (Distance in KM):</label>
-        <input type="number" id="distanceKM" placeholder="Auto calculate hoga ya khud KM likhein...">
-        <div class="hint" id="distHint">Koi bhi 2 shehar select karein, road distance khud aa jayega (tabdeel bhi kar sakte hain).</div>
+        <input type="number" id="distanceKM" placeholder="Shehar select karein, KM khud aa jayenge...">
+        <div class="hint" id="distHint">List se dono shehar select karein, road distance khud aa jayega.</div>
     </div>
 
     <div class="form-group">
@@ -130,7 +142,6 @@
 </div>
 
 <script>
-    // Pakistan ke 90+ chote aur bare shehron ke coordinates [Latitude, Longitude]
     const cityCoords = {
         // Sindh
         "Karachi": [24.8607, 67.0011],
@@ -309,7 +320,6 @@
         "Hunza": [36.3167, 74.6500]
     };
 
-    // Exact highway overrides (jahan road ghoom kar jati hai, maslan Karachi-Quetta ya M-5)
     const exactOverrides = {
         "karachi-quetta": 690,
         "karachi-lahore": 1265,
@@ -325,35 +335,57 @@
         "multan-faisalabad": 250
     };
 
-    // Page load hote hi dropdown list bharna
+    // Page load hote hi dono dropdown lists mein tamam shehar daalna
     window.onload = function() {
-        const datalist = document.getElementById('pkCities');
-        Object.keys(cityCoords).sort().forEach(city => {
-            const option = document.createElement('option');
-            option.value = city;
-            datalist.appendChild(option);
+        const fromSelect = document.getElementById('fromSelect');
+        const toSelect = document.getElementById('toSelect');
+        const sortedCities = Object.keys(cityCoords).sort();
+
+        sortedCities.forEach(city => {
+            const opt1 = document.createElement('option');
+            opt1.value = city;
+            opt1.textContent = city;
+            fromSelect.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = city;
+            opt2.textContent = city;
+            toSelect.appendChild(opt2);
         });
     };
 
-    // Case-insensitive shehar dhundne ka function
-    function findCityName(input) {
-        const lower = input.trim().toLowerCase();
-        return Object.keys(cityCoords).find(c => c.toLowerCase() === lower);
+    function handleCityChange(type) {
+        const selectEl = document.getElementById(type + 'Select');
+        const customEl = document.getElementById(type + 'Custom');
+
+        if (selectEl.value === 'CUSTOM') {
+            customEl.style.display = 'block';
+            customEl.focus();
+        } else {
+            customEl.style.display = 'none';
+            customEl.value = '';
+        }
+        autoCalculateDistance();
     }
 
-    // 2 shehron ke darmiyan road distance nikalna
     function autoCalculateDistance() {
-        const rawFrom = document.getElementById('fromCity').value.trim();
-        const rawTo = document.getElementById('toCity').value.trim();
+        const fromSel = document.getElementById('fromSelect').value;
+        const toSel = document.getElementById('toSelect').value;
         const distInput = document.getElementById('distanceKM');
         const hint = document.getElementById('distHint');
 
-        if (!rawFrom || !rawTo) return;
+        if (!fromSel || !toSel) return;
 
-        const key1 = rawFrom.toLowerCase() + "-" + rawTo.toLowerCase();
-        const key2 = rawTo.toLowerCase() + "-" + rawFrom.toLowerCase();
+        if (fromSel === 'CUSTOM' || toSel === 'CUSTOM') {
+            distInput.value = '';
+            hint.innerText = "✍️ Custom stop select kiya gaya hai — neeche Kul Faasla (KM) khud likhein.";
+            hint.style.color = "#d9534f";
+            return;
+        }
 
-        // Pehle exact highway list check karein
+        const key1 = fromSel.toLowerCase() + "-" + toSel.toLowerCase();
+        const key2 = toSel.toLowerCase() + "-" + fromSel.toLowerCase();
+
         if (exactOverrides[key1] || exactOverrides[key2]) {
             const km = exactOverrides[key1] || exactOverrides[key2];
             distInput.value = km;
@@ -362,46 +394,41 @@
             return;
         }
 
-        const city1 = findCityName(rawFrom);
-        const city2 = findCityName(rawTo);
-
-        if (city1 && city2) {
-            if (city1 === city2) {
-                distInput.value = 0;
-                return;
-            }
-            const [lat1, lon1] = cityCoords[city1];
-            const [lat2, lon2] = cityCoords[city2];
-
-            // Haversine formula + 1.22 Pakistan road factor
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const roadKM = Math.round(R * c * 1.22);
-
-            distInput.value = roadKM;
-            hint.innerText = "✅ Estimated Road Distance: " + roadKM + " KM (Zaroorat ho to tabdeel kar lein)";
-            hint.style.color = "green";
-        } else {
-            hint.innerText = "ℹ️ Naya stop hai — Kul Faasla (KM) box mein khud distance likh dein.";
-            hint.style.color = "#d9534f";
+        if (fromSel === toSel) {
+            distInput.value = 0;
+            return;
         }
+
+        const [lat1, lon1] = cityCoords[fromSel];
+        const [lat2, lon2] = cityCoords[toSel];
+
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const roadKM = Math.round(R * c * 1.22);
+
+        distInput.value = roadKM;
+        hint.innerText = "✅ Estimated Road Distance: " + roadKM + " KM (Zaroorat ho to tabdeel kar lein)";
+        hint.style.color = "green";
     }
 
     function calculateFuel() {
-        var origin = document.getElementById('fromCity').value.trim();
-        var destination = document.getElementById('toCity').value.trim();
-        var distanceKM = parseFloat(document.getElementById('distanceKM').value);
-        var dieselRate = parseFloat(document.getElementById('dieselRate').value);
-        var tareWeight = parseFloat(document.getElementById('tareWeight').value);
-        var grossWeight = parseFloat(document.getElementById('grossWeight').value);
+        const fromSel = document.getElementById('fromSelect').value;
+        const toSel = document.getElementById('toSelect').value;
+        const origin = (fromSel === 'CUSTOM') ? document.getElementById('fromCustom').value.trim() : fromSel;
+        const destination = (toSel === 'CUSTOM') ? document.getElementById('toCustom').value.trim() : toSel;
+
+        const distanceKM = parseFloat(document.getElementById('distanceKM').value);
+        const dieselRate = parseFloat(document.getElementById('dieselRate').value);
+        const tareWeight = parseFloat(document.getElementById('tareWeight').value);
+        const grossWeight = parseFloat(document.getElementById('grossWeight').value);
 
         if (!origin || !destination) {
-            alert("Barah-e-karam shuruat aur manzil dono sheher/stops ke naam likhein!");
+            alert("Barah-e-karam shuruat aur manzil dono sheher/stops select karein ya likhein!");
             return;
         }
 
@@ -410,23 +437,28 @@
             return;
         }
 
-        // Net cargo weight calculate karna
-        var netLoad = grossWeight - tareWeight;
+        let netLoad = grossWeight - tareWeight;
         if (netLoad < 0) netLoad = 0;
 
-        // Average formula
-        var baseAvg = 4.8;
-        var adjustedAvg = baseAvg - (netLoad * 0.05);
+        const baseAvg = 4.8;
+        let adjustedAvg = baseAvg - (netLoad * 0.05);
         if (adjustedAvg < 1.8) {
             adjustedAvg = 1.8;
         }
 
-        var totalFuel = distanceKM / adjustedAvg;
-        var totalCost = totalFuel * dieselRate;
+        const totalFuel = distanceKM / adjustedAvg;
+        const totalCost = totalFuel * dieselRate;
 
-        // Results screen par show karna
         document.getElementById('resRouteName').innerText = origin + " se " + destination;
         document.getElementById('resDist').innerText = distanceKM.toFixed(1);
         document.getElementById('resNetLoad').innerText = netLoad;
         document.getElementById('resAvg').innerText = adjustedAvg.toFixed(2);
-        document.getElementById('resFuel').
+        document.getElementById('resFuel').innerText = totalFuel.toFixed(1);
+        document.getElementById('resCost').innerText = totalCost.toLocaleString('en-PK', {maximumFractionDigits: 0});
+        
+        document.getElementById('resultBox').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
