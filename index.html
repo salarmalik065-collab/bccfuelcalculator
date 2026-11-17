@@ -264,12 +264,8 @@
         }
 
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printableSlip, #printableSlip * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            #printableSlip, #printableSlip * { visibility: visible; }
             #printableSlip {
                 position: absolute;
                 left: 0;
@@ -332,7 +328,6 @@
         </div>
     </div>
 
-    <!-- Toll Plaza Count & Rate Row -->
     <div class="row">
         <div class="col form-group">
             <label for="plazaCount">Toll Plazas (Ek Side Tadaad):</label>
@@ -357,7 +352,6 @@
         </div>
     </div>
 
-    <!-- Return Trip Option -->
     <div class="return-box">
         <label class="checkbox-label">
             <input type="checkbox" id="isReturn" onchange="toggleReturn()">
@@ -371,7 +365,6 @@
 
     <button class="btn-main" onclick="calculateFuel()">Generate Fuel & Trip Slip</button>
 
-    <!-- Official BCC Slip Result -->
     <div class="slip-wrapper" id="resultWrapper">
         <div class="slip-box" id="printableSlip">
             <div class="slip-content">
@@ -424,7 +417,7 @@
                 </div>
 
                 <div class="slip-row" id="perTonRow" style="border:none; font-size:12px; color:#666; margin-top:4px;">
-                    <span>Per Ton Kharcha:</span>
+                    <span>Per Ton Kharcha (Net Load):</span>
                     <span>Rs. <span id="resPerTon">0</span> / Ton</span>
                 </div>
 
@@ -445,7 +438,7 @@
 
 <script>
     const cityCoords = {
-        // Sindh Major & Small Cities/Towns
+        // Sindh
         "Karachi": [24.8607, 67.0011], "Thatta": [24.7475, 67.9235], "Badin": [24.6558, 68.8383],
         "Kotri": [25.3657, 68.3083], "Jamshoro": [25.4304, 68.2809], "Hyderabad": [25.3960, 68.3578],
         "Tando Allahyar": [25.4608, 68.7192], "Tando Muhammad Khan": [25.1239, 68.5389],
@@ -460,7 +453,252 @@
         "Daharki": [28.0467, 69.6719], "Ubauro": [28.1650, 69.7311], "Shikarpur": [27.9556, 68.6382],
         "Jacobabad": [28.2769, 68.4514], "Kashmore": [28.4326, 69.5836], "Kandhkot": [28.2439, 69.1823],
         "Larkana": [27.5570, 68.2028], "Shahdadkot": [27.8473, 67.9068], "Mehar": [27.1803, 67.8206],
-        "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613], "Thana Bula Khan": [25.3333, 67.8333],
+        "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613],
 
-        // Punjab Major & Small Cities / Towns / Interchanges
-        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.
+        // Punjab
+        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.6453, 70.6567],
+        "Zahid Pir": [28.8000, 70.5500], "Liaquatpur": [28.9317, 70.9508], "Ahmadpur East": [29.1436, 71.2598],
+        "Bahawalpur": [29.3544, 71.6911], "Lodhran": [29.5339, 71.6324], "Dunyapur": [29.8000, 71.7433],
+        "Jalalpur Pirwala": [29.5056, 71.2222], "Shujabad": [29.8806, 71.2931], "Multan": [30.1575, 71.5249],
+        "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4069, 71.8625], "Mian Channu": [30.4407, 72.3568],
+        "Chichawatni": [30.5301, 72.6916], "Sahiwal": [30.6682, 73.1114], "Okara": [30.8081, 73.4458],
+        "Depalpur": [30.6700, 73.6533], "Renala Khurd": [30.8783, 73.5986], "Pattoki": [31.0214, 73.8528],
+        "Bhai Pheru": [31.1319, 73.9633], "Manga Mandi": [31.3094, 74.0631], "Kasur": [31.1179, 74.4408],
+        "Lahore": [31.5204, 74.3587], "Sheikhupura": [31.7167, 73.9850], "Nankana Sahib": [31.4492, 73.7125],
+        "Faisalabad": [31.4504, 73.1350], "Jhang": [31.2681, 72.3181], "Toba Tek Singh": [30.9712, 72.4827],
+        "Gojra": [31.1486, 72.6869], "Samundri": [31.0639, 72.9611], "Sargodha": [32.0740, 72.6861],
+        "Bhera": [32.4820, 72.9086], "Bhalwal": [32.2653, 72.9028], "Mianwali": [32.5839, 71.5370],
+        "Khushab": [32.2967, 72.3525], "Dera Ghazi Khan": [30.0489, 70.6455], "Muzaffargarh": [30.0703, 71.1933],
+        "Layyah": [30.9613, 70.9390], "Bhakkar": [31.6253, 71.0657], "Vehari": [30.0419, 72.3528],
+        "Burewala": [30.1667, 72.6500], "Arifwala": [30.2906, 73.0653], "Pakpattan": [30.3410, 73.3866],
+        "Bahawalnagar": [29.9987, 73.2536], "Chishtian": [29.7958, 72.8578], "Hasilpur": [29.6922, 72.5456],
+        "Gujranwala": [32.1877, 74.1945], "Kamoke": [31.9767, 74.2239], "Wazirabad": [32.4432, 74.1200],
+        "Sialkot": [32.4945, 74.5229], "Daska": [32.3297, 74.3494], "Narowal": [32.1000, 74.8833],
+        "Hafizabad": [32.0709, 73.6880], "Mandi Bahauddin": [32.5861, 73.4917], "Gujrat": [32.5731, 74.0789],
+        "Lalamusa": [32.7006, 73.9575], "Kharian": [32.8161, 73.8861], "Jhelum": [32.9425, 73.7257],
+        "Sohawa": [33.1244, 73.4214], "Gujar Khan": [33.2544, 73.3044], "Chakwal": [32.9328, 72.8630],
+        "Kallar Kahar": [32.7794, 72.7069], "Rawalpindi": [33.5651, 73.0169], "Islamabad": [33.6844, 73.0479],
+        "Taxila": [33.7458, 72.7875], "Wah Cantt": [33.7715, 72.7511], "Attock": [33.7681, 72.3608],
+
+        // KPK & Balochistan
+        "Peshawar": [34.0151, 71.5249], "Nowshera": [34.0153, 71.9747], "Mardan": [34.1989, 72.0231],
+        "Swabi": [34.1202, 72.4698], "Charsadda": [34.1453, 71.7308], "Kohat": [33.5889, 71.4429],
+        "Bannu": [32.9889, 70.6056], "Dera Ismail Khan": [31.8626, 70.9019], "Abbottabad": [34.1688, 73.2215],
+        "Mansehra": [34.3313, 73.1980], "Haripur": [33.9942, 72.9342], "Swat / Mingora": [34.7717, 72.3600],
+        "Quetta": [30.1798, 66.9750], "Hub": [25.0242, 66.8897], "Bela": [26.2271, 66.3111],
+        "Khuzdar": [27.8120, 66.6106], "Kalat": [29.0266, 66.5936], "Sibi": [29.5430, 67.8773],
+        "Dera Murad Jamali": [28.5466, 68.2231], "Chaman": [30.9210, 66.4597], "Gwadar": [25.1264, 62.3225]
+    };
+
+    const cityNames = Object.keys(cityCoords).sort();
+    let latestSlipText = "";
+    let latestExcelRow = "";
+
+    function filterCities(type) {
+        const input = document.getElementById(type === 'from' ? 'fromCity' : 'toCity');
+        const box = document.getElementById(type === 'from' ? 'fromSuggestions' : 'toSuggestions');
+        const val = input.value.trim().toLowerCase();
+
+        box.innerHTML = '';
+        const matches = val === '' ? cityNames.slice(0, 15) : cityNames.filter(c => c.toLowerCase().includes(val));
+
+        if (matches.length === 0) {
+            box.style.display = 'none';
+            return;
+        }
+
+        matches.slice(0, 20).forEach(city => {
+            const div = document.createElement('div');
+            div.textContent = city;
+            div.onclick = function() {
+                input.value = city;
+                box.style.display = 'none';
+                autoCalculateDistance();
+            };
+            box.appendChild(div);
+        });
+        box.style.display = 'block';
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.form-group')) {
+            document.getElementById('fromSuggestions').style.display = 'none';
+            document.getElementById('toSuggestions').style.display = 'none';
+        }
+    });
+
+    function getHaversineKM(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function autoCalculateDistance() {
+        const from = document.getElementById('fromCity').value.trim();
+        const to = document.getElementById('toCity').value.trim();
+        const routeType = document.getElementById('routeType').value;
+
+        const fromKey = cityNames.find(c => c.toLowerCase() === from.toLowerCase());
+        const toKey = cityNames.find(c => c.toLowerCase() === to.toLowerCase());
+
+        if (fromKey && toKey) {
+            const [lat1, lon1] = cityCoords[fromKey];
+            const [lat2, lon2] = cityCoords[toKey];
+            const straightKM = getHaversineKM(lat1, lon1, lat2, lon2);
+
+            // Road factor: Motorway slightly more direct than GT Road
+            let factor = 1.22;
+            if (routeType === 'motorway') factor = 1.18;
+            if (routeType === 'mix') factor = 1.20;
+
+            const roadKM = Math.round(straightKM * factor);
+            document.getElementById('distanceKM').value = roadKM;
+            document.getElementById('distHint').textContent = `Andazan sarak faasla: ${roadKM} KM (zaroorat ho to edit karein).`;
+            estimatePlazasFromKM();
+        }
+    }
+
+    function estimatePlazasFromKM() {
+        const km = parseFloat(document.getElementById('distanceKM').value) || 0;
+        const routeType = document.getElementById('routeType').value;
+
+        if (km > 0) {
+            let plazas = 0;
+            if (routeType === 'gt') {
+                plazas = Math.max(1, Math.round(km / 75));
+            } else if (routeType === 'motorway') {
+                plazas = Math.max(1, Math.round(km / 140));
+            } else {
+                plazas = Math.max(1, Math.round(km / 95));
+            }
+            document.getElementById('plazaCount').value = plazas;
+        }
+        updateTollFromPlazas();
+    }
+
+    function updateTollFromPlazas() {
+        const count = parseFloat(document.getElementById('plazaCount').value) || 0;
+        const rate = parseFloat(document.getElementById('plazaRate').value) || 0;
+        const total = count * rate;
+        document.getElementById('totalTollPreview').textContent = `Ek side total toll: Rs. ${total.toLocaleString()}`;
+    }
+
+    function toggleReturn() {
+        const isChecked = document.getElementById('isReturn').checked;
+        document.getElementById('returnFields').style.display = isChecked ? 'block' : 'none';
+        if (isChecked) {
+            document.getElementById('returnGrossWeight').value = document.getElementById('tareWeight').value || 12;
+        }
+    }
+
+    // Realistic Heavy Truck Average Formula (KM/L)
+    function getTruckAverage(grossTons, tareTons, routeType) {
+        const netLoad = Math.max(0, grossTons - tareTons);
+        // Empty truck base average ~ 4.1 KM/L on GT, 4.3 KM/L on Motorway
+        let baseEmptyAvg = routeType === 'motorway' ? 4.3 : (routeType === 'mix' ? 4.2 : 4.0);
+        // Every 1 ton of cargo reduces average by ~0.065 KM/L
+        let avg = baseEmptyAvg - (netLoad * 0.065);
+        // Minimum floor 1.8 KM/L for super heavy loads
+        return Math.max(1.8, avg);
+    }
+
+    function calculateFuel() {
+        const vehicleNo = document.getElementById('vehicleNo').value.trim() || "N/A";
+        const routeSelect = document.getElementById('routeType');
+        const routeType = routeSelect.value;
+        const routeLabel = routeSelect.options[routeSelect.selectedIndex].text;
+
+        const fromCity = document.getElementById('fromCity').value.trim() || "Origin";
+        const toCity = document.getElementById('toCity').value.trim() || "Destination";
+
+        const oneWayKM = parseFloat(document.getElementById('distanceKM').value) || 0;
+        const dieselRate = parseFloat(document.getElementById('dieselRate').value) || 0;
+        const oneWayPlazas = parseFloat(document.getElementById('plazaCount').value) || 0;
+        const plazaRate = parseFloat(document.getElementById('plazaRate').value) || 0;
+
+        const tareWeight = parseFloat(document.getElementById('tareWeight').value) || 12;
+        const grossWeight = parseFloat(document.getElementById('grossWeight').value) || 35;
+        const isReturn = document.getElementById('isReturn').checked;
+        const returnGross = isReturn ? (parseFloat(document.getElementById('returnGrossWeight').value) || tareWeight) : 0;
+
+        if (oneWayKM <= 0) {
+            alert("Barah-e-karam shehar chunein ya Ek Side Faasla (KM) darj karein!");
+            return;
+        }
+
+        // Going trip
+        const goingAvg = getTruckAverage(grossWeight, tareWeight, routeType);
+        const goingFuel = oneWayKM / goingAvg;
+        const goingNetLoad = Math.max(0, grossWeight - tareWeight);
+
+        // Return trip
+        let totalKM = oneWayKM;
+        let totalFuel = goingFuel;
+        let totalPlazas = oneWayPlazas;
+        let totalNetLoad = goingNetLoad;
+        let avgDisplay = goingAvg.toFixed(2);
+
+        if (isReturn) {
+            const returnAvg = getTruckAverage(returnGross, tareWeight, routeType);
+            const returnFuel = oneWayKM / returnAvg;
+            const returnNetLoad = Math.max(0, returnGross - tareWeight);
+
+            totalKM = oneWayKM * 2;
+            totalFuel = goingFuel + returnFuel;
+            totalPlazas = oneWayPlazas * 2;
+            totalNetLoad = goingNetLoad + returnNetLoad;
+            avgDisplay = `${(totalKM / totalFuel).toFixed(2)} (Jana: ${goingAvg.toFixed(2)} / Wapsi: ${returnAvg.toFixed(2)})`;
+        }
+
+        const fuelCost = Math.round(totalFuel * dieselRate);
+        const tollCost = Math.round(totalPlazas * plazaRate);
+        const grandTotal = fuelCost + tollCost;
+        const perTonCost = totalNetLoad > 0 ? Math.round(grandTotal / totalNetLoad) : 0;
+
+        const today = new Date().toLocaleDateString('en-GB');
+        const routeHeading = isReturn ? `${fromCity} ⇄ ${toCity} (Return)` : `${fromCity} ➔ ${toCity} (One-Way)`;
+
+        document.getElementById('slipDate').textContent = today;
+        document.getElementById('slipVehicle').textContent = vehicleNo;
+        document.getElementById('resRouteName').textContent = routeHeading;
+        document.getElementById('resRouteType').textContent = routeLabel;
+        document.getElementById('resDist').textContent = totalKM.toLocaleString();
+        document.getElementById('resWeights').textContent = `${tareWeight}T / ${grossWeight}T (Net: ${totalNetLoad}T)`;
+        document.getElementById('resAvg').textContent = avgDisplay;
+        document.getElementById('resRate').textContent = dieselRate;
+        document.getElementById('resFuel').textContent = totalFuel.toFixed(1);
+        document.getElementById('resFuelCost').textContent = fuelCost.toLocaleString();
+        document.getElementById('resPlazaInfo').textContent = `${totalPlazas} Plazas @ Rs.${plazaRate}`;
+        document.getElementById('resTollCost').textContent = tollCost.toLocaleString();
+        document.getElementById('resGrandTotal').textContent = grandTotal.toLocaleString();
+        document.getElementById('resPerTon').textContent = perTonCost.toLocaleString();
+
+        document.getElementById('resultWrapper').style.display = 'block';
+        document.getElementById('resultWrapper').scrollIntoView({ behavior: 'smooth' });
+
+        latestSlipText = `*BCC FLEET & LOGISTICS*\nDate: ${today}\nGaari: ${vehicleNo}\nRoute: ${routeHeading}\nFaasla: ${totalKM} KM\nVazan: ${grossWeight} Tons (Net: ${totalNetLoad}T)\nAverage: ${avgDisplay} KM/L\nDiesel: ${totalFuel.toFixed(1)} Ltr (@ Rs.${dieselRate}) = Rs. ${fuelCost.toLocaleString()}\nToll Tax (${totalPlazas} Plazas): Rs. ${tollCost.toLocaleString()}\n*TOTAL KHARCHA: Rs. ${grandTotal.toLocaleString()}*`;
+
+        latestExcelRow = `${today}\t${vehicleNo}\t${routeHeading}\t${totalKM}\t${grossWeight}\t${totalNetLoad}\t${totalFuel.toFixed(1)}\t${dieselRate}\t${fuelCost}\t${tollCost}\t${grandTotal}`;
+    }
+
+    function shareWhatsApp() {
+        if (!latestSlipText) return;
+        const url = `https://wa.me/?text=${encodeURIComponent(latestSlipText)}`;
+        window.open(url, '_blank');
+    }
+
+    function copyForExcel() {
+        if (!latestExcelRow) return;
+        navigator.clipboard.writeText(latestExcelRow).then(() => {
+            alert("Excel row copy ho gayi hai! Ab Excel mein ja kar Ctrl+V dabayein.");
+        });
+    }
+</script>
+
+</body>
+</html>
