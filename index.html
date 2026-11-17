@@ -43,15 +43,16 @@
             color: #444;
             font-size: 14px;
         }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 15px;
+            background-color: #fff;
         }
-        input:focus {
+        input:focus, select:focus {
             border-color: #d9534f;
             outline: none;
         }
@@ -207,17 +208,28 @@
             <div class="hint" id="distHint">Shehar select karte hi KM aa jayenge.</div>
         </div>
         <div class="col form-group">
-            <label for="tollTax">Auto Toll Tax (Ek Side - Rs):</label>
-            <input type="number" id="tollTax" value="0" placeholder="Auto calculate hoga">
-            <div class="hint">Heavy truck NHA/Motorway andaza (edit kar sakte hain).</div>
+            <label for="routeType">Rasta (Route Type):</label>
+            <select id="routeType">
+                <option value="motorway">Motorway / M-9 (Behtar Average)</option>
+                <option value="mix">Mix Route (Motorway + GT Road)</option>
+                <option value="gt">Pure GT Road / Pahari (Kam Average)</option>
+            </select>
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
+            <label for="tollTax">Auto Toll Tax (Ek Side - Rs):</label>
+            <input type="number" id="tollTax" value="0" placeholder="Auto calculate hoga">
+            <div class="hint">Heavy truck NHA/Motorway andaza.</div>
+        </div>
+        <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
             <input type="number" id="dieselRate" value="360">
         </div>
+    </div>
+
+    <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
             <input type="number" id="tareWeight" value="12">
@@ -372,10 +384,8 @@
         document.getElementById('returnFields').style.display = checked ? 'block' : 'none';
     }
 
-    // Distance ke mutabiq automatic heavy truck toll tax calculate karna
     function updateAutoToll() {
         const km = parseFloat(document.getElementById('distanceKM').value) || 0;
-        // Heavy commercial truck avg toll rate (~Rs 15 per KM across NHA/Motorways)
         const estimatedToll = Math.round((km * 15) / 50) * 50;
         document.getElementById('tollTax').value = estimatedToll;
     }
@@ -432,15 +442,26 @@
         updateAutoToll();
     }
 
-    function getAverage(netLoad) {
-        let avg = 4.8 - (netLoad * 0.05);
-        return avg < 1.8 ? 1.8 : avg;
+    function getAverage(netLoad, routeType) {
+        // Base formula: 4.8 - (load * 0.05)
+        let baseAvg = 4.8 - (netLoad * 0.05);
+
+        // Route type ke hisab se average adjust karna
+        if (routeType === 'motorway') {
+            baseAvg += 0.3; // Motorway par smooth chalti hai to average behtar hoti hai
+        } else if (routeType === 'gt') {
+            baseAvg -= 0.4; // GT Road / Pahari par bar bar gear lagne se average kam hoti hai
+        }
+        // Mix route par default baseAvg hi rahe gi
+
+        return baseAvg < 1.6 ? 1.6 : baseAvg;
     }
 
     function calculateFuel() {
         const origin = document.getElementById('fromCity').value.trim();
         const destination = document.getElementById('toCity').value.trim();
         const oneWayKM = parseFloat(document.getElementById('distanceKM').value);
+        const routeType = document.getElementById('routeType').value;
         const oneWayToll = parseFloat(document.getElementById('tollTax').value) || 0;
         const dieselRate = parseFloat(document.getElementById('dieselRate').value) || 0;
         const tareWeight = parseFloat(document.getElementById('tareWeight').value) || 0;
@@ -454,7 +475,7 @@
         }
 
         let netLoadOut = Math.max(0, grossWeight - tareWeight);
-        let avgOut = getAverage(netLoadOut);
+        let avgOut = getAverage(netLoadOut, routeType);
         let fuelOut = oneWayKM / avgOut;
 
         let totalKM = oneWayKM;
@@ -465,7 +486,7 @@
 
         if (isReturn) {
             let netLoadRet = Math.max(0, returnGross - tareWeight);
-            let avgRet = getAverage(netLoadRet);
+            let avgRet = getAverage(netLoadRet, routeType);
             let fuelRet = oneWayKM / avgRet;
 
             totalKM = oneWayKM * 2;
@@ -496,8 +517,12 @@
 
         document.getElementById('resultBox').style.display = 'block';
 
+        let routeTypeName = "Mix Route";
+        if (routeType === 'motorway') routeTypeName = "Motorway";
+        if (routeType === 'gt') routeTypeName = "GT Road";
+
         lastReportText = `*🚚 Bcc Trip Estimate*\n` +
-                         `Route: ${routeTitle}\n` +
+                         `Route: ${routeTitle} (${routeTypeName})\n` +
                          `Distance: ${totalKM.toFixed(0)} KM\n` +
                          `Cargo Load: ${netLoadOut} Tons\n` +
                          `Average: ${avgDisplay} KM/L\n` +
@@ -507,7 +532,7 @@
                          `*Total Cost: Rs. ${Math.round(grandTotal).toLocaleString('en-PK')}*`;
 
         const today = new Date().toLocaleDateString('en-GB');
-        lastExcelRow = `${today}\t${routeTitle}\t${totalKM.toFixed(0)}\t${netLoadOut}\t${totalFuel.toFixed(1)}\t${dieselRate}\t${Math.round(totalToll)}\t${Math.round(grandTotal)}`;
+        lastExcelRow = `${today}\t${routeTitle} (${routeTypeName})\t${totalKM.toFixed(0)}\t${netLoadOut}\t${totalFuel.toFixed(1)}\t${dieselRate}\t${Math.round(totalToll)}\t${Math.round(grandTotal)}`;
     }
 
     function shareWhatsApp() {
