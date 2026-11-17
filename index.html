@@ -55,6 +55,7 @@
         input:focus, select:focus {
             border-color: #d9534f;
             outline: none;
+            background-color: #fffafa;
         }
         .suggestions {
             position: absolute;
@@ -124,7 +125,7 @@
             background-color: #c9302c;
         }
 
-        /* Official Slip Styling with BCC Watermark */
+        /* Official Slip Styling */
         .slip-wrapper {
             margin-top: 22px;
             display: none;
@@ -319,24 +320,24 @@
     <div class="row">
         <div class="col form-group">
             <label for="distanceKM">Ek Side Faasla (KM):</label>
-            <input type="number" id="distanceKM" placeholder="Auto fill ya khud likhein" oninput="estimatePlazasFromKM()">
-            <div class="hint" id="distHint">Shehar select karte hi KM aa jayenge.</div>
+            <input type="number" step="any" inputmode="decimal" id="distanceKM" placeholder="Auto fill ya khud likhein" onfocus="this.select()" oninput="estimatePlazasFromKM()">
+            <div class="hint" id="distHint">Shehar select karein ya khud KM likhein.</div>
         </div>
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
-            <input type="number" id="dieselRate" value="360">
+            <input type="number" step="any" inputmode="decimal" id="dieselRate" value="360" onfocus="this.select()">
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
             <label for="plazaCount">Toll Plazas (Ek Side Tadaad):</label>
-            <input type="number" id="plazaCount" value="0" min="0" oninput="updateTollFromPlazas()">
-            <div class="hint" id="plazaHint">Raste ke mutabiq plazas ki ginti (edit karein).</div>
+            <input type="number" step="1" inputmode="numeric" id="plazaCount" value="0" min="0" onfocus="this.select()" oninput="updateTollFromPlazas()">
+            <div class="hint" id="plazaHint">Raste ke mutabiq plazas ki ginti (khud likhein).</div>
         </div>
         <div class="col form-group">
             <label for="plazaRate">Per Plaza Rate (Rs):</label>
-            <input type="number" id="plazaRate" value="750" oninput="updateTollFromPlazas()">
+            <input type="number" step="any" inputmode="decimal" id="plazaRate" value="750" onfocus="this.select()" oninput="updateTollFromPlazas()">
             <div class="hint" id="totalTollPreview">Ek side total toll: Rs. 0</div>
         </div>
     </div>
@@ -344,11 +345,11 @@
     <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
-            <input type="number" id="tareWeight" value="12">
+            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="12" onfocus="this.select()">
         </div>
         <div class="col form-group">
             <label for="grossWeight">Kul Vazan (Gross Tons):</label>
-            <input type="number" id="grossWeight" value="35">
+            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="35" onfocus="this.select()">
         </div>
     </div>
 
@@ -359,7 +360,7 @@
         </label>
         <div id="returnFields" style="display:none; margin-top:10px;">
             <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to 12 likhein):</label>
-            <input type="number" id="returnGrossWeight" value="12">
+            <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="12" onfocus="this.select()">
         </div>
     </div>
 
@@ -551,7 +552,6 @@
             const [lat2, lon2] = cityCoords[toKey];
             const straightKM = getHaversineKM(lat1, lon1, lat2, lon2);
 
-            // Road factor: Motorway slightly more direct than GT Road
             let factor = 1.22;
             if (routeType === 'motorway') factor = 1.18;
             if (routeType === 'mix') factor = 1.20;
@@ -596,14 +596,10 @@
         }
     }
 
-    // Realistic Heavy Truck Average Formula (KM/L)
     function getTruckAverage(grossTons, tareTons, routeType) {
         const netLoad = Math.max(0, grossTons - tareTons);
-        // Empty truck base average ~ 4.1 KM/L on GT, 4.3 KM/L on Motorway
         let baseEmptyAvg = routeType === 'motorway' ? 4.3 : (routeType === 'mix' ? 4.2 : 4.0);
-        // Every 1 ton of cargo reduces average by ~0.065 KM/L
         let avg = baseEmptyAvg - (netLoad * 0.065);
-        // Minimum floor 1.8 KM/L for super heavy loads
         return Math.max(1.8, avg);
     }
 
@@ -631,12 +627,10 @@
             return;
         }
 
-        // Going trip
         const goingAvg = getTruckAverage(grossWeight, tareWeight, routeType);
         const goingFuel = oneWayKM / goingAvg;
         const goingNetLoad = Math.max(0, grossWeight - tareWeight);
 
-        // Return trip
         let totalKM = oneWayKM;
         let totalFuel = goingFuel;
         let totalPlazas = oneWayPlazas;
