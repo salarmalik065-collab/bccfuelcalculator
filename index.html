@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bcc Fuel Calculator</title>
-    <!-- Google Maps Places API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCINQeVHUWUQH6n_OrntjA4qk8ezLemnfo&libraries=places"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,6 +38,12 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 15px;
+        }
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
         }
         button {
             background-color: #d9534f;
@@ -49,7 +53,9 @@
             width: 100%;
             border-radius: 4px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            margin-top: 5px;
         }
         button:hover {
             background-color: #c9302c;
@@ -61,6 +67,10 @@
             border-radius: 4px;
             border-left: 5px solid #d9534f;
         }
+        .result h3 {
+            margin-top: 0;
+            color: #333;
+        }
         .result p {
             margin: 8px 0;
             font-size: 15px;
@@ -70,16 +80,42 @@
 <body>
 
 <div class="container">
-    <h2>🚚 Bcc Fuel Calculator (Live Maps)</h2>
+    <h2>🚚 Bcc Fuel Calculator</h2>
     
+    <!-- Pakistan ke main shehron aur stops ki list -->
+    <datalist id="pkCities">
+        <option value="Karachi">
+        <option value="Hyderabad">
+        <option value="Moro Bypass">
+        <option value="Sukkur">
+        <option value="Rahim Yar Khan">
+        <option value="Bahawalpur">
+        <option value="Multan">
+        <option value="Sahiwal">
+        <option value="Depalpur">
+        <option value="Faisalabad">
+        <option value="Lahore">
+        <option value="Gujranwala">
+        <option value="Islamabad">
+        <option value="Rawalpindi">
+        <option value="Peshawar">
+        <option value="Quetta">
+    </datalist>
+
     <div class="form-group">
         <label for="fromCity">Kahan Se (Origin City / Stop):</label>
-        <input type="text" id="fromCity" placeholder="Maslan: Moro Bypass, Sukkur, Karachi...">
+        <input type="text" id="fromCity" list="pkCities" placeholder="List se select karein ya naam likhein..." oninput="autoFillDistance()">
     </div>
 
     <div class="form-group">
         <label for="toCity">Kahan Tak (Destination City / Stop):</label>
-        <input type="text" id="toCity" placeholder="Maslan: Faisalabad, Depalpur...">
+        <input type="text" id="toCity" list="pkCities" placeholder="List se select karein ya naam likhein..." oninput="autoFillDistance()">
+    </div>
+
+    <div class="form-group">
+        <label for="distanceKM">Kul Faasla (Distance in KM):</label>
+        <input type="number" id="distanceKM" placeholder="Auto fill hoga ya khud KM likhein...">
+        <div class="hint" id="distHint">Save routes ka faasla khud aa jayega, naye route ke liye khud KM likh dein.</div>
     </div>
 
     <div class="form-group">
@@ -97,7 +133,7 @@
         <input type="number" id="grossWeight" value="35">
     </div>
 
-    <button onclick="calculateLiveFuel()">Calculate Live Distance & Fuel</button>
+    <button onclick="calculateFuel()">Calculate Distance & Fuel</button>
 
     <div class="result" id="resultBox" style="display: none;">
         <h3>Nataij (Results):</h3>
@@ -111,25 +147,62 @@
 </div>
 
 <script>
-    // Google Maps Autocomplete Initialize
-    let fromAutocomplete, toAutocomplete;
+    // Yahan aap apne rozana ke routes aur unke KM add kar sakte hain
+    // Format: "shehar1-shehar2": distance_in_km (dono taraf se khud kaam karega)
+    const savedRoutes = {
+        "karachi-hyderabad": 165,
+        "karachi-moro bypass": 330,
+        "karachi-sukkur": 475,
+        "karachi-rahim yar khan": 665,
+        "karachi-multan": 925,
+        "karachi-depalpur": 1130,
+        "karachi-faisalabad": 1190,
+        "karachi-lahore": 1265,
+        "karachi-islamabad": 1420,
+        "karachi-rawalpindi": 1410,
+        "karachi-peshawar": 1560,
+        "karachi-quetta": 690,
+        "sukkur-multan": 450,
+        "sukkur-faisalabad": 715,
+        "sukkur-lahore": 790,
+        "sukkur-islamabad": 955,
+        "multan-faisalabad": 250,
+        "multan-lahore": 340,
+        "multan-depalpur": 215,
+        "faisalabad-lahore": 180,
+        "faisalabad-islamabad": 325,
+        "lahore-islamabad": 375
+    };
 
-    function initAutocomplete() {
-        const options = {
-            componentRestrictions: { country: "pk" }, // Sirf Pakistan ke locations ke liye
-            fields: ["formatted_address", "geometry", "name"],
-            types: ["geocode", "establishment"]
-        };
+    function autoFillDistance() {
+        const from = document.getElementById('fromCity').value.trim().toLowerCase();
+        const to = document.getElementById('toCity').value.trim().toLowerCase();
+        const distInput = document.getElementById('distanceKM');
+        const hint = document.getElementById('distHint');
 
-        fromAutocomplete = new google.maps.places.Autocomplete(document.getElementById('fromCity'), options);
-        toAutocomplete = new google.maps.places.Autocomplete(document.getElementById('toCity'), options);
+        if (!from || !to) return;
+
+        const key1 = from + "-" + to;
+        const key2 = to + "-" + from;
+
+        if (savedRoutes[key1]) {
+            distInput.value = savedRoutes[key1];
+            hint.innerText = "✅ Saved route mil gaya (" + savedRoutes[key1] + " KM). Zaroorat ho to tabdeel kar lein.";
+            hint.style.color = "green";
+        } else if (savedRoutes[key2]) {
+            distInput.value = savedRoutes[key2];
+            hint.innerText = "✅ Saved route mil gaya (" + savedRoutes[key2] + " KM). Zaroorat ho to tabdeel kar lein.";
+            hint.style.color = "green";
+        } else {
+            hint.innerText = "ℹ️ Yeh route list mein save nahi hai — upar box mein khud KM likh dein.";
+            hint.style.color = "#d9534f";
+        }
     }
 
-    window.onload = initAutocomplete;
-
-    function calculateLiveFuel() {
-        var origin = document.getElementById('fromCity').value;
-        var destination = document.getElementById('toCity').value;
+    function calculateFuel() {
+        var origin = document.getElementById('fromCity').value.trim();
+        var destination = document.getElementById('toCity').value.trim();
+        var distanceKM = parseFloat(document.getElementById('distanceKM').value);
         var dieselRate = parseFloat(document.getElementById('dieselRate').value);
         var tareWeight = parseFloat(document.getElementById('tareWeight').value);
         var grossWeight = parseFloat(document.getElementById('grossWeight').value);
@@ -139,53 +212,34 @@
             return;
         }
 
-        var service = new google.maps.DistanceMatrixService();
-        service.getDistanceMatrix({
-            origins: [origin],
-            destinations: [destination],
-            travelMode: 'DRIVING',
-            unitSystem: google.maps.UnitSystem.METRIC,
-            avoidHighways: false,
-            avoidTolls: false
-        }, function(response, status) {
-            if (status !== 'OK') {
-                alert("Distance calculate karne mein masla hua: " + status);
-                return;
-            }
+        if (isNaN(distanceKM) || distanceKM <= 0) {
+            alert("Barah-e-karam sahi Kul Faasla (KM) likhein!");
+            return;
+        }
 
-            var results = response.rows[0].elements[0];
-            if (results.status === "ZERO_RESULTS") {
-                alert("Is route ka rasta Google Maps par nahi mila.");
-                return;
-            }
+        // Net cargo weight calculate karna
+        var netLoad = grossWeight - tareWeight;
+        if (netLoad < 0) netLoad = 0;
 
-            var distanceInMeters = results.distance.value;
-            var distanceKM = distanceInMeters / 1000;
+        // Aapka original average formula
+        var baseAvg = 4.8;
+        var adjustedAvg = baseAvg - (netLoad * 0.05);
+        if (adjustedAvg < 1.8) {
+            adjustedAvg = 1.8;
+        }
 
-            // Net cargo weight calculate karna
-            var netLoad = grossWeight - tareWeight;
-            if (netLoad < 0) netLoad = 0;
+        var totalFuel = distanceKM / adjustedAvg;
+        var totalCost = totalFuel * dieselRate;
 
-            // Average formula
-            var baseAvg = 4.8;
-            var adjustedAvg = baseAvg - (netLoad * 0.05);
-            if (adjustedAvg < 1.8) {
-                adjustedAvg = 1.8;
-            }
-
-            var totalFuel = distanceKM / adjustedAvg;
-            var totalCost = totalFuel * dieselRate;
-
-            // Results screen par show karna
-            document.getElementById('resRouteName').innerText = origin + " se " + destination;
-            document.getElementById('resDist').innerText = distanceKM.toFixed(1);
-            document.getElementById('resNetLoad').innerText = netLoad;
-            document.getElementById('resAvg').innerText = adjustedAvg.toFixed(2);
-            document.getElementById('resFuel').innerText = totalFuel.toFixed(1);
-            document.getElementById('resCost').innerText = totalCost.toLocaleString('en-PK', {maximumFractionDigits: 0});
-            
-            document.getElementById('resultBox').style.display = 'block';
-        });
+        // Results screen par show karna
+        document.getElementById('resRouteName').innerText = origin + " se " + destination;
+        document.getElementById('resDist').innerText = distanceKM.toFixed(1);
+        document.getElementById('resNetLoad').innerText = netLoad;
+        document.getElementById('resAvg').innerText = adjustedAvg.toFixed(2);
+        document.getElementById('resFuel').innerText = totalFuel.toFixed(1);
+        document.getElementById('resCost').innerText = totalCost.toLocaleString('en-PK', {maximumFractionDigits: 0});
+        
+        document.getElementById('resultBox').style.display = 'block';
     }
 </script>
 
