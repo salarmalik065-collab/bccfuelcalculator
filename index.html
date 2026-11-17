@@ -138,7 +138,6 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        /* Halka sa BCC Watermark background mein */
         .slip-box::before {
             content: "BCC";
             position: absolute;
@@ -264,7 +263,6 @@
             font-size: 14px;
         }
 
-        /* Print Settings: Sirf Slip Print Hogi */
         @media print {
             body * {
                 visibility: hidden;
@@ -301,8 +299,8 @@
         <div class="col form-group">
             <label for="routeType">Rasta (Route Type):</label>
             <select id="routeType" onchange="autoCalculateDistance()">
-                <option value="motorway">Motorway / M-9 (Alag KM & Toll)</option>
-                <option value="gt">GT Road / N-5 (Alag KM & Toll)</option>
+                <option value="gt">GT Road / N-5 (Toll Plazas)</option>
+                <option value="motorway">Motorway / M-9 / M-5</option>
                 <option value="mix">Mix Route (Motorway + GT)</option>
             </select>
         </div>
@@ -325,21 +323,30 @@
     <div class="row">
         <div class="col form-group">
             <label for="distanceKM">Ek Side Faasla (KM):</label>
-            <input type="number" id="distanceKM" placeholder="Auto fill ya khud likhein" oninput="updateAutoToll()">
-            <div class="hint" id="distHint">Raste ke mutabiq KM khud badal jayenge.</div>
+            <input type="number" id="distanceKM" placeholder="Auto fill ya khud likhein" oninput="estimatePlazasFromKM()">
+            <div class="hint" id="distHint">Shehar select karte hi KM aa jayenge.</div>
         </div>
-        <div class="col form-group">
-            <label for="tollTax">Auto Toll Tax (Ek Side - Rs):</label>
-            <input type="number" id="tollTax" value="0" placeholder="Auto calculate hoga">
-            <div class="hint" id="tollHint">Motorway aur GT Road ka alag toll.</div>
-        </div>
-    </div>
-
-    <div class="row">
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
             <input type="number" id="dieselRate" value="360">
         </div>
+    </div>
+
+    <!-- Toll Plaza Count & Rate Row -->
+    <div class="row">
+        <div class="col form-group">
+            <label for="plazaCount">Toll Plazas (Ek Side Tadaad):</label>
+            <input type="number" id="plazaCount" value="0" min="0" oninput="updateTollFromPlazas()">
+            <div class="hint" id="plazaHint">Raste ke mutabiq plazas ki ginti (edit karein).</div>
+        </div>
+        <div class="col form-group">
+            <label for="plazaRate">Per Plaza Rate (Rs):</label>
+            <input type="number" id="plazaRate" value="750" oninput="updateTollFromPlazas()">
+            <div class="hint" id="totalTollPreview">Ek side total toll: Rs. 0</div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
             <input type="number" id="tareWeight" value="12">
@@ -407,7 +414,7 @@
                     <span>Rs. <span id="resFuelCost">0</span></span>
                 </div>
                 <div class="slip-row">
-                    <span>Kul Toll Tax:</span>
+                    <span>Toll Tax (<span id="resPlazaInfo">0 Plazas</span>):</span>
                     <span>Rs. <span id="resTollCost">0</span></span>
                 </div>
 
@@ -449,112 +456,11 @@
         "Kandiaro": [27.0592, 68.2102], "Bhiria Road": [26.9108, 68.1947], "Ranipur": [27.2872, 68.5062],
         "Khairpur": [27.5295, 68.7592], "Rohri": [27.6920, 68.8950], "Sukkur": [27.7131, 68.8492],
         "Pano Aqil": [27.8561, 69.1111], "Ghotki": [28.0060, 69.3161], "Mirpur Mathelo": [28.0211, 69.5494],
-        "Daharki": [28.0467, 69.6719], "Ubauro": [28.1650, 69.7311], "Shikarpur": [27.9556, 68.6382],
-        "Jacobabad": [28.2769, 68.4514], "Kashmore": [28.4326, 69.5836], "Kandhkot": [28.2439, 69.1823],
-        "Larkana": [27.5570, 68.2028], "Shahdadkot": [27.8473, 67.9068], "Mehar": [27.1803, 67.8206],
-        "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613], "Sadiqabad": [28.3062, 70.1307],
-        "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.6453, 70.6567], "Liaquatpur": [28.9333, 70.9500],
-        "Ahmadpur East": [29.1431, 71.2598], "Bahawalpur": [29.3544, 71.6911], "Bahawalnagar": [29.9987, 73.2536],
-        "Chishtian": [29.7958, 72.8578], "Hasilpur": [29.6922, 72.5456], "Lodhran": [29.5339, 71.6324],
-        "Jalalpur Pirwala": [29.5067, 71.2222], "Shujabad": [29.8803, 71.2950], "Multan": [30.1575, 71.5249],
-        "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4068, 71.8667], "Mian Channu": [30.4407, 72.3568],
-        "Vehari": [30.0452, 72.3489], "Burewala": [30.1667, 72.6500], "Arifwala": [30.2906, 73.0653],
-        "Pakpattan": [30.3431, 73.3894], "Chichawatni": [30.5333, 72.7000], "Sahiwal": [30.6682, 73.1114],
-        "Okara": [30.8081, 73.4458], "Depalpur": [30.6708, 73.6533], "Renala Khurd": [30.8783, 73.5986],
-        "Pattoki": [31.0214, 73.8528], "Kasur": [31.1187, 74.4632], "Raiwind": [31.2489, 74.2153],
-        "Lahore": [31.5204, 74.3587], "Sheikhupura": [31.7167, 73.9850], "Nankana Sahib": [31.4492, 73.7125],
-        "Jaranwala": [31.3342, 73.4194], "Samundri": [31.0639, 72.9611], "Faisalabad": [31.4504, 73.1350],
-        "Gojra": [31.1492, 72.6832], "Toba Tek Singh": [30.9713, 72.4827], "Kamalia": [30.7258, 72.6447],
-        "Jhang": [31.2681, 72.3181], "Chiniot": [31.7200, 72.9789], "Pindi Bhattian": [31.8950, 73.2706],
-        "Hafizabad": [32.0709, 73.6880], "Gujranwala": [32.1877, 74.1945], "Wazirabad": [32.4432, 74.1200],
-        "Sialkot": [32.4945, 74.5229], "Gujrat": [32.5731, 74.1005], "Kharian": [32.8110, 73.8650],
-        "Lalamusa": [32.7006, 73.9575], "Mandi Bahauddin": [32.5861, 73.4917], "Sargodha": [32.0836, 72.6711],
-        "Jhelum": [32.9425, 73.7257], "Dina": [33.0283, 73.6011], "Sohawa": [33.1286, 73.4214],
-        "Gujar Khan": [33.2542, 73.3042], "Chakwal": [32.9328, 72.8630], "Talagang": [32.9297, 72.4158],
-        "Rawalpindi": [33.5651, 73.0169], "Islamabad": [33.6844, 73.0479], "Taxila": [33.7463, 72.7875],
-        "Wah Cantt": [33.7715, 72.7511], "Hassan Abdal": [33.8195, 72.6890], "Attock": [33.7667, 72.3609],
-        "Mianwali": [32.5839, 71.5370], "Bhakkar": [31.6333, 71.0667], "Layyah": [30.9613, 70.9390],
-        "Muzaffargarh": [30.0703, 71.1933], "Kot Addu": [30.4690, 70.9670], "Dera Ghazi Khan": [30.0489, 70.6455],
-        "Taunsa": [30.7036, 70.6506], "Rajanpur": [29.1035, 70.3297], "Peshawar": [34.0151, 71.5249],
-        "Nowshera": [34.0153, 71.9747], "Mardan": [34.1986, 72.0404], "Swabi": [34.1202, 72.4698],
-        "Charsadda": [34.1453, 71.7308], "Mingora": [34.7717, 72.3602], "Batkhela": [34.6178, 71.9722],
-        "Timergara": [34.8281, 71.8417], "Dir": [35.2074, 71.8768], "Chitral": [35.8518, 71.7864],
-        "Haripur": [33.9942, 72.9341], "Havelian": [34.0536, 73.1599], "Abbottabad": [34.1688, 73.2215],
-        "Mansehra": [34.3313, 73.1980], "Battagram": [34.6772, 73.0233], "Besham": [34.9306, 72.8819],
-        "Dasu": [35.2917, 73.2906], "Kohat": [33.5869, 71.4414], "Karak": [33.1163, 71.0935],
-        "Bannu": [32.9889, 70.6056], "Lakki Marwat": [32.6079, 70.9114], "Dera Ismail Khan": [31.8314, 70.9019],
-        "Hub": [25.0245, 66.8879], "Uthal": [25.8072, 66.6219], "Bela": [26.2271, 66.3111],
-        "Khuzdar": [27.8000, 66.6167], "Kalat": [29.0266, 66.5936], "Mastung": [29.7997, 66.8455],
-        "Quetta": [30.1798, 66.9750], "Chaman": [30.9210, 66.4597], "Pishin": [30.5803, 66.9961],
-        "Ziarat": [30.3814, 67.7256], "Loralai": [30.3705, 68.5979], "Qilla Saifullah": [30.7008, 68.3598],
-        "Zhob": [31.3417, 69.4486], "Sibi": [29.5430, 67.8773], "Dera Murad Jamali": [28.5466, 68.2231],
-        "Dera Allah Yar": [28.3735, 68.3508], "Nushki": [29.5522, 66.0229], "Dalbandin": [28.8885, 64.4062],
-        "Taftan": [28.9692, 61.5733], "Panjgur": [26.9644, 64.0903], "Turbat": [26.0031, 63.0544],
-        "Gwadar": [25.1216, 62.3254], "Pasni": [25.2631, 63.4710], "Ormara": [25.2088, 64.6357],
-        "Mirpur": [33.1484, 73.7518], "Bhimber": [32.9746, 74.0781], "Kotli": [33.5156, 73.9019],
-        "Rawalakot": [33.8578, 73.7604], "Muzaffarabad": [34.3700, 73.4711], "Chilas": [35.4206, 74.0967],
-        "Gilgit": [35.9208, 74.3089], "Skardu": [35.2971, 75.6333], "Hunza": [36.3167, 74.6500]
-    };
-
-    // Motorway vs GT Road ke alag-alag KM (Main Corridors)
-    const routeCorridorKM = {
-        "karachi-lahore": { motorway: 1240, gt: 1285, mix: 1265 },
-        "karachi-islamabad": { motorway: 1420, gt: 1455, mix: 1435 },
-        "karachi-faisalabad": { motorway: 1175, gt: 1215, mix: 1190 },
-        "karachi-multan": { motorway: 910, gt: 950, mix: 925 },
-        "karachi-sukkur": { motorway: 465, gt: 495, mix: 475 },
-        "karachi-depalpur": { motorway: 1120, gt: 1150, mix: 1130 },
-        "lahore-islamabad": { motorway: 375, gt: 300, mix: 340 },
-        "faisalabad-islamabad": { motorway: 325, gt: 350, mix: 335 },
-        "multan-lahore": { motorway: 345, gt: 340, mix: 342 },
-        "multan-faisalabad": { motorway: 245, gt: 260, mix: 250 },
-        "karachi-quetta": { motorway: 690, gt: 690, mix: 690 }
-    };
-
-    const sortedCityNames = Object.keys(cityCoords).sort();
-    let lastReportText = "";
-    let lastExcelRow = "";
-
-    function filterCities(type) {
-        const input = document.getElementById(type + 'City');
-        const box = document.getElementById(type + 'Suggestions');
-        const val = input.value.trim().toLowerCase();
-
-        box.innerHTML = '';
-        const matches = sortedCityNames.filter(c => c.toLowerCase().includes(val));
-
-        if (matches.length === 0) {
-            box.style.display = 'none';
-            autoCalculateDistance();
-            return;
-        }
-
-        matches.slice(0, 15).forEach(city => {
-            const div = document.createElement('div');
-            div.innerText = city;
-            div.onclick = function() {
-                input.value = city;
-                box.style.display = 'none';
-                autoCalculateDistance();
-            };
-            box.appendChild(div);
-        });
-        box.style.display = 'block';
-        autoCalculateDistance();
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.form-group')) {
-            document.getElementById('fromSuggestions').style.display = 'none';
-            document.getElementById('toSuggestions').style.display = 'none';
-        }
-    });
-
-    function toggleReturn() {
-        const checked = document.getElementById('isReturn').checked;
-        document.getElementById('returnFields').style.display = checked ? 'block' : 'none';
-    }
-
-    // Route Type (Motorway vs GT) ke mutabiq alag Toll Tax
-    function updateAutoToll() {
-        const km = parseFloat(document.getElementById('distanceKM').value
+        "Daharki": [28.0467, 69.6719], "Ubauro": [28.1650, 69.7311], 
+        // M-5 / M-4 Interchanges & Nearby Towns
+        "Khanbela": [28.5300, 70.3800], "Uch Sharif": [29.2230, 71.2580], "Zahir Pir": [28.9800, 70.7800],
+        "Jalalpur Pirwala": [29.5067, 71.2222], "Abdul Hakeem": [30.5528, 72.0625],
+        "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Kashmore": [28.4326, 69.5836],
+        "Kandhkot": [28.2439, 69.1823], "Larkana": [27.5570, 68.2028], "Shahdadkot": [27.8473, 67.9068],
+        "Mehar": [27.1803, 67.8206], "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613],
+        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.645
