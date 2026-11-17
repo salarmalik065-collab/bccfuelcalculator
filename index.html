@@ -57,32 +57,6 @@
             outline: none;
             background-color: #fffafa;
         }
-        .suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-top: none;
-            border-radius: 0 0 6px 6px;
-            max-height: 180px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: none;
-        }
-        .suggestions div {
-            padding: 9px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f1f1f1;
-            font-size: 14px;
-        }
-        .suggestions div:hover {
-            background-color: #ffeaea;
-            color: #d9534f;
-            font-weight: bold;
-        }
         .hint {
             font-size: 12px;
             color: #666;
@@ -125,7 +99,7 @@
             background-color: #c9302c;
         }
 
-        /* Compact Voucher Slip Styling (Fits easily on A4) */
+        /* Slip Styling */
         .slip-wrapper {
             margin-top: 20px;
             display: none;
@@ -193,13 +167,8 @@
             font-size: 12.5px;
             border-bottom: 1px dotted #ddd;
         }
-        .slip-row span:first-child {
-            color: #444;
-        }
-        .slip-row span:last-child {
-            font-weight: 600;
-            color: #111;
-        }
+        .slip-row span:first-child { color: #444; }
+        .slip-row span:last-child { font-weight: 600; color: #111; }
         .slip-total {
             margin-top: 8px;
             padding: 7px 10px;
@@ -227,7 +196,6 @@
             font-weight: 600;
         }
 
-        /* Action Buttons */
         .action-btns {
             display: flex;
             gap: 8px;
@@ -236,57 +204,15 @@
             margin-left: auto;
             margin-right: auto;
         }
-        .btn-print {
-            flex: 1;
-            background-color: #333;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-whatsapp {
-            flex: 1;
-            background-color: #25D366;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-excel {
-            flex: 1;
-            background-color: #217346;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 13px;
-        }
+        .btn-print { flex: 1; background-color: #333; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-whatsapp { flex: 1; background-color: #25D366; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-excel { flex: 1; background-color: #217346; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
-        /* Compact A4 Print Rules */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 10mm;
-            }
-            body {
-                background: #fff;
-                padding: 0;
-                margin: 0;
-            }
-            body * {
-                visibility: hidden;
-            }
-            #printableSlip, #printableSlip * {
-                visibility: visible;
-            }
+            @page { size: A4 portrait; margin: 10mm; }
+            body { background: #fff; padding: 0; margin: 0; }
+            body * { visibility: hidden; }
+            #printableSlip, #printableSlip * { visibility: visible; }
             #printableSlip {
                 position: absolute;
                 left: 50%;
@@ -330,16 +256,171 @@
     <div class="row">
         <div class="col form-group">
             <label for="fromCity">Kahan Se (Origin):</label>
-            <input type="text" id="fromCity" placeholder="Type karein (maslan: Karachi)..." autocomplete="off" oninput="filterCities('from')" onfocus="filterCities('from')">
-            <div id="fromSuggestions" class="suggestions"></div>
+            <input type="text" id="fromCity" list="pakistan-cities" placeholder="Shehar select karein ya type karein..." autocomplete="off" oninput="autoCalculateDistance()">
         </div>
 
         <div class="col form-group">
             <label for="toCity">Kahan Tak (Destination):</label>
-            <input type="text" id="toCity" placeholder="Type karein (maslan: Lahore)..." autocomplete="off" oninput="filterCities('to')" onfocus="filterCities('to')">
-            <div id="toSuggestions" class="suggestions"></div>
+            <input type="text" id="toCity" list="pakistan-cities" placeholder="Shehar select karein ya type karein..." autocomplete="off" oninput="autoCalculateDistance()">
         </div>
     </div>
+
+    <!-- Pakistan ke Tamam Chotay Bary Shehar, Mandiyan & Industrial Hubs ki Datalist -->
+    <datalist id="pakistan-cities">
+        <!-- Sindh -->
+        <option value="Karachi">
+        <option value="Hyderabad">
+        <option value="Sukkur">
+        <option value="Larkana">
+        <option value="Nawabshah">
+        <option value="Mirpur Khas">
+        <option value="Shikarpur">
+        <option value="Jacobabad">
+        <option value="Khairpur">
+        <option value="Dadu">
+        <option value="Tando Adam">
+        <option value="Kotri">
+        <option value="Jamshoro">
+        <option value="Thatta">
+        <option value="Badin">
+        <option value="Ghotki">
+        <option value="Daharki">
+        <option value="Mirpur Mathelo">
+        <option value="Pano Aqil">
+        <option value="Rohri">
+        <option value="Sehwan">
+        <option value="Moro">
+        <option value="Naushahro Feroze">
+        <option value="Kandiaro">
+        <option value="Ranipur">
+        <option value="Umerkot">
+        <option value="Mithi">
+        <option value="Sanghar">
+        <option value="Tando Allahyar">
+        <option value="Tando Muhammad Khan">
+        <option value="Kashmore">
+        <option value="Kandhkot">
+        <option value="Shahdadkot">
+        <option value="Mehar">
+        <option value="Hala">
+        <option value="Matiari">
+
+        <!-- Punjab -->
+        <option value="Lahore">
+        <option value="Faisalabad">
+        <option value="Rawalpindi">
+        <option value="Multan">
+        <option value="Gujranwala">
+        <option value="Sialkot">
+        <option value="Bahawalpur">
+        <option value="Sargodha">
+        <option value="Sheikhupura">
+        <option value="Rahim Yar Khan">
+        <option value="Sadiqabad">
+        <option value="Khanpur">
+        <option value="Jhang">
+        <option value="Gujrat">
+        <option value="Mardan">
+        <option value="Kasur">
+        <option value="Sahiwal">
+        <option value="Okara">
+        <option value="Depalpur">
+        <option value="Wah Cantonment">
+        <option value="Dera Ghazi Khan">
+        <option value="Chiniot">
+        <option value="Kamoke">
+        <option value="Hafizabad">
+        <option value="Sadiqabad">
+        <option value="Bhalwal">
+        <option value="Muzaffargarh">
+        <option value="Khanewal">
+        <option value="Kabirwala">
+        <option value="Mian Channu">
+        <option value="Lodhran">
+        <option value="Dunyapur">
+        <option value="Jalalpur Pirwala">
+        <option value="Shujabad">
+        <option value="Ahmadpur East">
+        <option value="Liaquatpur">
+        <option value="Zahid Pir">
+        <option value="Vehari">
+        <option value="Burewala">
+        <option value="Hasilpur">
+        <option value="Arifwala">
+        <option value="Pakpattan">
+        <option value="Chichawatni">
+        <option value="Renala Khurd">
+        <option value="Pattoki">
+        <option value="Phunga">
+        <option value="Muridke">
+        <option value="Narowal">
+        <option value="Shakargarh">
+        <option value="Pasrur">
+        <option value="Daska">
+        <option value="Wazirabad">
+        <option value="Kharian">
+        <option value="Jhelum">
+        <option value="Dina">
+        <option value="Gujar Khan">
+        <option value="Attock">
+        <option value="Taxila">
+        <option value="Hassan Abdal">
+        <option value="Fateh Jang">
+        <option value="Talagang">
+        <option value="Chakwal">
+        <option value="Khushab">
+        <option value="Jauharabad">
+        <option value="Bhakkar">
+        <option value="Mianwali">
+        <option value="Leiah">
+        <option value="Kot Adu">
+        <option value="Taunsa Sharif">
+        <option value="Rajanpur">
+        <option value="Jampur">
+        <option value="Ryk Bypass">
+
+        <!-- KPK & Islamabad -->
+        <option value="Islamabad">
+        <option value="Peshawar">
+        <option value="Abbottabad">
+        <option value="Swat">
+        <option value="Mingora">
+        <option value="Nowshera">
+        <option value="Charsadda">
+        <option value="Mardan">
+        <option value="Swabi">
+        <option value="Haripur">
+        <option value="Mansehra">
+        <option value="Kohat">
+        <option value="Bannu">
+        <option value="Dera Ismail Khan">
+        <option value="Timergara">
+        <option value="Chitral">
+        <option value="Battagram">
+        <option value="Hangu">
+        <option value="Karak">
+        <option value="Lakki Marwat">
+
+        <!-- Balochistan & Azad Kashmir / Northern Areas -->
+        <option value="Quetta">
+        <option value="Gwadar">
+        <option value="Turbat">
+        <option value="Hub">
+        <option value="Khuzdar">
+        <option value="Sibi">
+        <option value="Chaman">
+        <option value="Zhob">
+        <option value="Loralai">
+        <option value="Noshki">
+        <option value="Dera Murad Jamali">
+        <option value="Muzaffarabad">
+        <option value="Mirpur">
+        <option value="Rawalakot">
+        <option value="Kotli">
+        <option value="Gilgit">
+        <option value="Skardu">
+        <option value="Chilas">
+    </datalist>
 
     <div class="row">
         <div class="col form-group">
@@ -468,26 +549,221 @@
 
 <script>
     const cityCoords = {
-        // Sindh
-        "Karachi": [24.8607, 67.0011], "Thatta": [24.7475, 67.9235], "Badin": [24.6558, 68.8383],
-        "Kotri": [25.3657, 68.3083], "Jamshoro": [25.4304, 68.2809], "Hyderabad": [25.3960, 68.3578],
-        "Tando Allahyar": [25.4608, 68.7192], "Tando Muhammad Khan": [25.1239, 68.5389],
-        "Tando Adam": [25.7682, 68.6619], "Sanghar": [26.0466, 68.9481], "Mirpur Khas": [25.5276, 69.0159],
-        "Umerkot": [25.3616, 69.7362], "Mithi": [24.7370, 69.7971], "Matiari": [25.5971, 68.4467],
-        "Hala": [25.8146, 68.4219], "Saeedabad": [25.9667, 68.3667], "Sakrand": [26.1384, 68.2736],
-        "Nawabshah": [26.2442, 68.4100], "Qazi Ahmed": [26.3069, 68.1061], "Moro": [26.6631, 68.0001],
-        "Moro Bypass": [26.6650, 68.0150], "Naushahro Feroze": [26.8401, 68.1227],
-        "Kandiaro": [27.0592, 68.2102], "Bhiria Road": [26.9108, 68.1947], "Ranipur": [27.2872, 68.5062],
-        "Khairpur": [27.5295, 68.7592], "Rohri": [27.6920, 68.8950], "Sukkur": [27.7131, 68.8492],
-        "Pano Aqil": [27.8561, 69.1111], "Ghotki": [28.0060, 69.3161], "Mirpur Mathelo": [28.0211, 69.5494],
-        "Daharki": [28.0467, 69.6719], "Ubauro": [28.1650, 69.7311], "Shikarpur": [27.9556, 68.6382],
-        "Jacobabad": [28.2769, 68.4514], "Kashmore": [28.4326, 69.5836], "Kandhkot": [28.2439, 69.1823],
-        "Larkana": [27.5570, 68.2028], "Shahdadkot": [27.8473, 67.9068], "Mehar": [27.1803, 67.8206],
-        "Dadu": [26.7319, 67.7750], "Sehwan": [26.4249, 67.8613],
+        "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
+        "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
+        "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Khairpur": [27.5295, 68.7592],
+        "Dadu": [26.7319, 67.7750], "Tando Adam": [25.7682, 68.6619], "Kotri": [25.3657, 68.3083],
+        "Jamshoro": [25.4304, 68.2809], "Thatta": [24.7475, 67.9235], "Badin": [24.6558, 68.8383],
+        "Ghotki": [28.0060, 69.3161], "Daharki": [28.0467, 69.6719], "Mirpur Mathelo": [28.0211, 69.5494],
+        "Pano Aqil": [27.8561, 69.1111], "Rohri": [27.6920, 68.8950], "Sehwan": [26.4249, 67.8613],
+        "Moro": [26.6631, 68.0001], "Naushahro Feroze": [26.8401, 68.1227], "Kandiaro": [27.0592, 68.2102],
+        
+        "Lahore": [31.5497, 74.3436], "Faisalabad": [31.4504, 73.1350], "Rawalpindi": [33.5651, 73.0169],
+        "Multan": [30.1575, 71.5249], "Gujranwala": [32.1877, 74.1945], "Sialkot": [32.4945, 74.5229],
+        "Bahawalpur": [29.3544, 71.6911], "Sargodha": [32.0836, 72.6711], "Sheikhupura": [31.7145, 73.9850],
+        "Rahim Yar Khan": [28.4212, 70.2989], "Sadiqabad": [28.3062, 70.1307], "Khanpur": [28.6453, 70.6567],
+        "Jhang": [31.2751, 72.3308], "Gujrat": [32.5731, 74.0787], "Kasur": [31.1170, 74.4446],
+        "Sahiwal": [30.6682, 73.1114], "Okara": [30.8138, 73.4534], "Depalpur": [30.6736, 73.6617],
+        "Dera Ghazi Khan": [30.0456, 70.6419], "Chiniot": [31.7200, 72.9789], "Kamoke": [31.9754, 74.2163],
+        "Hafizabad": [32.0707, 73.6882], "Muzaffargarh": [30.0703, 71.1933], "Khanewal": [30.3017, 71.9321],
+        "Lodhran": [29.5339, 71.6324], "Vehari": [30.0436, 72.3556], "Burewala": [30.1578, 72.6892],
+        "Pakpattan": [30.3433, 73.3931], "Chichawatni": [30.5283, 72.7031], "Pattoki": [31.0200, 73.8542],
+        "Jhelum": [32.9333, 73.7333], "Attock": [33.7667, 72.3667], "Chakwal": [32.9333, 72.8500],
+        
+        "Islamabad": [33.6844, 73.0479], "Peshawar": [34.0151, 71.5249], "Abbottabad": [34.1463, 73.2116],
+        "Mardan": [34.1989, 72.0406], "Nowshera": [34.0158, 71.9793], "Charsadda": [34.1539, 71.7424],
+        "Kohat": [33.5889, 71.4429], "Bannu": [32.9855, 70.6042], "Dera Ismail Khan": [31.8311, 70.9014],
+        
+        "Quetta": [30.1798, 66.9750], "Gwadar": [25.1216, 62.3254], "Turbat": [26.0012, 63.0456],
+        "Hub": [25.0267, 66.8864], "Khuzdar": [27.7384, 66.6434], "Sibi": [29.5450, 67.8797],
+        "Muzaffarabad": [34.3700, 73.4711], "Mirpur": [33.1478, 73.7519], "Gilgit": [35.9208, 74.3093], "Skardu": [35.2971, 75.6333]
+    };
 
-        // Punjab
-        "Sadiqabad": [28.3062, 70.1307], "Rahim Yar Khan": [28.4212, 70.2989], "Khanpur": [28.6453, 70.6567],
-        "Zahid Pir": [28.8000, 70.5500], "Liaquatpur": [28.9317, 70.9508], "Ahmadpur East": [29.1436, 71.2598],
-        "Bahawalpur": [29.3544, 71.6911], "Lodhran": [29.5339, 71.6324], "Dunyapur": [29.8000, 71.7433],
-        "Jalalpur Pirwala": [29.5056, 71.2222], "Shujabad": [29.8806, 71.2931], "Multan": [30.1575, 71.5249],
-        "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4069, 71.8625], "Mian Channu
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        var R = 6371;
+        var dLat = deg2rad(lat2 - lat1);
+        var dLon = deg2rad(lon2 - lon1);
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    function autoCalculateDistance() {
+        var from = document.getElementById("fromCity").value.trim();
+        var to = document.getElementById("toCity").value.trim();
+        var routeType = document.getElementById("routeType").value;
+
+        if(cityCoords[from] && cityCoords[to]) {
+            var coord1 = cityCoords[from];
+            var coord2 = cityCoords[to];
+            var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
+            
+            // Road factor multiplier
+            var multiplier = 1.25;
+            if(routeType === 'gt') multiplier = 1.30;
+            if(routeType === 'motorway') multiplier = 1.15;
+
+            var roadDist = Math.round(straightDist * multiplier);
+            document.getElementById("distanceKM").value = roadDist;
+            document.getElementById("distHint").innerText = "Auto calculated route distance (" + roadDist + " KM)";
+            estimatePlazasFromKM();
+        }
+    }
+
+    function estimatePlazasFromKM() {
+        var km = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var routeType = document.getElementById("routeType").value;
+        var estimatedPlazas = 0;
+
+        if (routeType === 'gt') {
+            estimatedPlazas = Math.round(km / 65);
+        } else if (routeType === 'motorway') {
+            estimatedPlazas = Math.round(km / 90);
+        } else {
+            estimatedPlazas = Math.round(km / 75);
+        }
+
+        document.getElementById("plazaCount").value = estimatedPlazas;
+        updateTollFromPlazas();
+    }
+
+    function updateTollFromPlazas() {
+        var count = parseFloat(document.getElementById("plazaCount").value) || 0;
+        var rate = parseFloat(document.getElementById("plazaRate").value) || 0;
+        var totalToll = count * rate;
+        document.getElementById("totalTollPreview").innerText = "Ek side total toll: Rs. " + totalToll.toLocaleString();
+    }
+
+    function toggleReturn() {
+        var isReturn = document.getElementById("isReturn").checked;
+        document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
+    }
+
+    function calculateFuel() {
+        var vehicleNo = document.getElementById("vehicleNo").value.trim() || "N/A";
+        var routeSelect = document.getElementById("routeType");
+        var routeTypeText = routeSelect.options[routeSelect.selectedIndex].text;
+        
+        var from = document.getElementById("fromCity").value.trim() || "Origin";
+        var to = document.getElementById("toCity").value.trim() || "Destination";
+        var routeName = from + " ➔ " + to;
+
+        var oneWayDist = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var isReturn = document.getElementById("isReturn").checked;
+        var totalDist = isReturn ? oneWayDist * 2 : oneWayDist;
+
+        var dieselRate = parseFloat(document.getElementById("dieselRate").value) || 360;
+        var plazaCount = parseFloat(document.getElementById("plazaCount").value) || 0;
+        var plazaRate = parseFloat(document.getElementById("plazaRate").value) || 750;
+        
+        var oneWayToll = plazaCount * plazaRate;
+        var totalToll = isReturn ? oneWayToll * 2 : oneWayToll;
+
+        var tare = parseFloat(document.getElementById("tareWeight").value) || 14;
+        var gross = parseFloat(document.getElementById("grossWeight").value) || 47;
+        var netLoad = Math.max(0, gross - tare);
+
+        var customAvg = parseFloat(document.getElementById("customAvg").value);
+        var avg = customAvg;
+
+        if (!avg || avg <= 0) {
+            if (gross <= 20) avg = 4.2;
+            else if (gross <= 25) avg = 4.0;
+            else if (gross <= 30) avg = 3.8;
+            else if (gross <= 35) avg = 3.5;
+            else if (gross <= 40) avg = 3.2;
+            else avg = 3.0;
+        }
+
+        var oneWayFuel = oneWayDist / avg;
+        var returnFuel = 0;
+        
+        if (isReturn) {
+            var returnGross = parseFloat(document.getElementById("returnGrossWeight").value) || 14;
+            var returnNet = Math.max(0, returnGross - tare);
+            var returnAvg = avg;
+            
+            if (!customAvg || customAvg <= 0) {
+                if (returnGross <= 20) returnAvg = 4.2;
+                else if (returnGross <= 25) returnAvg = 4.0;
+                else if (returnGross <= 30) returnAvg = 3.8;
+                else if (returnGross <= 35) returnAvg = 3.5;
+                else if (returnGross <= 40) returnAvg = 3.2;
+                else returnAvg = 3.0;
+            }
+            returnFuel = oneWayDist / returnAvg;
+        }
+
+        var totalFuel = isReturn ? (oneWayFuel + returnFuel) : oneWayFuel;
+        var fuelCost = totalFuel * dieselRate;
+        var grandTotal = fuelCost + totalToll;
+        
+        var perTon = netLoad > 0 ? Math.round(grandTotal / netLoad) : 0;
+
+        // Populate slip
+        var now = new Date();
+        document.getElementById("slipDate").innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById("slipVehicle").innerText = vehicleNo;
+        document.getElementById("resRouteName").innerText = routeName + (isReturn ? " (Return Trip)" : "");
+        document.getElementById("resRouteType").innerText = routeTypeText;
+        document.getElementById("resDist").innerText = totalDist.toLocaleString() + (isReturn ? " (" + oneWayDist + " x 2)" : "");
+        document.getElementById("resWeights").innerText = tare + "T / " + gross + "T (Net: " + netLoad + "T)";
+        document.getElementById("resAvg").innerText = avg.toFixed(2);
+        document.getElementById("resRate").innerText = dieselRate;
+        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
+        document.getElementById("resFuelCost").innerText = Math.round(fuelCost).toLocaleString();
+        document.getElementById("resPlazaInfo").innerText = (isReturn ? (plazaCount * 2) : plazaCount) + " Plazas";
+        document.getElementById("resTollCost").innerText = Math.round(totalToll).toLocaleString();
+        document.getElementById("resGrandTotal").innerText = Math.round(grandTotal).toLocaleString();
+        document.getElementById("resPerTon").innerText = perTon.toLocaleString();
+
+        document.getElementById("resultWrapper").style.display = "block";
+        document.getElementById("resultWrapper").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function shareWhatsApp() {
+        var vehicle = document.getElementById("slipVehicle").innerText;
+        var route = document.getElementById("resRouteName").innerText;
+        var dist = document.getElementById("resDist").innerText;
+        var fuel = document.getElementById("resFuel").innerText;
+        var fuelCost = document.getElementById("resFuelCost").innerText;
+        var tollCost = document.getElementById("resTollCost").innerText;
+        var grandTotal = document.getElementById("resGrandTotal").innerText;
+
+        var text = `🚚 *BCC FLEET & LOGISTICS SLIP* 🚚\n` +
+                   `📅 Date: ${document.getElementById("slipDate").innerText}\n` +
+                   `🚛 Vehicle: ${vehicle}\n` +
+                   `🛣️ Route: ${route}\n` +
+                   `📏 Total Distance: ${dist} KM\n` +
+                   `⛽ Required Diesel: ${fuel} Litres\n` +
+                   `💵 Diesel Cost: Rs. ${fuelCost}\n` +
+                   `🎫 Toll Tax: Rs. ${tollCost}\n` +
+                   `💰 *TOTAL TRIP COST: Rs. ${grandTotal}*`;
+
+        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank");
+    }
+
+    function copyForExcel() {
+        var vehicle = document.getElementById("slipVehicle").innerText;
+        var route = document.getElementById("resRouteName").innerText;
+        var dist = document.getElementById("resDist").innerText;
+        var fuel = document.getElementById("resFuel").innerText;
+        var fuelCost = document.getElementById("resFuelCost").innerText;
+        var tollCost = document.getElementById("resTollCost").innerText;
+        var grandTotal = document.getElementById("resGrandTotal").innerText;
+
+        var tsv = `${vehicle}\t${route}\t${dist}\t${fuel}\t${fuelCost}\t${tollCost}\t${grandTotal}`;
+        navigator.clipboard.writeText(tsv).then(function() {
+            alert("Slip data copied! Excel mein direct paste (`Ctrl + V`) kar sakte hain.");
+        });
+    }
+</script>
+
+</body>
+</html>
