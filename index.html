@@ -345,12 +345,17 @@
     <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
-            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="12" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()">
         </div>
         <div class="col form-group">
             <label for="grossWeight">Kul Vazan (Gross Tons):</label>
-            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="35" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="47" onfocus="this.select()">
         </div>
+    </div>
+
+    <div class="form-group">
+        <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (15-20T: ~4.0 | 30-35T: ~3.5 KM/L)" onfocus="this.select()">
     </div>
 
     <div class="return-box">
@@ -359,8 +364,8 @@
             Wapsi Trip (Return) bhi shamil karein
         </label>
         <div id="returnFields" style="display:none; margin-top:10px;">
-            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to 12 likhein):</label>
-            <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="12" onfocus="this.select()">
+            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to 14 likhein):</label>
+            <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
         </div>
     </div>
 
@@ -592,15 +597,24 @@
         const isChecked = document.getElementById('isReturn').checked;
         document.getElementById('returnFields').style.display = isChecked ? 'block' : 'none';
         if (isChecked) {
-            document.getElementById('returnGrossWeight').value = document.getElementById('tareWeight').value || 12;
+            document.getElementById('returnGrossWeight').value = document.getElementById('tareWeight').value || 14;
         }
     }
 
-    function getTruckAverage(grossTons, tareTons, routeType) {
+    // Exact Calibrated Formula:
+    // 15-20 Tons cargo => ~4.00 KM/L
+    // 30-35 Tons cargo => ~3.50 KM/L
+    function getTruckAverage(grossTons, tareTons, routeType, customAvg) {
+        if (customAvg && customAvg > 0) {
+            return customAvg;
+        }
         const netLoad = Math.max(0, grossTons - tareTons);
-        let baseEmptyAvg = routeType === 'motorway' ? 4.3 : (routeType === 'mix' ? 4.2 : 4.0);
-        let avg = baseEmptyAvg - (netLoad * 0.065);
-        return Math.max(1.8, avg);
+        // Empty base average: 4.58 KM/L on Mix, 4.70 on Motorway, 4.45 on GT Road
+        let baseEmptyAvg = routeType === 'motorway' ? 4.70 : (routeType === 'mix' ? 4.58 : 4.45);
+        // 17.5T cargo => 4.58 - (17.5 * 0.033) = 4.00 KM/L
+        // 33.0T cargo => 4.58 - (33.0 * 0.033) = 3.49 (~3.50 KM/L)
+        let avg = baseEmptyAvg - (netLoad * 0.033);
+        return Math.max(2.8, avg);
     }
 
     function calculateFuel() {
@@ -617,8 +631,10 @@
         const oneWayPlazas = parseFloat(document.getElementById('plazaCount').value) || 0;
         const plazaRate = parseFloat(document.getElementById('plazaRate').value) || 0;
 
-        const tareWeight = parseFloat(document.getElementById('tareWeight').value) || 12;
-        const grossWeight = parseFloat(document.getElementById('grossWeight').value) || 35;
+        const tareWeight = parseFloat(document.getElementById('tareWeight').value) || 14;
+        const grossWeight = parseFloat(document.getElementById('grossWeight').value) || 47;
+        const customAvg = parseFloat(document.getElementById('customAvg').value) || 0;
+
         const isReturn = document.getElementById('isReturn').checked;
         const returnGross = isReturn ? (parseFloat(document.getElementById('returnGrossWeight').value) || tareWeight) : 0;
 
@@ -627,7 +643,7 @@
             return;
         }
 
-        const goingAvg = getTruckAverage(grossWeight, tareWeight, routeType);
+        const goingAvg = getTruckAverage(grossWeight, tareWeight, routeType, customAvg);
         const goingFuel = oneWayKM / goingAvg;
         const goingNetLoad = Math.max(0, grossWeight - tareWeight);
 
@@ -638,7 +654,7 @@
         let avgDisplay = goingAvg.toFixed(2);
 
         if (isReturn) {
-            const returnAvg = getTruckAverage(returnGross, tareWeight, routeType);
+            const returnAvg = getTruckAverage(returnGross, tareWeight, routeType, customAvg);
             const returnFuel = oneWayKM / returnAvg;
             const returnNetLoad = Math.max(0, returnGross - tareWeight);
 
