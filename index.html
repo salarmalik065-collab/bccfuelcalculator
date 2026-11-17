@@ -125,20 +125,20 @@
             background-color: #c9302c;
         }
 
-        /* Official Slip Styling (A4 Print Ready) */
+        /* Compact Voucher Slip Styling (Fits easily on A4) */
         .slip-wrapper {
-            margin-top: 22px;
+            margin-top: 20px;
             display: none;
         }
         .slip-box {
             position: relative;
             background: #ffffff;
-            border: 2px solid #222;
+            border: 1.5px dashed #333;
             border-radius: 6px;
-            padding: 30px;
+            padding: 14px 18px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            max-width: 700px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            max-width: 440px;
             margin: 0 auto;
         }
         .slip-box::before {
@@ -147,10 +147,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 130px;
+            font-size: 85px;
             font-weight: 900;
-            color: rgba(217, 83, 79, 0.06);
-            letter-spacing: 15px;
+            color: rgba(217, 83, 79, 0.07);
+            letter-spacing: 10px;
             pointer-events: none;
             z-index: 0;
             white-space: nowrap;
@@ -161,78 +161,78 @@
         }
         .slip-header {
             text-align: center;
-            border-bottom: 3px double #222;
-            padding-bottom: 12px;
-            margin-bottom: 18px;
+            border-bottom: 2px solid #222;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
         }
         .slip-header h3 {
             margin: 0;
-            font-size: 24px;
+            font-size: 17px;
             color: #d9534f;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
         }
         .slip-header p {
-            margin: 4px 0 0 0;
-            font-size: 13px;
+            margin: 2px 0 0 0;
+            font-size: 11px;
             color: #555;
             font-weight: 600;
         }
         .slip-meta {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 11px;
             color: #222;
-            margin-bottom: 15px;
-            border-bottom: 1px dashed #777;
-            padding-bottom: 8px;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #888;
+            padding-bottom: 4px;
         }
         .slip-row {
             display: flex;
             justify-content: space-between;
-            padding: 9px 0;
-            font-size: 15px;
-            border-bottom: 1px dotted #ccc;
+            padding: 4px 0;
+            font-size: 12.5px;
+            border-bottom: 1px dotted #ddd;
         }
         .slip-row span:first-child {
-            color: #333;
+            color: #444;
         }
         .slip-row span:last-child {
             font-weight: 600;
             color: #111;
         }
         .slip-total {
-            margin-top: 15px;
-            padding: 12px 15px;
+            margin-top: 8px;
+            padding: 7px 10px;
             background: #fff5f5;
-            border-top: 2px solid #d9534f;
-            border-bottom: 2px solid #d9534f;
+            border-top: 1.5px solid #d9534f;
+            border-bottom: 1.5px solid #d9534f;
             display: flex;
             justify-content: space-between;
-            font-size: 19px;
+            font-size: 15px;
             font-weight: bold;
             color: #b52b27;
         }
         .slip-footer {
-            margin-top: 40px;
+            margin-top: 22px;
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 11px;
             color: #444;
         }
         .sig-line {
             border-top: 1px solid #333;
-            width: 160px;
+            width: 115px;
             text-align: center;
-            padding-top: 6px;
+            padding-top: 3px;
             font-weight: 600;
         }
 
         /* Action Buttons */
         .action-btns {
             display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            max-width: 700px;
+            gap: 8px;
+            margin-top: 12px;
+            max-width: 440px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -241,40 +241,45 @@
             background-color: #333;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
         .btn-whatsapp {
             flex: 1;
             background-color: #25D366;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
         .btn-excel {
             flex: 1;
             background-color: #217346;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        /* A4 Printing Rules */
+        /* Compact A4 Print Rules */
         @media print {
             @page {
-                size: A4;
-                margin: 15mm;
+                size: A4 portrait;
+                margin: 10mm;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+                margin: 0;
             }
             body * {
                 visibility: hidden;
@@ -284,13 +289,14 @@
             }
             #printableSlip {
                 position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                max-width: 100%;
-                border: 2px solid #000;
+                left: 50%;
+                top: 10mm;
+                transform: translateX(-50%);
+                width: 135mm;
+                max-width: 135mm;
+                border: 1.5px solid #000;
                 box-shadow: none;
-                padding: 20mm;
+                padding: 12px 16px;
                 background: #fff;
             }
         }
@@ -441,7 +447,7 @@
                 <span>Rs. <span id="resGrandTotal">0</span></span>
             </div>
 
-            <div class="slip-row" id="perTonRow" style="border:none; font-size:13px; color:#555; margin-top:6px;">
+            <div class="slip-row" id="perTonRow" style="border:none; font-size:11.5px; color:#555; margin-top:4px;">
                 <span>Per Ton Kharcha (Net Load):</span>
                 <span>Rs. <span id="resPerTon">0</span> / Ton</span>
             </div>
@@ -454,7 +460,7 @@
     </div>
 
     <div class="action-btns">
-        <button class="btn-print" onclick="window.print()">🖨️ Print / A4 PDF</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Print Slip</button>
         <button class="btn-whatsapp" onclick="shareWhatsApp()">📲 WhatsApp Share</button>
         <button class="btn-excel" onclick="copyForExcel()">📋 Excel Copy</button>
     </div>
@@ -484,26 +490,4 @@
         "Zahid Pir": [28.8000, 70.5500], "Liaquatpur": [28.9317, 70.9508], "Ahmadpur East": [29.1436, 71.2598],
         "Bahawalpur": [29.3544, 71.6911], "Lodhran": [29.5339, 71.6324], "Dunyapur": [29.8000, 71.7433],
         "Jalalpur Pirwala": [29.5056, 71.2222], "Shujabad": [29.8806, 71.2931], "Multan": [30.1575, 71.5249],
-        "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4069, 71.8625], "Mian Channu": [30.4407, 72.3568],
-        "Chichawatni": [30.5301, 72.6916], "Sahiwal": [30.6682, 73.1114], "Okara": [30.8081, 73.4458],
-        "Depalpur": [30.6700, 73.6533], "Renala Khurd": [30.8783, 73.5986], "Pattoki": [31.0214, 73.8528],
-        "Bhai Pheru": [31.1319, 73.9633], "Manga Mandi": [31.3094, 74.0631], "Kasur": [31.1179, 74.4408],
-        "Lahore": [31.5204, 74.3587], "Sheikhupura": [31.7167, 73.9850], "Nankana Sahib": [31.4492, 73.7125],
-        "Faisalabad": [31.4504, 73.1350], "Jhang": [31.2681, 72.3181], "Toba Tek Singh": [30.9712, 72.4827],
-        "Gojra": [31.1486, 72.6869], "Samundri": [31.0639, 72.9611], "Sargodha": [32.0740, 72.6861],
-        "Bhera": [32.4820, 72.9086], "Bhalwal": [32.2653, 72.9028], "Mianwali": [32.5839, 71.5370],
-        "Khushab": [32.2967, 72.3525], "Dera Ghazi Khan": [30.0489, 70.6455], "Muzaffargarh": [30.0703, 71.1933],
-        "Layyah": [30.9613, 70.9390], "Bhakkar": [31.6253, 71.0657], "Vehari": [30.0419, 72.3528],
-        "Burewala": [30.1667, 72.6500], "Arifwala": [30.2906, 73.0653], "Pakpattan": [30.3410, 73.3866],
-        "Bahawalnagar": [29.9987, 73.2536], "Chishtian": [29.7958, 72.8578], "Hasilpur": [29.6922, 72.5456],
-        "Gujranwala": [32.1877, 74.1945], "Kamoke": [31.9767, 74.2239], "Wazirabad": [32.4432, 74.1200],
-        "Sialkot": [32.4945, 74.5229], "Daska": [32.3297, 74.3494], "Narowal": [32.1000, 74.8833],
-        "Hafizabad": [32.0709, 73.6880], "Mandi Bahauddin": [32.5861, 73.4917], "Gujrat": [32.5731, 74.0789],
-        "Lalamusa": [32.7006, 73.9575], "Kharian": [32.8161, 73.8861], "Jhelum": [32.9425, 73.7257],
-        "Sohawa": [33.1244, 73.4214], "Gujar Khan": [33.2544, 73.3044], "Chakwal": [32.9328, 72.8630],
-        "Kallar Kahar": [32.7794, 72.7069], "Rawalpindi": [33.5651, 73.0169], "Islamabad": [33.6844, 73.0479],
-        "Taxila": [33.7458, 72.7875], "Wah Cantt": [33.7715, 72.7511], "Attock": [33.7681, 72.3608],
-
-        // KPK & Balochistan
-        "Peshawar": [34.0151, 71.5249], "Nowshera": [34.0153, 71.9747], "Mardan": [34.1989, 72.0231],
-        "Swabi": [34.1202, 72.4698], "
+        "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4069, 71.8625], "Mian Channu
