@@ -333,7 +333,7 @@
 
     <div class="form-group">
         <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
-        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (15-20T: ~4.0 | 30-35T: ~3.5 KM/L)" onfocus="this.select()">
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (0-10T: ~4.3 | 15-22T: ~3.7 | 28-35T: ~3.0 KM/L)" onfocus="this.select()">
     </div>
 
     <div class="return-box">
@@ -628,124 +628,16 @@
         document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
     }
 
+    // Updated Logic based on actual real trip data (3.70 to 3.00 KM/L slabs)
+    function getAverageByGross(gross) {
+        if (gross <= 15) return 4.30; // Khali gaari
+        else if (gross <= 22) return 3.70; // Halka maal (e.g. ~20-22T gross)
+        else if (gross <= 30) return 3.40; // Darmiyana maal
+        else if (gross <= 40) return 3.10; // Bhaari maal
+        else return 3.00; // Bohat bhaari / Full load (~45-47T gross)
+    }
+
     function calculateFuel() {
         var vehicleNo = document.getElementById("vehicleNo").value.trim() || "N/A";
         var routeSelect = document.getElementById("routeType");
-        var routeTypeText = routeSelect.options[routeSelect.selectedIndex].text;
-        
-        var from = document.getElementById("fromCity").value.trim() || "Origin";
-        var to = document.getElementById("toCity").value.trim() || "Destination";
-        var routeName = from + " ➔ " + to;
-
-        var oneWayDist = parseFloat(document.getElementById("distanceKM").value) || 0;
-        var isReturn = document.getElementById("isReturn").checked;
-        var totalDist = isReturn ? oneWayDist * 2 : oneWayDist;
-
-        var dieselRate = parseFloat(document.getElementById("dieselRate").value) || 360;
-        var plazaCount = parseFloat(document.getElementById("plazaCount").value) || 0;
-        var plazaRate = parseFloat(document.getElementById("plazaRate").value) || 750;
-        
-        var oneWayToll = plazaCount * plazaRate;
-        var totalToll = isReturn ? oneWayToll * 2 : oneWayToll;
-
-        var tare = parseFloat(document.getElementById("tareWeight").value) || 14;
-        var gross = parseFloat(document.getElementById("grossWeight").value) || 47;
-        var netLoad = Math.max(0, gross - tare);
-
-        var customAvg = parseFloat(document.getElementById("customAvg").value);
-        var avg = customAvg;
-
-        if (!avg || avg <= 0) {
-            if (gross <= 20) avg = 4.2;
-            else if (gross <= 25) avg = 4.0;
-            else if (gross <= 30) avg = 3.8;
-            else if (gross <= 35) avg = 3.5;
-            else if (gross <= 40) avg = 3.2;
-            else avg = 3.0;
-        }
-
-        var oneWayFuel = oneWayDist / avg;
-        var returnFuel = 0;
-        
-        if (isReturn) {
-            var returnGross = parseFloat(document.getElementById("returnGrossWeight").value) || 14;
-            var returnNet = Math.max(0, returnGross - tare);
-            var returnAvg = avg;
-            
-            if (!customAvg || customAvg <= 0) {
-                if (returnGross <= 20) returnAvg = 4.2;
-                else if (returnGross <= 25) returnAvg = 4.0;
-                else if (returnGross <= 30) returnAvg = 3.8;
-                else if (returnGross <= 35) returnAvg = 3.5;
-                else if (returnGross <= 40) returnAvg = 3.2;
-                else returnAvg = 3.0;
-            }
-            returnFuel = oneWayDist / returnAvg;
-        }
-
-        var totalFuel = isReturn ? (oneWayFuel + returnFuel) : oneWayFuel;
-        var fuelCost = totalFuel * dieselRate;
-        var grandTotal = fuelCost + totalToll;
-        
-        var perTon = netLoad > 0 ? Math.round(grandTotal / netLoad) : 0;
-
-        var now = new Date();
-        document.getElementById("slipDate").innerText = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        document.getElementById("slipVehicle").innerText = vehicleNo;
-        document.getElementById("resRouteName").innerText = routeName + (isReturn ? " (Return Trip)" : "");
-        document.getElementById("resRouteType").innerText = routeTypeText;
-        document.getElementById("resDist").innerText = totalDist.toLocaleString() + (isReturn ? " (" + oneWayDist + " x 2)" : "");
-        document.getElementById("resWeights").innerText = tare + "T / " + gross + "T (Net: " + netLoad + "T)";
-        document.getElementById("resAvg").innerText = avg.toFixed(2);
-        document.getElementById("resRate").innerText = dieselRate;
-        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
-        document.getElementById("resFuelCost").innerText = Math.round(fuelCost).toLocaleString();
-        document.getElementById("resPlazaInfo").innerText = (isReturn ? (plazaCount * 2) : plazaCount) + " Plazas";
-        document.getElementById("resTollCost").innerText = Math.round(totalToll).toLocaleString();
-        document.getElementById("resGrandTotal").innerText = Math.round(grandTotal).toLocaleString();
-        document.getElementById("resPerTon").innerText = perTon.toLocaleString();
-
-        document.getElementById("resultWrapper").style.display = "block";
-        document.getElementById("resultWrapper").scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function shareWhatsApp() {
-        var vehicle = document.getElementById("slipVehicle").innerText;
-        var route = document.getElementById("resRouteName").innerText;
-        var dist = document.getElementById("resDist").innerText;
-        var fuel = document.getElementById("resFuel").innerText;
-        var fuelCost = document.getElementById("resFuelCost").innerText;
-        var tollCost = document.getElementById("resTollCost").innerText;
-        var grandTotal = document.getElementById("resGrandTotal").innerText;
-
-        var text = `🚚 *BCC FLEET & LOGISTICS SLIP* 🚚\n` +
-                   `📅 Date: ${document.getElementById("slipDate").innerText}\n` +
-                   `🚛 Vehicle: ${vehicle}\n` +
-                   `🛣️ Route: ${route}\n` +
-                   `📏 Total Distance: ${dist} KM\n` +
-                   `⛽ Required Diesel: ${fuel} Litres\n` +
-                   `💵 Diesel Cost: Rs. ${fuelCost}\n` +
-                   `🎫 Toll Tax: Rs. ${tollCost}\n` +
-                   `💰 *TOTAL TRIP COST: Rs. ${grandTotal}*`;
-
-        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank");
-    }
-
-    function copyForExcel() {
-        var vehicle = document.getElementById("slipVehicle").innerText;
-        var route = document.getElementById("resRouteName").innerText;
-        var dist = document.getElementById("resDist").innerText;
-        var fuel = document.getElementById("resFuel").innerText;
-        var fuelCost = document.getElementById("resFuelCost").innerText;
-        var tollCost = document.getElementById("resTollCost").innerText;
-        var grandTotal = document.getElementById("resGrandTotal").innerText;
-
-        var tsv = `${vehicle}\t${route}\t${dist}\t${fuel}\t${fuelCost}\t${tollCost}\t${grandTotal}`;
-        navigator.clipboard.writeText(tsv).then(function() {
-            alert("Slip data copied! Excel mein direct paste (`Ctrl + V`) kar sakte hain.");
-        });
-    }
-</script>
-
-</body>
-</html>
+        var routeTypeText = routeSelect.options[routeSelect.
