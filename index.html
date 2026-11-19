@@ -62,7 +62,7 @@
             color: #666;
             margin-top: 4px;
         }
-        
+
         /* Custom Autocomplete Suggestions Dropdown */
         .autocomplete-items {
             position: absolute;
@@ -86,9 +86,10 @@
             font-size: 14px;
             color: #333;
         }
-        .autocomplete-items div:hover {
-            background-color: #ffeef0;
-            color: #d9534f;
+        .autocomplete-items div:hover,
+        .autocomplete-active {
+            background-color: #ffeef0 !important;
+            color: #d9534f !important;
             font-weight: 600;
         }
 
@@ -323,7 +324,7 @@
     <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
-            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()" oninput="syncReturnTare()">
         </div>
         <div class="col form-group">
             <label for="grossWeight">Kul Vazan (Gross Tons):</label>
@@ -333,7 +334,7 @@
 
     <div class="form-group">
         <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
-        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (0-10T: ~4.3 | 15-22T: ~3.7 | 28-35T: ~3.0 KM/L)" onfocus="this.select()">
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.3 | 1-14T: 3.7 | 15-22T: 3.4 | 23-28T: 3.1 | 29T+: 3.0 KM/L)" onfocus="this.select()">
     </div>
 
     <div class="return-box">
@@ -342,7 +343,7 @@
             Wapsi Trip (Return) bhi shamil karein
         </label>
         <div id="returnFields" style="display:none; margin-top:10px;">
-            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to 14 likhein):</label>
+            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to Tare ke barabar likhein):</label>
             <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
         </div>
     </div>
@@ -384,7 +385,7 @@
                 <span><span id="resAvg">0</span> KM/L</span>
             </div>
             <div class="slip-row">
-                <span>Zاروری Diesel (@ Rs.<span id="resRate">0</span>):</span>
+                <span>Zaroori Diesel (@ Rs.<span id="resRate">0</span>):</span>
                 <span><span id="resFuel">0</span> Litres</span>
             </div>
             <div class="slip-row">
@@ -487,12 +488,12 @@
             closeAllLists();
             if (!val) { return false; }
             currentFocus = -1;
-            
+
             a = document.createElement("DIV");
             a.setAttribute("id", this.id + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
             this.parentNode.appendChild(a);
-            
+
             for (i = 0; i < arr.length; i++) {
                 if (arr[i].toLowerCase().indexOf(val.toLowerCase()) > -1) {
                     b = document.createElement("DIV");
@@ -500,10 +501,10 @@
                     let matchedText = arr[i].substr(idx, val.length);
                     let restText = arr[i].substr(idx + val.length);
                     let prefixText = arr[i].substr(0, idx);
-                    
+
                     b.innerHTML = prefixText + "<strong>" + matchedText + "</strong>" + restText;
                     b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-                    
+
                     b.addEventListener("click", function(e) {
                         inp.value = this.getElementsByTagName("input")[0].value;
                         closeAllLists();
@@ -517,22 +518,22 @@
         inp.addEventListener("keydown", function(e) {
             var x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
-            if (e.keyCode == 40) { 
+            if (e.keyCode == 40) {
                 currentFocus++;
                 addActive(x);
-            } else if (e.keyCode == 38) { 
+            } else if (e.keyCode == 38) {
                 currentFocus--;
                 addActive(x);
-            } else if (e.keyCode == 13) { 
-                e.preventDefault();
-                if (currentFocus > -1) {
-                    if (x) x[currentFocus].click();
+            } else if (e.keyCode == 13) {
+                if (currentFocus > -1 && x && x[currentFocus]) {
+                    e.preventDefault();
+                    x[currentFocus].click();
                 }
             }
         });
 
         function addActive(x) {
-            if (!x) return false;
+            if (!x || !x.length) return false;
             removeActive(x);
             if (currentFocus >= x.length) currentFocus = 0;
             if (currentFocus < 0) currentFocus = (x.length - 1);
@@ -587,7 +588,7 @@
             var coord1 = cityCoords[from];
             var coord2 = cityCoords[to];
             var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
-            
+
             var multiplier = 1.25;
             if(routeType === 'gt') multiplier = 1.30;
             if(routeType === 'motorway') multiplier = 1.15;
@@ -623,21 +624,162 @@
         document.getElementById("totalTollPreview").innerText = "Ek side total toll: Rs. " + totalToll.toLocaleString();
     }
 
+    function syncReturnTare() {
+        var tare = parseFloat(document.getElementById("tareWeight").value) || 0;
+        document.getElementById("returnGrossWeight").value = tare;
+    }
+
     function toggleReturn() {
         var isReturn = document.getElementById("isReturn").checked;
         document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
     }
 
-    // Updated Logic based on actual real trip data (3.70 to 3.00 KM/L slabs)
-    function getAverageByGross(gross) {
-        if (gross <= 15) return 4.30; // Khali gaari
-        else if (gross <= 22) return 3.70; // Halka maal (e.g. ~20-22T gross)
-        else if (gross <= 30) return 3.40; // Darmiyana maal
-        else if (gross <= 40) return 3.10; // Bhaari maal
-        else return 3.00; // Bohat bhaari / Full load (~45-47T gross)
+    // FIXED: Average based on Net Cargo Load (Gross - Tare)
+    function getAverageByNetLoad(netLoad) {
+        if (netLoad <= 2) return 4.30;        // Khali gaari (0 - 2 Tons)
+        else if (netLoad <= 14) return 3.70;  // Halka maal (3 - 14 Tons)
+        else if (netLoad <= 22) return 3.40;  // Darmiyana maal (15 - 22 Tons)
+        else if (netLoad <= 28) return 3.10;  // Bhaari maal (23 - 28 Tons)
+        else return 3.00;                     // Full load (29+ Tons, jaise 33T net / 47T gross)
     }
+
+    let lastSlipSummary = "";
+    let lastExcelRow = "";
 
     function calculateFuel() {
         var vehicleNo = document.getElementById("vehicleNo").value.trim() || "N/A";
         var routeSelect = document.getElementById("routeType");
-        var routeTypeText = routeSelect.options[routeSelect.
+        var routeTypeText = routeSelect.options[routeSelect.selectedIndex].text;
+
+        var fromCity = document.getElementById("fromCity").value.trim() || "Origin";
+        var toCity = document.getElementById("toCity").value.trim() || "Destination";
+
+        var oneWayDist = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var dieselRate = parseFloat(document.getElementById("dieselRate").value) || 0;
+        var plazaCount = parseFloat(document.getElementById("plazaCount").value) || 0;
+        var plazaRate = parseFloat(document.getElementById("plazaRate").value) || 0;
+
+        var tareWeight = parseFloat(document.getElementById("tareWeight").value) || 0;
+        var grossWeight = parseFloat(document.getElementById("grossWeight").value) || 0;
+        var customAvgInput = document.getElementById("customAvg").value.trim();
+        var customAvg = customAvgInput !== "" ? parseFloat(customAvgInput) : NaN;
+
+        var isReturn = document.getElementById("isReturn").checked;
+        var returnGross = parseFloat(document.getElementById("returnGrossWeight").value) || tareWeight;
+
+        if (oneWayDist <= 0) {
+            alert("Baraye meharbani sahi faasla (KM) likhein.");
+            return;
+        }
+        if (grossWeight < tareWeight) {
+            alert("Kul Vazan (Gross) Khali Gari (Tare) se kam nahi ho sakta.");
+            return;
+        }
+        if (isReturn && returnGross < tareWeight) {
+            alert("Wapsi ka Kul Vazan Khali Gari (Tare) se kam nahi ho sakta.");
+            return;
+        }
+
+        // Outgoing (Jaane ki) calculation
+        var outNetLoad = Math.max(0, grossWeight - tareWeight);
+        var outAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(outNetLoad);
+        var outFuel = oneWayDist / outAvg;
+
+        // Return (Wapsi ki) calculation
+        var totalDist = oneWayDist;
+        var totalFuel = outFuel;
+        var totalPlazas = plazaCount;
+        var retNetLoad = 0;
+        var retAvg = 0;
+
+        if (isReturn) {
+            retNetLoad = Math.max(0, returnGross - tareWeight);
+            retAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(retNetLoad);
+            var retFuel = oneWayDist / retAvg;
+
+            totalDist = oneWayDist * 2;
+            totalFuel = outFuel + retFuel;
+            totalPlazas = plazaCount * 2;
+        }
+
+        var effectiveAvg = totalDist / totalFuel;
+        var fuelCost = Math.round(totalFuel * dieselRate);
+        var tollCost = Math.round(totalPlazas * plazaRate);
+        var grandTotal = fuelCost + tollCost;
+
+        var totalNetCargo = outNetLoad + (isReturn ? retNetLoad : 0);
+        var perTonCost = totalNetCargo > 0 ? Math.round(grandTotal / totalNetCargo) : 0;
+
+        // Date format
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('en-GB');
+
+        // Populate Slip
+        document.getElementById("slipDate").innerText = dateStr;
+        document.getElementById("slipVehicle").innerText = vehicleNo;
+        document.getElementById("resRouteName").innerText = isReturn
+            ? (fromCity + " ⇄ " + toCity + " (Return)")
+            : (fromCity + " → " + toCity);
+        document.getElementById("resRouteType").innerText = routeTypeText;
+        document.getElementById("resDist").innerText = totalDist.toLocaleString();
+
+        document.getElementById("resWeights").innerText = isReturn
+            ? (tareWeight + "T / " + grossWeight + "T (Out) & " + returnGross + "T (Ret)")
+            : (tareWeight + "T / " + grossWeight + "T / " + outNetLoad.toFixed(1) + "T Net");
+
+        document.getElementById("resAvg").innerText = isReturn
+            ? (effectiveAvg.toFixed(2) + " (Out: " + outAvg.toFixed(2) + " | Ret: " + retAvg.toFixed(2) + ")")
+            : outAvg.toFixed(2);
+
+        document.getElementById("resRate").innerText = dieselRate;
+        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
+        document.getElementById("resFuelCost").innerText = fuelCost.toLocaleString();
+        document.getElementById("resPlazaInfo").innerText = totalPlazas + " Plazas @ Rs." + plazaRate;
+        document.getElementById("resTollCost").innerText = tollCost.toLocaleString();
+        document.getElementById("resGrandTotal").innerText = grandTotal.toLocaleString();
+
+        if (totalNetCargo > 0) {
+            document.getElementById("perTonRow").style.display = "flex";
+            document.getElementById("resPerTon").innerText = perTonCost.toLocaleString();
+        } else {
+            document.getElementById("perTonRow").style.display = "none";
+        }
+
+        document.getElementById("resultWrapper").style.display = "block";
+        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth" });
+
+        // Prepare WhatsApp & Excel text
+        lastSlipSummary =
+            "*BCC FLEET & LOGISTICS - TRIP SLIP*\n" +
+            "Date: " + dateStr + "\n" +
+            "Vehicle: " + vehicleNo + "\n" +
+            "Route: " + document.getElementById("resRouteName").innerText + "\n" +
+            "Distance: " + totalDist + " KM\n" +
+            "Weight: " + document.getElementById("resWeights").innerText + "\n" +
+            "Average: " + effectiveAvg.toFixed(2) + " KM/L\n" +
+            "Diesel: " + totalFuel.toFixed(1) + " Ltr (@ Rs." + dieselRate + ") = Rs. " + fuelCost.toLocaleString() + "\n" +
+            "Toll (" + totalPlazas + " Plazas): Rs. " + tollCost.toLocaleString() + "\n" +
+            "*TOTAL TRIP COST: Rs. " + grandTotal.toLocaleString() + "*";
+
+        lastExcelRow = [
+            dateStr, vehicleNo, fromCity, toCity, isReturn ? "Return" : "One-Way",
+            totalDist, tareWeight, grossWeight, totalNetCargo,
+            effectiveAvg.toFixed(2), totalFuel.toFixed(1), dieselRate, fuelCost, tollCost, grandTotal
+        ].join("\t");
+    }
+
+    function shareWhatsApp() {
+        if (!lastSlipSummary) return;
+        var url = "https://wa.me/?text=" + encodeURIComponent(lastSlipSummary);
+        window.open(url, "_blank");
+    }
+
+    function copyForExcel() {
+        if (!lastExcelRow) return;
+        navigator.clipboard.writeText(lastExcelRow).then(function() {
+            alert("Excel row copy ho gayi hai! Seedha Excel sheet mein Ctrl+V karein.");
+        });
+    }
+</script>
+</body>
+</html>
