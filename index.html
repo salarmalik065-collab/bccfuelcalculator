@@ -243,6 +243,7 @@
             @page { size: A4 portrait; margin: 10mm; }
             body { background: #fff; padding: 0; margin: 0; }
             body * { visibility: hidden; }
+            #bcc-settings-btn, #bcc-lock-overlay, #bcc-pin-modal { display: none !important; }
             #printableSlip, #printableSlip * { visibility: visible; }
             #printableSlip {
                 position: absolute;
@@ -420,6 +421,41 @@
         <button class="btn-excel" onclick="copyForExcel()">📋 Excel Copy</button>
     </div>
 </div>
+
+<!-- 🔒 BCC Lock Screen + PIN Change Settings Start -->
+<div id="bcc-lock-overlay" style="position:fixed;inset:0;background:#0f172a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:'Segoe UI',Arial,sans-serif;padding:20px;text-align:center;">
+  <div style="background:#1e293b;padding:28px 24px;border-radius:12px;max-width:340px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.4);">
+    <h2 style="margin:0 0 8px;font-size:22px;color:#fff;">🚚 BCC Fuel Calculator</h2>
+    <p style="color:#cbd5e1;font-size:14px;margin:0 0 18px;">Calculator kholne ke liye PIN darj karein:</p>
+    <input id="bcc-login-pin" type="password" inputmode="numeric" placeholder="PIN likhein..." onkeydown="if(event.key==='Enter') verifyBccPin()" style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;text-align:center;margin-bottom:12px;" />
+    <button onclick="verifyBccPin()" style="width:100%;padding:12px;font-size:16px;font-weight:bold;background:#d9534f;color:#fff;border:none;border-radius:8px;cursor:pointer;">Unlock Karein</button>
+    <p id="bcc-login-error" style="color:#f87171;font-size:13px;margin:12px 0 0;display:none;">❌ Ghalat PIN! Dobara koshish karein.</p>
+  </div>
+</div>
+
+<!-- ⚙️ Floating Settings Button -->
+<button id="bcc-settings-btn" onclick="openPinModal()" style="display:none;position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;border:1px solid #475569;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;z-index:9998;box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+  ⚙️ PIN Settings
+</button>
+
+<!-- ⚙️ Change PIN Modal -->
+<div id="bcc-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);align-items:center;justify-content:center;z-index:100000;font-family:'Segoe UI',Arial,sans-serif;padding:20px;">
+  <div style="background:#ffffff;color:#1e293b;padding:24px;border-radius:12px;max-width:340px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+    <h3 style="margin:0 0 12px;font-size:18px;color:#d9534f;">⚙️ PIN Tabdeel Karein</h3>
+    <label style="display:block;font-size:13px;margin-bottom:4px;color:#475569;">Purana PIN:</label>
+    <input id="bcc-old-pin" type="password" placeholder="Purana PIN" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:10px;" />
+    <label style="display:block;font-size:13px;margin-bottom:4px;color:#475569;">Naya PIN:</label>
+    <input id="bcc-new-pin" type="password" placeholder="Naya PIN (kam az kam 4 huroof)" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:12px;" />
+    <p id="bcc-change-msg" style="font-size:13px;margin:0 0 12px;display:none;"></p>
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveNewBccPin()" style="flex:1;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer;">Save PIN</button>
+      <button onclick="closePinModal()" style="flex:1;padding:10px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;">Band Karein</button>
+    </div>
+    <hr style="margin:14px 0;border:none;border-top:1px solid #e2e8f0;" />
+    <button onclick="lockBccNow()" style="width:100%;padding:8px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;">🔒 Calculator Abhi Lock Karein</button>
+  </div>
+</div>
+<!-- 🔒 BCC Lock Screen + PIN Change Settings End -->
 
 <script>
     const cityCoords = {
@@ -725,61 +761,4 @@
 
         document.getElementById("resWeights").innerText = isReturn
             ? (tareWeight + "T / " + grossWeight + "T (Out) & " + returnGross + "T (Ret)")
-            : (tareWeight + "T / " + grossWeight + "T / " + outNetLoad.toFixed(1) + "T Net");
-
-        document.getElementById("resAvg").innerText = isReturn
-            ? (effectiveAvg.toFixed(2) + " (Out: " + outAvg.toFixed(2) + " | Ret: " + retAvg.toFixed(2) + ")")
-            : outAvg.toFixed(2);
-
-        document.getElementById("resRate").innerText = dieselRate;
-        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
-        document.getElementById("resFuelCost").innerText = fuelCost.toLocaleString();
-        document.getElementById("resPlazaInfo").innerText = totalPlazas + " Plazas @ Rs." + plazaRate;
-        document.getElementById("resTollCost").innerText = tollCost.toLocaleString();
-        document.getElementById("resGrandTotal").innerText = grandTotal.toLocaleString();
-
-        if (totalNetCargo > 0) {
-            document.getElementById("perTonRow").style.display = "flex";
-            document.getElementById("resPerTon").innerText = perTonCost.toLocaleString();
-        } else {
-            document.getElementById("perTonRow").style.display = "none";
-        }
-
-        document.getElementById("resultWrapper").style.display = "block";
-        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth" });
-
-        // Prepare WhatsApp & Excel text
-        lastSlipSummary =
-            "*BCC FLEET & LOGISTICS - TRIP SLIP*\n" +
-            "Date: " + dateStr + "\n" +
-            "Vehicle: " + vehicleNo + "\n" +
-            "Route: " + document.getElementById("resRouteName").innerText + "\n" +
-            "Distance: " + totalDist + " KM\n" +
-            "Weight: " + document.getElementById("resWeights").innerText + "\n" +
-            "Average: " + effectiveAvg.toFixed(2) + " KM/L\n" +
-            "Diesel: " + totalFuel.toFixed(1) + " Ltr (@ Rs." + dieselRate + ") = Rs. " + fuelCost.toLocaleString() + "\n" +
-            "Toll (" + totalPlazas + " Plazas): Rs. " + tollCost.toLocaleString() + "\n" +
-            "*TOTAL TRIP COST: Rs. " + grandTotal.toLocaleString() + "*";
-
-        lastExcelRow = [
-            dateStr, vehicleNo, fromCity, toCity, isReturn ? "Return" : "One-Way",
-            totalDist, tareWeight, grossWeight, totalNetCargo,
-            effectiveAvg.toFixed(2), totalFuel.toFixed(1), dieselRate, fuelCost, tollCost, grandTotal
-        ].join("\t");
-    }
-
-    function shareWhatsApp() {
-        if (!lastSlipSummary) return;
-        var url = "https://wa.me/?text=" + encodeURIComponent(lastSlipSummary);
-        window.open(url, "_blank");
-    }
-
-    function copyForExcel() {
-        if (!lastExcelRow) return;
-        navigator.clipboard.writeText(lastExcelRow).then(function() {
-            alert("Excel row copy ho gayi hai! Seedha Excel sheet mein Ctrl+V karein.");
-        });
-    }
-</script>
-</body>
-</html>
+            : (tareWeight + "
