@@ -884,3 +884,951 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bcc Fuel Calculator</title>
+    <style>
+        :root {
+            --wm-text: "BCC";
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            max-width: 650px;
+            background: #ffffff;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #d9534f;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+        .row {
+            display: flex;
+            gap: 12px;
+        }
+        .col {
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 14px;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #fff;
+        }
+        input:focus, select:focus {
+            border-color: #d9534f;
+            outline: none;
+            background-color: #fffafa;
+        }
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Custom Autocomplete Suggestions Dropdown */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 180px;
+            overflow-y: auto;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+            font-size: 14px;
+            color: #333;
+        }
+        .autocomplete-items div:hover,
+        .autocomplete-active {
+            background-color: #ffeef0 !important;
+            color: #d9534f !important;
+            font-weight: 600;
+        }
+
+        .return-box {
+            background: #fff8f8;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #d9534f;
+            margin: 0;
+        }
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .btn-main {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 13px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-main:hover {
+            background-color: #c9302c;
+        }
+
+        /* Slip Styling */
+        .slip-wrapper {
+            margin-top: 20px;
+            display: none;
+        }
+        .slip-box {
+            position: relative;
+            background: #ffffff;
+            border: 1.5px dashed #333;
+            border-radius: 6px;
+            padding: 14px 18px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .slip-box::before {
+            content: var(--wm-text);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 75px;
+            font-weight: 900;
+            color: rgba(217, 83, 79, 0.07);
+            letter-spacing: 8px;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+        }
+        .slip-content {
+            position: relative;
+            z-index: 1;
+        }
+        .slip-header {
+            text-align: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .slip-header h3 {
+            margin: 0;
+            font-size: 17px;
+            color: #d9534f;
+            letter-spacing: 1px;
+        }
+        .slip-header p {
+            margin: 2px 0 0 0;
+            font-size: 11px;
+            color: #555;
+            font-weight: 600;
+        }
+        .slip-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #222;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #888;
+            padding-bottom: 4px;
+        }
+        .slip-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 12.5px;
+            border-bottom: 1px dotted #ddd;
+        }
+        .slip-row span:first-child { color: #444; }
+        .slip-row span:last-child { font-weight: 600; color: #111; }
+        .slip-total {
+            margin-top: 8px;
+            padding: 7px 10px;
+            background: #fff5f5;
+            border-top: 1.5px solid #d9534f;
+            border-bottom: 1.5px solid #d9534f;
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: bold;
+            color: #b52b27;
+        }
+        .slip-footer {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #444;
+        }
+        .sig-line {
+            border-top: 1px solid #333;
+            width: 115px;
+            text-align: center;
+            padding-top: 3px;
+            font-weight: 600;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            max-width: 440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-print { flex: 1; background-color: #333; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-whatsapp { flex: 1; background-color: #25D366; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-excel { flex: 1; background-color: #217346; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            body { background: #fff; padding: 0; margin: 0; }
+            body * { visibility: hidden; }
+            #bcc-settings-btn, #bcc-lock-overlay, #bcc-pin-modal { display: none !important; }
+            #printableSlip, #printableSlip * { visibility: visible; }
+            #printableSlip {
+                position: absolute;
+                left: 50%;
+                top: 10mm;
+                transform: translateX(-50%);
+                width: 135mm;
+                max-width: 135mm;
+                border: 1.5px solid #000;
+                box-shadow: none;
+                padding: 12px 16px;
+                background: #fff;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .row { flex-direction: column; gap: 0; }
+            .action-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="appMainHeading">🚚 Bcc Fuel Calculator</h2>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="vehicleNo">Gaari Number (Optional):</label>
+            <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990" value="JT-5697">
+        </div>
+        <div class="col form-group">
+            <label for="routeType">Rasta (Route Type):</label>
+            <select id="routeType" onchange="autoCalculateDistance()">
+                <option value="gt">GT Road / N-5 (Toll Plazas)</option>
+                <option value="motorway">Motorway / M-9 / M-5</option>
+                <option value="mix" selected>Mix Route (Motorway + GT)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group autocomplete">
+            <label for="fromCity">Kahan Se (Origin):</label>
+            <input type="text" id="fromCity" placeholder="Shehar select karein ya type karein..." value="Karachi" autocomplete="off">
+        </div>
+
+        <div class="col form-group autocomplete">
+            <label for="toCity">Kahan Tak (Destination):</label>
+            <input type="text" id="toCity" placeholder="Shehar select karein ya type karein..." value="Faisalabad" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="distanceKM">Ek Side Faasla (KM):</label>
+            <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()" oninput="estimatePlazasFromKM()">
+            <div class="hint" id="distHint">Shehar select karein ya khud KM likhein.</div>
+        </div>
+        <div class="col form-group">
+            <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
+            <input type="number" step="any" inputmode="decimal" id="dieselRate" value="344" onfocus="this.select()">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="plazaCount">Toll Plazas (Ek Side Tadaad):</label>
+            <input type="number" step="1" inputmode="numeric" id="plazaCount" value="16" min="0" onfocus="this.select()" oninput="updateTollFromPlazas()">
+            <div class="hint" id="plazaHint">Raste ke mutabiq plazas ki ginti (khud likhein).</div>
+        </div>
+        <div class="col form-group">
+            <label for="plazaRate">Per Plaza Rate (Rs):</label>
+            <input type="number" step="any" inputmode="decimal" id="plazaRate" value="750" onfocus="this.select()" oninput="updateTollFromPlazas()">
+            <div class="hint" id="totalTollPreview">Ek side total toll: Rs. 12,000</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="tareWeight">Khali Gari (Tare Tons):</label>
+            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()" oninput="syncReturnTare()">
+        </div>
+        <div class="col form-group">
+            <label for="grossWeight">Kul Vazan (Gross Tons):</label>
+            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="47" onfocus="this.select()">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.3 | 1-14T: 3.7 | 15-22T: 3.4 | 23-28T: 3.1 | 29T+: 3.0 KM/L)" onfocus="this.select()">
+    </div>
+
+    <div class="return-box">
+        <label class="checkbox-label">
+            <input type="checkbox" id="isReturn" onchange="toggleReturn()">
+            Wapsi Trip (Return) bhi shamil karein
+        </label>
+        <div id="returnFields" style="display:none; margin-top:10px;">
+            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to Tare ke barabar likhein):</label>
+            <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="calculateFuel()">Generate Fuel & Trip Slip</button>
+</div>
+
+<div class="slip-wrapper" id="resultWrapper">
+    <div class="slip-box" id="printableSlip">
+        <div class="slip-content">
+            <div class="slip-header">
+                <h3 id="slipCompanyHeader">BCC FLEET & LOGISTICS</h3>
+                <p>Official Diesel & Trip Estimate Slip</p>
+            </div>
+
+            <div class="slip-meta">
+                <span><strong>Date:</strong> <span id="slipDate">-</span></span>
+                <span><strong>Vehicle:</strong> <span id="slipVehicle">N/A</span></span>
+            </div>
+
+            <div class="slip-row">
+                <span>Route:</span>
+                <span id="resRouteName">-</span>
+            </div>
+            <div class="slip-row">
+                <span>Rasta (Corridor):</span>
+                <span id="resRouteType">-</span>
+            </div>
+            <div class="slip-row">
+                <span>Kul Faasla (Distance):</span>
+                <span><span id="resDist">0</span> KM</span>
+            </div>
+            <div class="slip-row">
+                <span>Vazan (Tare / Gross / Net):</span>
+                <span><span id="resWeights">-</span></span>
+            </div>
+            <div class="slip-row">
+                <span>Andazan Average:</span>
+                <span><span id="resAvg">0</span> KM/L</span>
+            </div>
+            <div class="slip-row">
+                <span>Zaroori Diesel (@ Rs.<span id="resRate">0</span>):</span>
+                <span><span id="resFuel">0</span> Litres</span>
+            </div>
+            <div class="slip-row">
+                <span>Diesel Kharcha:</span>
+                <span>Rs. <span id="resFuelCost">0</span></span>
+            </div>
+            <div class="slip-row">
+                <span>Toll Tax (<span id="resPlazaInfo">0 Plazas</span>):</span>
+                <span>Rs. <span id="resTollCost">0</span></span>
+            </div>
+
+            <div class="slip-total">
+                <span>TOTAL TRIP COST:</span>
+                <span>Rs. <span id="resGrandTotal">0</span></span>
+            </div>
+
+            <div class="slip-row" id="perTonRow" style="border:none; font-size:11.5px; color:#555; margin-top:4px;">
+                <span>Per Ton Kharcha (Net Load):</span>
+                <span>Rs. <span id="resPerTon">0</span> / Ton</span>
+            </div>
+
+            <div class="slip-footer">
+                <div class="sig-line" id="slipPreparedBy">Prepared By (BCC)</div>
+                <div class="sig-line">Driver Signature</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-btns">
+        <button class="btn-print" onclick="window.print()">🖨️ Print Slip</button>
+        <button class="btn-whatsapp" onclick="shareWhatsApp()">📲 WhatsApp Share</button>
+        <button class="btn-excel" onclick="copyForExcel()">📋 Excel Copy</button>
+    </div>
+</div>
+
+<!-- 🔒 Multi-Company Login Overlay -->
+<div id="bcc-lock-overlay" style="position:fixed;inset:0;background:#0f172a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:'Segoe UI',Arial,sans-serif;padding:20px;text-align:center;">
+  <div style="background:#1e293b;padding:28px 24px;border-radius:12px;max-width:350px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.4);">
+    <h2 style="margin:0 0 6px;font-size:22px;color:#fff;">🚚 Fleet Fuel Calculator</h2>
+    <p style="color:#cbd5e1;font-size:13px;margin:0 0 18px;">Apni Company Code aur PIN darj karein:</p>
+    <input id="bcc-company-code" type="text" placeholder="Company Code (maslan: BCC)" style="width:100%;box-sizing:border-box;padding:11px;font-size:15px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;text-align:center;margin-bottom:10px;text-transform:uppercase;" />
+    <input id="bcc-login-pin" type="password" inputmode="numeric" placeholder="PIN likhein..." onkeydown="if(event.key==='Enter') verifyCompanyLogin()" style="width:100%;box-sizing:border-box;padding:11px;font-size:15px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;text-align:center;margin-bottom:12px;" />
+    <button id="bcc-unlock-btn" onclick="verifyCompanyLogin()" style="width:100%;padding:12px;font-size:16px;font-weight:bold;background:#d9534f;color:#fff;border:none;border-radius:8px;cursor:pointer;">Unlock Karein</button>
+    <p id="bcc-login-error" style="color:#f87171;font-size:13px;margin:12px 0 0;display:none;"></p>
+  </div>
+</div>
+
+<!-- ⚙️ Floating Account & Lock Button -->
+<button id="bcc-settings-btn" onclick="openAccountModal()" style="display:none;position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;border:1px solid #475569;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;z-index:9998;box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+  ⚙️ Account / Lock
+</button>
+
+<!-- ⚙️ Account Info & Lock Modal -->
+<div id="bcc-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);align-items:center;justify-content:center;z-index:100000;font-family:'Segoe UI',Arial,sans-serif;padding:20px;">
+  <div style="background:#ffffff;color:#1e293b;padding:24px;border-radius:12px;max-width:340px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.3);text-align:center;">
+    <h3 style="margin:0 0 8px;font-size:18px;color:#d9534f;">🏢 Active License Details</h3>
+    <p id="activeCompanyInfo" style="font-size:13px;color:#475569;margin:0 0 16px;line-height:1.5;"></p>
+    <button onclick="lockBccNow()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;margin-bottom:8px;">🔒 Logout / Lock Karein</button>
+    <button onclick="closeAccountModal()" style="width:100%;padding:9px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;">Band Karein</button>
+  </div>
+</div>
+
+<script>
+    // 🔗 Aapka Google Sheet CSV Link
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9gfE2jb7_BYIxm2cMRhFraejEo7X6o6xqpise5oY1hAabcWb35UDn_7i8SXWPcChq_04Qtd4Ycw5o/pub?gid=0&single=true&output=csv";
+
+    let activeCompany = {
+        code: "BCC",
+        title: "BCC FLEET & LOGISTICS",
+        watermark: "BCC",
+        expiry: "2030-12-31"
+    };
+
+    const cityCoords = {
+        // Sindh
+        "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
+        "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
+        "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Khairpur": [27.5295, 68.7592],
+        "Dadu": [26.7319, 67.7750], "Tando Adam": [25.7682, 68.6619], "Kotri": [25.3657, 68.3083],
+        "Jamshoro": [25.4304, 68.2809], "Thatta": [24.7475, 67.9235], "Badin": [24.6558, 68.8383],
+        "Ghotki": [28.0060, 69.3161], "Daharki": [28.0467, 69.6719], "Mirpur Mathelo": [28.0211, 69.5494],
+        "Pano Aqil": [27.8561, 69.1111], "Rohri": [27.6920, 68.8950], "Sehwan": [26.4249, 67.8613],
+        "Moro": [26.6631, 68.0001], "Naushahro Feroze": [26.8401, 68.1227], "Kandiaro": [27.0592, 68.2102],
+        "Ranipur": [27.2795, 68.4981], "Umerkot": [25.3547, 69.7372], "Mithi": [24.2568, 69.7997],
+        "Sanghar": [26.0465, 68.9481], "Tando Allahyar": [25.4667, 68.7167], "Tando Muhammad Khan": [25.1222, 68.5361],
+        "Kashmore": [28.4367, 69.5781], "Kandhkot": [28.2433, 69.1769], "Shahdadkot": [27.8483, 67.9083],
+        "Mehar": [27.1772, 67.8214], "Hala": [25.8258, 68.4189], "Matiari": [25.5972, 68.4469],
+
+        // Punjab
+        "Lahore": [31.5497, 74.3436], "Faisalabad": [31.4504, 73.1350], "Rawalpindi": [33.5651, 73.0169],
+        "Multan": [30.1575, 71.5249], "Gujranwala": [32.1877, 74.1945], "Sialkot": [32.4945, 74.5229],
+        "Bahawalpur": [29.3544, 71.6911], "Sargodha": [32.0836, 72.6711], "Sheikhupura": [31.7145, 73.9850],
+        "Rahim Yar Khan": [28.4212, 70.2989], "Sadiqabad": [28.3062, 70.1307], "Khanpur": [28.6453, 70.6567],
+        "Jhang": [31.2751, 72.3308], "Gujrat": [32.5731, 74.0787], "Kasur": [31.1170, 74.4446],
+        "Sahiwal": [30.6682, 73.1114], "Okara": [30.8138, 73.4534], "Depalpur": [30.6736, 73.6617],
+        "Wah Cantonment": [33.7744, 72.7153], "Dera Ghazi Khan": [30.0456, 70.6419], "Chiniot": [31.7200, 72.9789],
+        "Kamoke": [31.9754, 74.2163], "Hafizabad": [32.0707, 73.6882], "Bhalwal": [32.2619, 72.8953],
+        "Muzaffargarh": [30.0703, 71.1933], "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4072, 71.8617],
+        "Mian Channu": [30.4406, 72.3556], "Lodhran": [29.5339, 71.6324], "Dunyapur": [29.8058, 71.7289],
+        "Jalalpur Pirwala": [29.5036, 71.9250], "Shujabad": [29.8828, 71.2936], "Ahmadpur East": [29.4147, 71.2581],
+        "Liaquatpur": [28.9167, 70.7333], "Vehari": [30.0436, 72.3556], "Burewala": [30.1578, 72.6892],
+        "Hasilpur": [29.6978, 72.5539], "Arifwala": [30.2925, 73.0658], "Pakpattan": [30.3433, 73.3931],
+        "Chichawatni": [30.5283, 72.7031], "Renala Khurd": [30.8858, 73.5997], "Pattoki": [31.0200, 73.8542],
+        "Muridke": [31.8100, 74.2533], "Narowal": [32.1025, 74.8731], "Shakargarh": [32.2631, 75.1611],
+        "Pasrur": [32.2667, 74.6667], "Daska": [32.3242, 74.8731], "Wazirabad": [32.4431, 74.1281],
+        "Kharian": [32.7417, 73.8642], "Jhelum": [32.9333, 73.7333], "Dina": [33.0294, 73.5756],
+        "Gujar Khan": [33.2608, 73.3086], "Attock": [33.7667, 72.3667], "Taxila": [33.7456, 72.8089],
+        "Hassan Abdal": [33.8197, 72.6864], "Fateh Jang": [33.5744, 72.6433], "Talagang": [32.9253, 72.4189],
+        "Chakwal": [32.9333, 72.8500], "Khushab": [32.2956, 72.3525], "Jauharabad": [32.4967, 72.4833],
+        "Bhakkar": [31.6247, 71.0653], "Mianwali": [32.5858, 71.5436], "Leiah": [30.9678, 70.9431],
+        "Kot Adu": [30.4667, 70.9667], "Taunsa Sharif": [30.7039, 70.6542], "Rajanpur": [29.1042, 70.3283],
+        "Jampur": [29.6425, 70.5906],
+
+        // KPK & Islamabad
+        "Islamabad": [33.6844, 73.0479], "Peshawar": [34.0151, 71.5249], "Abbottabad": [34.1463, 73.2116],
+        "Swat": [34.7500, 72.3500], "Mingora": [34.7717, 72.3600], "Nowshera": [34.0158, 71.9793],
+        "Charsadda": [34.1539, 71.7424], "Mardan": [34.1989, 72.0406], "Swabi": [34.1167, 72.4667],
+        "Haripur": [33.9961, 72.9331], "Mansehra": [34.3333, 73.2000], "Kohat": [33.5889, 71.4429],
+        "Bannu": [32.9855, 70.6042], "Dera Ismail Khan": [31.8311, 70.9014], "Timergara": [34.8258, 71.8436],
+        "Chitral": [35.8518, 71.7864], "Battagram": [34.6778, 73.0222], "Hangu": [33.5281, 71.0583],
+        "Karak": [33.1114, 71.0911], "Lakki Marwat": [32.6078, 70.9114],
+
+        // Balochistan & Azad Kashmir / Northern Areas
+        "Quetta": [30.1798, 66.9750], "Gwadar": [25.1216, 62.3254], "Turbat": [26.0012, 63.0456],
+        "Hub": [25.0267, 66.8864], "Khuzdar": [27.7384, 66.6434], "Sibi": [29.5450, 67.8797],
+        "Chaman": [30.9216, 66.4476], "Zhob": [31.3456, 69.4489], "Loralai": [30.3697, 68.5981],
+        "Noshki": [29.5542, 66.0125], "Dera Murad Jamali": [28.5467, 68.2231],
+        "Muzaffarabad": [34.3700, 73.4711], "Mirpur": [33.1478, 73.7519], "Rawalakot": [33.8584, 73.7563],
+        "Kotli": [33.5156, 73.9028], "Gilgit": [35.9208, 74.3093], "Skardu": [35.2971, 75.6333], "Chilas": [35.4122, 74.1042]
+    };
+
+    function setupAutocomplete(inp, arr) {
+        var currentFocus;
+        inp.addEventListener("input", function(e) {
+            var a, b, i, val = this.value;
+            closeAllLists();
+            if (!val) { return false; }
+            currentFocus = -1;
+
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(a);
+
+            for (i = 0; i < arr.length; i++) {
+                if (arr[i].toLowerCase().indexOf(val.toLowerCase()) > -1) {
+                    b = document.createElement("DIV");
+                    let idx = arr[i].toLowerCase().indexOf(val.toLowerCase());
+                    let matchedText = arr[i].substr(idx, val.length);
+                    let restText = arr[i].substr(idx + val.length);
+                    let prefixText = arr[i].substr(0, idx);
+
+                    b.innerHTML = prefixText + "<strong>" + matchedText + "</strong>" + restText;
+                    b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                        autoCalculateDistance();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        });
+
+        inp.addEventListener("keydown", function(e) {
+            var x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) {
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) {
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                if (currentFocus > -1 && x && x[currentFocus]) {
+                    e.preventDefault();
+                    x[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(x) {
+            if (!x || !x.length) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    var cityNames = Object.keys(cityCoords);
+    setupAutocomplete(document.getElementById("fromCity"), cityNames);
+    setupAutocomplete(document.getElementById("toCity"), cityNames);
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        var R = 6371;
+        var dLat = deg2rad(lat2 - lat1);
+        var dLon = deg2rad(lon2 - lon1);
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    function autoCalculateDistance() {
+        var from = document.getElementById("fromCity").value.trim();
+        var to = document.getElementById("toCity").value.trim();
+        var routeType = document.getElementById("routeType").value;
+
+        if(cityCoords[from] && cityCoords[to]) {
+            var coord1 = cityCoords[from];
+            var coord2 = cityCoords[to];
+            var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
+
+            var multiplier = 1.25;
+            if(routeType === 'gt') multiplier = 1.30;
+            if(routeType === 'motorway') multiplier = 1.15;
+
+            var roadDist = Math.round(straightDist * multiplier);
+            document.getElementById("distanceKM").value = roadDist;
+            document.getElementById("distHint").innerText = "Auto calculated route distance (" + roadDist + " KM)";
+            estimatePlazasFromKM();
+        }
+    }
+
+    function estimatePlazasFromKM() {
+        var km = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var routeType = document.getElementById("routeType").value;
+        var estimatedPlazas = 0;
+
+        if (routeType === 'gt') {
+            estimatedPlazas = Math.round(km / 65);
+        } else if (routeType === 'motorway') {
+            estimatedPlazas = Math.round(km / 90);
+        } else {
+            estimatedPlazas = Math.round(km / 75);
+        }
+
+        document.getElementById("plazaCount").value = estimatedPlazas;
+        updateTollFromPlazas();
+    }
+
+    function updateTollFromPlazas() {
+        var count = parseFloat(document.getElementById("plazaCount").value) || 0;
+        var rate = parseFloat(document.getElementById("plazaRate").value) || 0;
+        var totalToll = count * rate;
+        document.getElementById("totalTollPreview").innerText = "Ek side total toll: Rs. " + totalToll.toLocaleString();
+    }
+
+    function syncReturnTare() {
+        var tare = parseFloat(document.getElementById("tareWeight").value) || 0;
+        document.getElementById("returnGrossWeight").value = tare;
+    }
+
+    function toggleReturn() {
+        var isReturn = document.getElementById("isReturn").checked;
+        document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
+    }
+
+    function getAverageByNetLoad(netLoad) {
+        if (netLoad <= 2) return 4.30;
+        else if (netLoad <= 14) return 3.70;
+        else if (netLoad <= 22) return 3.40;
+        else if (netLoad <= 28) return 3.10;
+        else return 3.00;
+    }
+
+    let lastSlipSummary = "";
+    let lastExcelRow = "";
+
+    function calculateFuel() {
+        var vehicleNo = document.getElementById("vehicleNo").value.trim() || "N/A";
+        var routeSelect = document.getElementById("routeType");
+        var routeTypeText = routeSelect.options[routeSelect.selectedIndex].text;
+
+        var fromCity = document.getElementById("fromCity").value.trim() || "Origin";
+        var toCity = document.getElementById("toCity").value.trim() || "Destination";
+
+        var oneWayDist = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var dieselRate = parseFloat(document.getElementById("dieselRate").value) || 0;
+        var plazaCount = parseFloat(document.getElementById("plazaCount").value) || 0;
+        var plazaRate = parseFloat(document.getElementById("plazaRate").value) || 0;
+
+        var tareWeight = parseFloat(document.getElementById("tareWeight").value) || 0;
+        var grossWeight = parseFloat(document.getElementById("grossWeight").value) || 0;
+        var customAvgInput = document.getElementById("customAvg").value.trim();
+        var customAvg = customAvgInput !== "" ? parseFloat(customAvgInput) : NaN;
+
+        var isReturn = document.getElementById("isReturn").checked;
+        var returnGross = parseFloat(document.getElementById("returnGrossWeight").value) || tareWeight;
+
+        if (oneWayDist <= 0) {
+            alert("Baraye meharbani sahi faasla (KM) likhein.");
+            return;
+        }
+        if (grossWeight < tareWeight) {
+            alert("Kul Vazan (Gross) Khali Gari (Tare) se kam nahi ho sakta.");
+            return;
+        }
+        if (isReturn && returnGross < tareWeight) {
+            alert("Wapsi ka Kul Vazan Khali Gari (Tare) se kam nahi ho sakta.");
+            return;
+        }
+
+        var outNetLoad = Math.max(0, grossWeight - tareWeight);
+        var outAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(outNetLoad);
+        var outFuel = oneWayDist / outAvg;
+
+        var totalDist = oneWayDist;
+        var totalFuel = outFuel;
+        var totalPlazas = plazaCount;
+        var retNetLoad = 0;
+        var retAvg = 0;
+
+        if (isReturn) {
+            retNetLoad = Math.max(0, returnGross - tareWeight);
+            retAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(retNetLoad);
+            var retFuel = oneWayDist / retAvg;
+
+            totalDist = oneWayDist * 2;
+            totalFuel = outFuel + retFuel;
+            totalPlazas = plazaCount * 2;
+        }
+
+        var effectiveAvg = totalDist / totalFuel;
+        var fuelCost = Math.round(totalFuel * dieselRate);
+        var tollCost = Math.round(totalPlazas * plazaRate);
+        var grandTotal = fuelCost + tollCost;
+
+        var totalNetCargo = outNetLoad + (isReturn ? retNetLoad : 0);
+        var perTonCost = totalNetCargo > 0 ? Math.round(grandTotal / totalNetCargo) : 0;
+
+        var today = new Date();
+        var dateStr = today.toLocaleDateString('en-GB');
+
+        document.getElementById("slipDate").innerText = dateStr;
+        document.getElementById("slipVehicle").innerText = vehicleNo;
+        document.getElementById("resRouteName").innerText = isReturn
+            ? (fromCity + " ⇄ " + toCity + " (Return)")
+            : (fromCity + " → " + toCity);
+        document.getElementById("resRouteType").innerText = routeTypeText;
+        document.getElementById("resDist").innerText = totalDist.toLocaleString();
+
+        document.getElementById("resWeights").innerText = isReturn
+            ? (tareWeight + "T / " + grossWeight + "T (Out) & " + returnGross + "T (Ret)")
+            : (tareWeight + "T / " + grossWeight + "T / " + outNetLoad.toFixed(1) + "T Net");
+
+        document.getElementById("resAvg").innerText = isReturn
+            ? (effectiveAvg.toFixed(2) + " (Out: " + outAvg.toFixed(2) + " | Ret: " + retAvg.toFixed(2) + ")")
+            : outAvg.toFixed(2);
+
+        document.getElementById("resRate").innerText = dieselRate;
+        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
+        document.getElementById("resFuelCost").innerText = fuelCost.toLocaleString();
+        document.getElementById("resPlazaInfo").innerText = totalPlazas + " Plazas @ Rs." + plazaRate;
+        document.getElementById("resTollCost").innerText = tollCost.toLocaleString();
+        document.getElementById("resGrandTotal").innerText = grandTotal.toLocaleString();
+
+        if (totalNetCargo > 0) {
+            document.getElementById("perTonRow").style.display = "flex";
+            document.getElementById("resPerTon").innerText = perTonCost.toLocaleString();
+        } else {
+            document.getElementById("perTonRow").style.display = "none";
+        }
+
+        document.getElementById("resultWrapper").style.display = "block";
+        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth" });
+
+        lastSlipSummary =
+            "*" + activeCompany.title + " - TRIP SLIP*\n" +
+            "Date: " + dateStr + "\n" +
+            "Vehicle: " + vehicleNo + "\n" +
+            "Route: " + document.getElementById("resRouteName").innerText + "\n" +
+            "Distance: " + totalDist + " KM\n" +
+            "Weight: " + document.getElementById("resWeights").innerText + "\n" +
+            "Average: " + effectiveAvg.toFixed(2) + " KM/L\n" +
+            "Diesel: " + totalFuel.toFixed(1) + " Ltr (@ Rs." + dieselRate + ") = Rs. " + fuelCost.toLocaleString() + "\n" +
+            "Toll (" + totalPlazas + " Plazas): Rs. " + tollCost.toLocaleString() + "\n" +
+            "*TOTAL TRIP COST: Rs. " + grandTotal.toLocaleString() + "*";
+
+        lastExcelRow = [
+            dateStr, vehicleNo, fromCity, toCity, isReturn ? "Return" : "One-Way",
+            totalDist, tareWeight, grossWeight, totalNetCargo,
+            effectiveAvg.toFixed(2), totalFuel.toFixed(1), dieselRate, fuelCost, tollCost, grandTotal
+        ].join("\t");
+    }
+
+    function shareWhatsApp() {
+        if (!lastSlipSummary) return;
+        var url = "https://wa.me/?text=" + encodeURIComponent(lastSlipSummary);
+        window.open(url, "_blank");
+    }
+
+    function copyForExcel() {
+        if (!lastExcelRow) return;
+        navigator.clipboard.writeText(lastExcelRow).then(function() {
+            alert("Excel row copy ho gayi hai! Seedha Excel sheet mein Ctrl+V karein.");
+        });
+    }
+
+    // 🔒 Google Sheet Multi-Company Verification Logic
+    function parseCSVLine(line) {
+        const result = [];
+        let current = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                inQuotes = !inQuotes;
+            } else if (ch === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += ch;
+            }
+        }
+        result.push(current.trim());
+        return result;
+    }
+
+    function applyCompanyBranding(comp) {
+        activeCompany = comp;
+        document.getElementById("appMainHeading").innerText = "🚚 " + comp.title;
+        document.getElementById("slipCompanyHeader").innerText = comp.title;
+        document.getElementById("slipPreparedBy").innerText = "Prepared By (" + comp.watermark + ")";
+        document.documentElement.style.setProperty('--wm-text', '"' + comp.watermark + '"');
+    }
+
+    // Check saved session on load
+    (function checkSavedSession() {
+        const saved = sessionStorage.getItem("bcc_active_company");
+        if (saved) {
+            try {
+                const comp = JSON.parse(saved);
+                applyCompanyBranding(comp);
+                document.getElementById("bcc-lock-overlay").style.display = "none";
+                document.getElementById("bcc-settings-btn").style.display = "block";
+            } catch (e) {}
+        }
+    })();
+
+    async function verifyCompanyLogin() {
+        const codeInput = document.getElementById("bcc-company-code").value.trim().toUpperCase();
+        const pinInput = document.getElementById("bcc-login-pin").value.trim();
+        const errEl = document.getElementById("bcc-login-error");
+        const btn = document.getElementById("bcc-unlock-btn");
+
+        if (!codeInput || !pinInput) {
+            errEl.innerText = "❌ Company Code aur PIN dono likhein.";
+            errEl.style.display = "block";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Checking License...";
+        errEl.style.display = "none";
+
+        try {
+            // Cache buster added so Google Sheet updates reflect immediately
+            const response = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now());
+            const csvText = await response.text();
+            const lines = csvText.split(/\r?\n/).filter(l => l.trim() !== "");
+
+            let matched = null;
+            for (let i = 1; i < lines.length; i++) {
+                const cols = parseCSVLine(lines[i]);
+                const rowCode = (cols[0] || "").toUpperCase();
+                const rowPin = (cols[1] || "");
+                const rowTitle = cols[2] || (rowCode + " TRANSPORT");
+                const rowWatermark = cols[3] || rowCode;
+                const rowStatus = (cols[4] || "Active").toLowerCase();
+                const rowExpiry = cols[5] || "2099-12-31";
+
+                if (rowCode === codeInput && rowPin === pinInput) {
+                    matched = {
+                        code: rowCode,
+                        title: rowTitle.toUpperCase(),
+                        watermark: rowWatermark.toUpperCase(),
+                        status: rowStatus,
+                        expiry: rowExpiry
+                    };
+                    break;
+                }
+            }
+
+            if (!matched) {
+                errEl.innerText = "❌ Company Code ya PIN ghalat hai.";
+                errEl.style.display = "block";
+            } else if (matched.status !== "active") {
+                errEl.innerText = "⛔ Aapka account block/inactive hai. Rabta karein.";
+                errEl.style.display = "block";
+            } else {
+                const todayStr = new Date().toISOString().split("T")[0];
+                if (matched.expiry && todayStr > matched.expiry) {
+                    errEl.innerText = "⏳ Aapki subscription expire ho chuki hai (" + matched.expiry + ").";
+                    errEl.style.display = "block";
+                } else {
+                    sessionStorage.setItem("bcc_active_company", JSON.stringify(matched));
+                    applyCompanyBranding(matched);
+                    document.getElementById("bcc-lock-overlay").style.display = "none";
+                    document.getElementById("bcc-settings-btn").style.display = "block";
+                }
+            }
+        } catch (err) {
+            errEl.innerText = "⚠️ Internet ya Google Sheet connection ka masla hai. Dobara koshish karein.";
+            errEl.style.display = "block";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Unlock Karein";
+        }
+    }
+
+    function openAccountModal() {
+        document.getElementById("activeCompanyInfo").innerHTML =
+            "<strong>Company:</strong> " + activeCompany.title + "<br>" +
+            "<strong>Code:</strong> " + activeCompany.code + "<br>" +
+            "<strong>Valid Until:</strong> " + (activeCompany.expiry || "Active");
+        document.getElementById("bcc-pin-modal").style.display = "flex";
+    }
+
+    function closeAccountModal() {
+        document.getElementById("bcc-pin-modal").style.display = "none";
+    }
+
+    function lockBccNow() {
+        sessionStorage.removeItem("bcc_active_company");
+        location.reload();
+    }
+</script>
+</body>
+</html>
