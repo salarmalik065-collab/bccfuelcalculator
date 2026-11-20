@@ -843,6 +843,10 @@
     }
 
     // 🔒 Google Sheet Multi-Company Verification Logic
+    function cleanCell(val) {
+        return String(val || "").replace(/^"|"$/g, "").replace(/\u00A0/g, " ").trim();
+    }
+
     function parseCSVLine(line) {
         const result = [];
         let current = "";
@@ -850,15 +854,20 @@
         for (let i = 0; i < line.length; i++) {
             const ch = line[i];
             if (ch === '"') {
-                inQuotes = !inQuotes;
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
             } else if (ch === ',' && !inQuotes) {
-                result.push(current.trim());
+                result.push(cleanCell(current));
                 current = "";
             } else {
                 current += ch;
             }
         }
-        result.push(current.trim());
+        result.push(cleanCell(current));
         return result;
     }
 
@@ -888,5 +897,95 @@
     })();
 
     async function verifyCompanyLogin() {
-        const codeInput = document.getElementById("bcc-company-code").value.trim().toUpperCase();
-        const pinInput = document.getElementById("
+        const codeInput = cleanCell(document.getElementById("bcc-company-code").value).toUpperCase();
+        const pinInput = cleanCell(document.getElementById("bcc-login-pin").value);
+        const errEl = document.getElementById("bcc-login-error");
+        const btn = document.getElementById("bcc-unlock-btn");
+
+        if (!codeInput || !pinInput) {
+            errEl.innerText = "❌ Company Code aur PIN dono likhein.";
+            errEl.style.display = "block";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Checking License...";
+        errEl.style.display = "none";
+
+        try {
+            const sep = GOOGLE_SHEET_CSV_URL.includes("?") ? "&" : "?";
+            const response = await fetch(GOOGLE_SHEET_CSV_URL + sep + "t=" + Date.now());
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status);
+            }
+            const csvText = await response.text();
+            const lines = csvText.split(/\r?\n/).filter(l => cleanCell(l) !== "");
+
+            let matched = null;
+            for (let i = 1; i < lines.length; i++) {
+                const cols = parseCSVLine(lines[i]);
+                const rowCode = cleanCell(cols[0]).toUpperCase();
+                const rowPin = cleanCell(cols[1]);
+                const rowTitle = cleanCell(cols[2]) || (rowCode + " TRANSPORT");
+                const rowWatermark = cleanCell(cols[3]) || rowCode;
+                const rowStatus = cleanCell(cols[4]).toLowerCase() || "active";
+                const rowExpiry = cleanCell(cols[5]) || "2099-12-31";
+
+                if (rowCode === codeInput && rowPin === pinInput) {
+                    matched = {
+                        code: rowCode,
+                        title: rowTitle.toUpperCase(),
+                        watermark: rowWatermark.toUpperCase(),
+                        status: rowStatus,
+                        expiry: rowExpiry
+                    };
+                    break;
+                }
+            }
+
+            if (!matched) {
+                errEl.innerText = "❌ Company Code ya PIN ghalat hai.";
+                errEl.style.display = "block";
+            } else if (matched.status !== "active") {
+                errEl.innerText = "⛔ Aapka account block/inactive hai. Rabta karein.";
+                errEl.style.display = "block";
+            } else {
+                const todayStr = new Date().toISOString().split("T")[0];
+                if (matched.expiry && todayStr > matched.expiry) {
+                    errEl.innerText = "⏳ Aapki subscription expire ho chuki hai (" + matched.expiry + ").";
+                    errEl.style.display = "block";
+                } else {
+                    sessionStorage.setItem("bcc_active_company", JSON.stringify(matched));
+                    applyCompanyBranding(matched);
+                    document.getElementById("bcc-lock-overlay").style.display = "none";
+                    document.getElementById("bcc-settings-btn").style.display = "block";
+                }
+            }
+        } catch (err) {
+            errEl.innerText = "⚠️ Google Sheet fetch nahi ho rahi (" + err.message + "). Publish/Sharing check karein.";
+            errEl.style.display = "block";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Unlock Karein";
+        }
+    }
+
+    function openAccountModal() {
+        document.getElementById("activeCompanyInfo").innerHTML =
+            "<strong>Company:</strong> " + activeCompany.title + "<br>" +
+            "<strong>Code:</strong> " + activeCompany.code + "<br>" +
+            "<strong>Valid Until:</strong> " + (activeCompany.expiry || "Active");
+        document.getElementById("bcc-pin-modal").style.display = "flex";
+    }
+
+    function closeAccountModal() {
+        document.getElementById("bcc-pin-modal").style.display = "none";
+    }
+
+    function lockBccNow() {
+        sessionStorage.removeItem("bcc_active_company");
+        location.reload();
+    }
+</script>
+</body>
+</html>
