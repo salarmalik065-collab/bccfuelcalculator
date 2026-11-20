@@ -66,6 +66,33 @@
             margin-top: 4px;
         }
 
+        /* Quick KM Adjust Buttons */
+        .km-adjust-bar {
+            display: flex;
+            gap: 5px;
+            margin-top: 6px;
+        }
+        .btn-km-adj {
+            flex: 1;
+            padding: 5px 2px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            color: #334155;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-km-adj:hover {
+            background-color: #ffeef0;
+            border-color: #d9534f;
+            color: #d9534f;
+        }
+        .btn-km-adj:active {
+            transform: scale(0.96);
+        }
+
         /* Custom Autocomplete Suggestions Dropdown */
         .autocomplete-items {
             position: absolute;
@@ -338,13 +365,13 @@
 
     <div class="row">
         <div class="col form-group autocomplete">
-            <label for="fromCity">Kahan Se (Origin):</label>
-            <input type="text" id="fromCity" placeholder="Shehar select karein ya type karein..." value="Karachi" autocomplete="off">
+            <label for="fromCity">Kahan Se (Origin / Industrial Area):</label>
+            <input type="text" id="fromCity" placeholder="Shehar ya Industrial Area likhein..." value="Karachi" autocomplete="off">
         </div>
 
         <div class="col form-group autocomplete">
-            <label for="toCity">Kahan Tak (Destination):</label>
-            <input type="text" id="toCity" placeholder="Shehar select karein ya type karein..." value="Faisalabad" autocomplete="off">
+            <label for="toCity">Kahan Tak (Destination / Industrial Area):</label>
+            <input type="text" id="toCity" placeholder="Shehar ya Industrial Area likhein..." value="Faisalabad" autocomplete="off">
         </div>
     </div>
 
@@ -352,7 +379,13 @@
         <div class="col form-group">
             <label for="distanceKM">Ek Side Faasla (KM):</label>
             <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()">
-            <div class="hint" id="distHint">Shehar select karein ya khud KM likhein.</div>
+            <div class="km-adjust-bar" title="Factory bypass ya sheher ke andar ka farq adjust karein">
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(-10)">-10 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(-5)">-5 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(5)">+5 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(10)">+10 KM</button>
+            </div>
+            <div class="hint" id="distHint">Shehar select karein ya +/- KM se bypass adjust karein.</div>
         </div>
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
@@ -525,6 +558,36 @@
     };
 
     const cityCoords = {
+        // Major Industrial Areas, Ports & Dry Ports (Freight Hubs)
+        "Port Qasim (Karachi)": [24.7847, 67.3497],
+        "Bin Qasim Industrial Area": [24.8195, 67.3592],
+        "Korangi Industrial Area (Karachi)": [24.8358, 67.1328],
+        "SITE Area (Karachi)": [24.9014, 66.9936],
+        "Landhi Industrial Area (Karachi)": [24.8536, 67.2114],
+        "North Karachi Industrial Area": [24.9964, 67.0658],
+        "Nooriabad Industrial Estate": [25.1475, 67.8558],
+        "Hub Industrial Area (SITE Hub)": [25.0531, 66.8953],
+        "SITE Kotri Industrial Area": [25.3519, 68.2947],
+        "SITE Sukkur": [27.7214, 68.8289],
+        "Sundar Industrial Estate (Lahore)": [31.2944, 74.1628],
+        "Quaid-e-Azam Industrial Estate (Kot Lakhpat)": [31.4647, 74.3311],
+        "Manga Mandi (Lahore)": [31.3075, 74.0631],
+        "Kala Shah Kaku Industrial Area": [31.7244, 74.2672],
+        "Mughalpura Dry Port (Lahore)": [31.5644, 74.3653],
+        "Prem Nagar Dry Port (Lahore)": [31.2589, 74.0725],
+        "Khurrianwala Industrial Estate (Faisalabad)": [31.4958, 73.2683],
+        "Sahianwala / M3 Industrial City (Faisalabad)": [31.6525, 73.2044],
+        "Chak Jhumra (Faisalabad)": [31.5681, 73.1831],
+        "Faisalabad Dry Port": [31.5311, 73.1708],
+        "Multan Industrial Estate": [30.1189, 71.4397],
+        "Bhalwal Industrial Estate": [32.2750, 72.9050],
+        "Sialkot Dry Port (Sambrial)": [32.4783, 74.3531],
+        "Hattar Industrial Estate (Haripur)": [33.8519, 72.8511],
+        "Gadoon Amazai Industrial Estate (Swabi)": [34.1286, 72.6956],
+        "Hayatabad Industrial Estate (Peshawar)": [33.9875, 71.4258],
+        "Azakhel Dry Port (Nowshera)": [34.0086, 71.8744],
+        "Rashakai Economic Zone (M1)": [34.1131, 71.9767],
+
         // Sindh
         "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
         "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
@@ -696,8 +759,18 @@
 
             var roadDist = Math.round(straightDist * multiplier);
             document.getElementById("distanceKM").value = roadDist;
-            document.getElementById("distHint").innerText = "Auto calculated route distance (" + roadDist + " KM)";
+            document.getElementById("distHint").innerText = "Auto route: " + roadDist + " KM (Bypass/City ke liye +/- KM dabayein)";
         }
+    }
+
+    // Quick +/- KM adjustment for bypass or inner-city stops
+    function adjustDistance(delta) {
+        var distInput = document.getElementById("distanceKM");
+        var current = parseFloat(distInput.value) || 0;
+        var updated = Math.max(1, Math.round((current + delta) * 10) / 10);
+        distInput.value = updated;
+        var sign = delta > 0 ? "+" : "";
+        document.getElementById("distHint").innerText = "Adjusted: " + updated + " KM (" + sign + delta + " KM)";
     }
 
     function syncReturnTare() {
@@ -710,24 +783,19 @@
         document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
     }
 
-    // ✅ Accurate Smooth Average: Net Cargo Load + Route Type
+    // Accurate Smooth Average: Net Cargo Load + Route Type
     function getAverageByNetLoadAndRoute(netLoad, routeType) {
         var safeLoad = Math.max(0, Number(netLoad) || 0);
-
-        // Base average: Khali (0T) = 4.30 KM/L, har ton load par ~0.04 KM/L kam
         var baseAvg = 4.30 - (safeLoad * 0.04);
-
-        // Minimum floor taake bohat heavy load par bhi realistic average rahe
         if (baseAvg < 2.65) {
             baseAvg = 2.65;
         }
 
-        // Route Type Adjustment
-        var routeFactor = 1.00; // Mix Route (default)
+        var routeFactor = 1.00;
         if (routeType === "motorway") {
-            routeFactor = 1.05; // Motorway par +5% behtar average
+            routeFactor = 1.05;
         } else if (routeType === "gt") {
-            routeFactor = 0.93; // GT Road / N-5 par -7% kam average
+            routeFactor = 0.93;
         }
 
         return Number((baseAvg * routeFactor).toFixed(2));
