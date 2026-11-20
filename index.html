@@ -761,4 +761,126 @@
 
         document.getElementById("resWeights").innerText = isReturn
             ? (tareWeight + "T / " + grossWeight + "T (Out) & " + returnGross + "T (Ret)")
-            : (tareWeight + "
+            : (tareWeight + "T / " + grossWeight + "T / " + outNetLoad.toFixed(1) + "T Net");
+
+        document.getElementById("resAvg").innerText = isReturn
+            ? (effectiveAvg.toFixed(2) + " (Out: " + outAvg.toFixed(2) + " | Ret: " + retAvg.toFixed(2) + ")")
+            : outAvg.toFixed(2);
+
+        document.getElementById("resRate").innerText = dieselRate;
+        document.getElementById("resFuel").innerText = totalFuel.toFixed(1);
+        document.getElementById("resFuelCost").innerText = fuelCost.toLocaleString();
+        document.getElementById("resPlazaInfo").innerText = totalPlazas + " Plazas @ Rs." + plazaRate;
+        document.getElementById("resTollCost").innerText = tollCost.toLocaleString();
+        document.getElementById("resGrandTotal").innerText = grandTotal.toLocaleString();
+
+        if (totalNetCargo > 0) {
+            document.getElementById("perTonRow").style.display = "flex";
+            document.getElementById("resPerTon").innerText = perTonCost.toLocaleString();
+        } else {
+            document.getElementById("perTonRow").style.display = "none";
+        }
+
+        document.getElementById("resultWrapper").style.display = "block";
+        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth" });
+
+        // Prepare WhatsApp & Excel text
+        lastSlipSummary =
+            "*BCC FLEET & LOGISTICS - TRIP SLIP*\n" +
+            "Date: " + dateStr + "\n" +
+            "Vehicle: " + vehicleNo + "\n" +
+            "Route: " + document.getElementById("resRouteName").innerText + "\n" +
+            "Distance: " + totalDist + " KM\n" +
+            "Weight: " + document.getElementById("resWeights").innerText + "\n" +
+            "Average: " + effectiveAvg.toFixed(2) + " KM/L\n" +
+            "Diesel: " + totalFuel.toFixed(1) + " Ltr (@ Rs." + dieselRate + ") = Rs. " + fuelCost.toLocaleString() + "\n" +
+            "Toll (" + totalPlazas + " Plazas): Rs. " + tollCost.toLocaleString() + "\n" +
+            "*TOTAL TRIP COST: Rs. " + grandTotal.toLocaleString() + "*";
+
+        lastExcelRow = [
+            dateStr, vehicleNo, fromCity, toCity, isReturn ? "Return" : "One-Way",
+            totalDist, tareWeight, grossWeight, totalNetCargo,
+            effectiveAvg.toFixed(2), totalFuel.toFixed(1), dieselRate, fuelCost, tollCost, grandTotal
+        ].join("\t");
+    }
+
+    function shareWhatsApp() {
+        if (!lastSlipSummary) return;
+        var url = "https://wa.me/?text=" + encodeURIComponent(lastSlipSummary);
+        window.open(url, "_blank");
+    }
+
+    function copyForExcel() {
+        if (!lastExcelRow) return;
+        navigator.clipboard.writeText(lastExcelRow).then(function() {
+            alert("Excel row copy ho gayi hai! Seedha Excel sheet mein Ctrl+V karein.");
+        });
+    }
+
+    // 🔒 BCC Lock Screen + PIN Settings Logic
+    const DEFAULT_BCC_PIN = "7860";
+
+    function getActiveBccPin() {
+        return localStorage.getItem("bcc_custom_pin") || DEFAULT_BCC_PIN;
+    }
+
+    if (sessionStorage.getItem("bcc_unlocked") === "true") {
+        document.getElementById("bcc-lock-overlay").style.display = "none";
+        document.getElementById("bcc-settings-btn").style.display = "block";
+    }
+
+    function verifyBccPin() {
+        const entered = document.getElementById("bcc-login-pin").value.trim();
+        if (entered === getActiveBccPin()) {
+            sessionStorage.setItem("bcc_unlocked", "true");
+            document.getElementById("bcc-lock-overlay").style.display = "none";
+            document.getElementById("bcc-settings-btn").style.display = "block";
+            document.getElementById("bcc-login-error").style.display = "none";
+        } else {
+            document.getElementById("bcc-login-error").style.display = "block";
+        }
+    }
+
+    function openPinModal() {
+        document.getElementById("bcc-old-pin").value = "";
+        document.getElementById("bcc-new-pin").value = "";
+        document.getElementById("bcc-change-msg").style.display = "none";
+        document.getElementById("bcc-pin-modal").style.display = "flex";
+    }
+
+    function closePinModal() {
+        document.getElementById("bcc-pin-modal").style.display = "none";
+    }
+
+    function saveNewBccPin() {
+        const oldPin = document.getElementById("bcc-old-pin").value.trim();
+        const newPin = document.getElementById("bcc-new-pin").value.trim();
+        const msg = document.getElementById("bcc-change-msg");
+
+        if (oldPin !== getActiveBccPin()) {
+            msg.style.color = "#dc2626";
+            msg.textContent = "❌ Purana PIN ghalat hai.";
+            msg.style.display = "block";
+            return;
+        }
+        if (newPin.length < 4) {
+            msg.style.color = "#dc2626";
+            msg.textContent = "❌ Naya PIN kam az kam 4 digits ka rakhein.";
+            msg.style.display = "block";
+            return;
+        }
+
+        localStorage.setItem("bcc_custom_pin", newPin);
+        msg.style.color = "#16a34a";
+        msg.textContent = "✅ Naya PIN save ho gaya hai!";
+        msg.style.display = "block";
+        setTimeout(closePinModal, 1200);
+    }
+
+    function lockBccNow() {
+        sessionStorage.removeItem("bcc_unlocked");
+        location.reload();
+    }
+</script>
+</body>
+</html>
