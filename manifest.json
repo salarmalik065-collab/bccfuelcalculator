@@ -1,0 +1,16 @@
+{
+  "name": "R TECH Fleet Fuel Calculator",
+  "short_name": "R TECH Fuel",
+  "start_url": "/bccfuelcalculator/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#ef4444",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2554/2554936.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
