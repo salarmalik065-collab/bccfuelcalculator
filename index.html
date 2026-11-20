@@ -144,6 +144,16 @@
             height: 18px;
             cursor: pointer;
         }
+        .return-sub-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: #b52b27;
+            margin: 10px 0 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #f1b0b7;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
         .btn-main {
             background-color: #d9534f;
             color: white;
@@ -224,12 +234,13 @@
         .slip-row {
             display: flex;
             justify-content: space-between;
+            gap: 10px;
             padding: 4px 0;
             font-size: 12.5px;
             border-bottom: 1px dotted #ddd;
         }
-        .slip-row span:first-child { color: #444; }
-        .slip-row span:last-child { font-weight: 600; color: #111; }
+        .slip-row span:first-child { color: #444; white-space: nowrap; }
+        .slip-row span:last-child { font-weight: 600; color: #111; text-align: right; }
         .slip-total {
             margin-top: 8px;
             padding: 7px 10px;
@@ -278,39 +289,21 @@
 
         /* ✨ R TECH Animated Logo Styles */
         @keyframes rtechFloat {
-            0%, 100% {
-                transform: translateY(0px) scale(1);
-            }
-            50% {
-                transform: translateY(-6px) scale(1.03);
-            }
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.03); }
         }
-
         @keyframes rtechPulseGlow {
-            0%, 100% {
-                filter: drop-shadow(0 4px 10px rgba(239, 68, 68, 0.35));
-            }
-            50% {
-                filter: drop-shadow(0 8px 20px rgba(239, 68, 68, 0.72));
-            }
+            0%, 100% { filter: drop-shadow(0 4px 10px rgba(239, 68, 68, 0.35)); }
+            50% { filter: drop-shadow(0 8px 20px rgba(239, 68, 68, 0.72)); }
         }
-
         @keyframes rtechDotBlink {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.45);
-                opacity: 0.55;
-            }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.45); opacity: 0.55; }
         }
-
         #bcc-lock-overlay svg {
             animation: rtechFloat 3.2s ease-in-out infinite, rtechPulseGlow 3.2s ease-in-out infinite;
             transform-origin: center;
         }
-
         #bcc-lock-overlay svg circle {
             animation: rtechDotBlink 1.8s ease-in-out infinite;
             transform-box: fill-box;
@@ -354,7 +347,7 @@
             <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990" value="JT-5697">
         </div>
         <div class="col form-group">
-            <label for="routeType">Rasta (Route Type):</label>
+            <label for="routeType">Jaane ka Rasta (Outbound Route):</label>
             <select id="routeType" onchange="autoCalculateDistance()">
                 <option value="gt">GT Road / N-5</option>
                 <option value="motorway">Motorway / M-9 / M-5</option>
@@ -365,19 +358,19 @@
 
     <div class="row">
         <div class="col form-group autocomplete">
-            <label for="fromCity">Kahan Se (Origin / Industrial Area / Adda):</label>
-            <input type="text" id="fromCity" placeholder="Shehar, Factory ya Adda likhein..." value="Karachi" autocomplete="off">
+            <label for="fromCity">Kahan Se (Origin / Port / Adda):</label>
+            <input type="text" id="fromCity" placeholder="Shehar, Factory ya Adda likhein..." value="Karachi" autocomplete="off" oninput="syncReturnDefaultCity()">
         </div>
 
         <div class="col form-group autocomplete">
-            <label for="toCity">Kahan Tak (Destination / Industrial Area / Adda):</label>
+            <label for="toCity">Kahan Tak (Destination / Factory):</label>
             <input type="text" id="toCity" placeholder="Shehar, Factory ya Adda likhein..." value="Faisalabad" autocomplete="off">
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
-            <label for="distanceKM">Ek Side Faasla (KM):</label>
+            <label for="distanceKM">Jaane ka Faasla (Outbound KM):</label>
             <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()">
             <div class="km-adjust-bar" title="Factory bypass ya sheher ke andar ka farq adjust karein">
                 <button type="button" class="btn-km-adj" onclick="adjustDistance(-10)">-10 KM</button>
@@ -399,7 +392,7 @@
             <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()" oninput="syncReturnTare()">
         </div>
         <div class="col form-group">
-            <label for="grossWeight">Kul Vazan (Gross Tons):</label>
+            <label for="grossWeight">Jaate Waqt Kul Vazan (Gross Tons):</label>
             <input type="number" step="any" inputmode="decimal" id="grossWeight" value="47" onfocus="this.select()">
         </div>
     </div>
@@ -409,14 +402,50 @@
         <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()">
     </div>
 
+    <!-- 🔄 Flexible Return / Local Shifting Trip Box -->
     <div class="return-box">
         <label class="checkbox-label">
             <input type="checkbox" id="isReturn" onchange="toggleReturn()">
-            Wapsi Trip (Return) bhi shamil karein
+            Wapsi / Agla Trip (Return ya Local Shifting) shamil karein
         </label>
-        <div id="returnFields" style="display:none; margin-top:10px;">
-            <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons - Khali ho to Tare ke barabar likhein):</label>
-            <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
+
+        <div id="returnFields" style="display:none;">
+            <div class="return-sub-header">Wapsi / Next Leg ki Tafseel (Destination se Aage)</div>
+
+            <div class="row">
+                <div class="col form-group autocomplete">
+                    <label for="returnToCity">Wapsi Kahan Tak (Same Shehar, Doosra Shehar ya Local):</label>
+                    <input type="text" id="returnToCity" placeholder="Shehar ya Local point likhein..." autocomplete="off">
+                </div>
+                <div class="col form-group">
+                    <label for="returnRouteType">Wapsi ka Rasta (Return Route):</label>
+                    <select id="returnRouteType" onchange="autoCalculateReturnDistance()">
+                        <option value="gt">GT Road / N-5</option>
+                        <option value="motorway">Motorway / M-9 / M-5</option>
+                        <option value="mix" selected>Mix Route / Local</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label for="returnDistanceKM">Wapsi / Local Faasla (KM):</label>
+                    <input type="number" step="any" inputmode="decimal" id="returnDistanceKM" value="1184" placeholder="Wapsi ya local KM likhein" onfocus="this.select()">
+                    <div class="km-adjust-bar" title="Local shifting ya bypass KM adjust karein">
+                        <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(-10)">-10 KM</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(-5)">-5 KM</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(5)">+5 KM</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(10)">+10 KM</button>
+                    </div>
+                    <div class="hint" id="retDistHint">Local trip ho to seedha KM likh dein (maslan 45 KM).</div>
+                </div>
+
+                <div class="col form-group">
+                    <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons):</label>
+                    <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
+                    <div class="hint">Khali wapsi ho to Tare (14T) ke barabar rakhein.</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -693,7 +722,9 @@
         "Kotli": [33.5156, 73.9028], "Gilgit": [35.9208, 74.3093], "Skardu": [35.2971, 75.6333], "Chilas": [35.4122, 74.1042]
     };
 
-    function setupAutocomplete(inp, arr) {
+    let returnCityManuallyChanged = false;
+
+    function setupAutocomplete(inp, arr, onSelectCallback) {
         var currentFocus;
         inp.addEventListener("input", function(e) {
             var a, b, i, val = this.value;
@@ -720,7 +751,7 @@
                     b.addEventListener("click", function(e) {
                         inp.value = this.getElementsByTagName("input")[0].value;
                         closeAllLists();
-                        autoCalculateDistance();
+                        if (onSelectCallback) onSelectCallback();
                     });
                     a.appendChild(b);
                 }
@@ -773,8 +804,22 @@
     }
 
     var cityNames = Object.keys(cityCoords);
-    setupAutocomplete(document.getElementById("fromCity"), cityNames);
-    setupAutocomplete(document.getElementById("toCity"), cityNames);
+    setupAutocomplete(document.getElementById("fromCity"), cityNames, function() {
+        syncReturnDefaultCity();
+        autoCalculateDistance();
+    });
+    setupAutocomplete(document.getElementById("toCity"), cityNames, function() {
+        autoCalculateDistance();
+        autoCalculateReturnDistance();
+    });
+    setupAutocomplete(document.getElementById("returnToCity"), cityNames, function() {
+        returnCityManuallyChanged = true;
+        autoCalculateReturnDistance();
+    });
+
+    document.getElementById("returnToCity").addEventListener("input", function() {
+        returnCityManuallyChanged = true;
+    });
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         var R = 6371;
@@ -791,27 +836,60 @@
         return deg * (Math.PI/180);
     }
 
+    function computeRoadKm(originName, destName, routeType) {
+        if (cityCoords[originName] && cityCoords[destName]) {
+            if (originName === destName) return 0;
+            var coord1 = cityCoords[originName];
+            var coord2 = cityCoords[destName];
+            var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
+
+            var multiplier = 1.25;
+            if (routeType === 'gt') multiplier = 1.30;
+            if (routeType === 'motorway') multiplier = 1.15;
+
+            return Math.round(straightDist * multiplier);
+        }
+        return null;
+    }
+
     function autoCalculateDistance() {
         var from = document.getElementById("fromCity").value.trim();
         var to = document.getElementById("toCity").value.trim();
         var routeType = document.getElementById("routeType").value;
 
-        if(cityCoords[from] && cityCoords[to]) {
-            var coord1 = cityCoords[from];
-            var coord2 = cityCoords[to];
-            var straightDist = getDistanceFromLatLonInKm(coord1[0], coord1[1], coord2[0], coord2[1]);
-
-            var multiplier = 1.25;
-            if(routeType === 'gt') multiplier = 1.30;
-            if(routeType === 'motorway') multiplier = 1.15;
-
-            var roadDist = Math.round(straightDist * multiplier);
+        var roadDist = computeRoadKm(from, to, routeType);
+        if (roadDist !== null && roadDist > 0) {
             document.getElementById("distanceKM").value = roadDist;
             document.getElementById("distHint").innerText = "Auto route: " + roadDist + " KM (Bypass/City ke liye +/- KM dabayein)";
+            if (!returnCityManuallyChanged) {
+                autoCalculateReturnDistance();
+            }
         }
     }
 
-    // Quick +/- KM adjustment for bypass or inner-city stops
+    function autoCalculateReturnDistance() {
+        var retFrom = document.getElementById("toCity").value.trim();
+        var retTo = document.getElementById("returnToCity").value.trim();
+        var retRouteType = document.getElementById("returnRouteType").value;
+
+        var roadDist = computeRoadKm(retFrom, retTo, retRouteType);
+        if (roadDist !== null) {
+            if (roadDist === 0) {
+                document.getElementById("returnDistanceKM").value = 25;
+                document.getElementById("retDistHint").innerText = "Local trip: Same shehar ke andar ka KM likhein (maslan 25 KM).";
+            } else {
+                document.getElementById("returnDistanceKM").value = roadDist;
+                document.getElementById("retDistHint").innerText = "Auto wapsi (" + retFrom + " → " + retTo + "): " + roadDist + " KM";
+            }
+        }
+    }
+
+    function syncReturnDefaultCity() {
+        if (!returnCityManuallyChanged) {
+            document.getElementById("returnToCity").value = document.getElementById("fromCity").value.trim();
+        }
+    }
+
     function adjustDistance(delta) {
         var distInput = document.getElementById("distanceKM");
         var current = parseFloat(distInput.value) || 0;
@@ -819,6 +897,15 @@
         distInput.value = updated;
         var sign = delta > 0 ? "+" : "";
         document.getElementById("distHint").innerText = "Adjusted: " + updated + " KM (" + sign + delta + " KM)";
+    }
+
+    function adjustReturnDistance(delta) {
+        var distInput = document.getElementById("returnDistanceKM");
+        var current = parseFloat(distInput.value) || 0;
+        var updated = Math.max(1, Math.round((current + delta) * 10) / 10);
+        distInput.value = updated;
+        var sign = delta > 0 ? "+" : "";
+        document.getElementById("retDistHint").innerText = "Adjusted: " + updated + " KM (" + sign + delta + " KM)";
     }
 
     function syncReturnTare() {
@@ -829,6 +916,13 @@
     function toggleReturn() {
         var isReturn = document.getElementById("isReturn").checked;
         document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
+        if (isReturn) {
+            if (!document.getElementById("returnToCity").value.trim()) {
+                returnCityManuallyChanged = false;
+                syncReturnDefaultCity();
+            }
+            autoCalculateReturnDistance();
+        }
     }
 
     // Accurate Smooth Average: Net Cargo Load + Route Type
@@ -861,7 +955,7 @@
         var fromCity = document.getElementById("fromCity").value.trim() || "Origin";
         var toCity = document.getElementById("toCity").value.trim() || "Destination";
 
-        var oneWayDist = parseFloat(document.getElementById("distanceKM").value) || 0;
+        var outDist = parseFloat(document.getElementById("distanceKM").value) || 0;
         var dieselRate = parseFloat(document.getElementById("dieselRate").value) || 0;
 
         var tareWeight = parseFloat(document.getElementById("tareWeight").value) || 0;
@@ -870,14 +964,23 @@
         var customAvg = customAvgInput !== "" ? parseFloat(customAvgInput) : NaN;
 
         var isReturn = document.getElementById("isReturn").checked;
+        var returnToCity = document.getElementById("returnToCity").value.trim() || fromCity;
+        var retRouteSelect = document.getElementById("returnRouteType");
+        var retRouteTypeVal = retRouteSelect.value;
+        var retRouteTypeText = retRouteSelect.options[retRouteSelect.selectedIndex].text;
+        var retDist = parseFloat(document.getElementById("returnDistanceKM").value) || 0;
         var returnGross = parseFloat(document.getElementById("returnGrossWeight").value) || tareWeight;
 
-        if (oneWayDist <= 0) {
+        if (outDist <= 0) {
             alert("Baraye meharbani sahi faasla (KM) likhein.");
             return;
         }
         if (grossWeight < tareWeight) {
             alert("Kul Vazan (Gross) Khali Gari (Tare) se kam nahi ho sakta.");
+            return;
+        }
+        if (isReturn && retDist <= 0) {
+            alert("Wapsi / Local trip ka sahi faasla (KM) likhein.");
             return;
         }
         if (isReturn && returnGross < tareWeight) {
@@ -889,9 +992,9 @@
         var outAvg = (!isNaN(customAvg) && customAvg > 0)
             ? customAvg
             : getAverageByNetLoadAndRoute(outNetLoad, routeTypeVal);
-        var outFuel = oneWayDist / outAvg;
+        var outFuel = outDist / outAvg;
 
-        var totalDist = oneWayDist;
+        var totalDist = outDist;
         var totalFuel = outFuel;
         var retNetLoad = 0;
         var retAvg = 0;
@@ -900,10 +1003,10 @@
             retNetLoad = Math.max(0, returnGross - tareWeight);
             retAvg = (!isNaN(customAvg) && customAvg > 0)
                 ? customAvg
-                : getAverageByNetLoadAndRoute(retNetLoad, routeTypeVal);
-            var retFuel = oneWayDist / retAvg;
+                : getAverageByNetLoadAndRoute(retNetLoad, retRouteTypeVal);
+            var retFuel = retDist / retAvg;
 
-            totalDist = oneWayDist * 2;
+            totalDist = outDist + retDist;
             totalFuel = outFuel + retFuel;
         }
 
@@ -919,11 +1022,21 @@
 
         document.getElementById("slipDate").innerText = dateStr;
         document.getElementById("slipVehicle").innerText = vehicleNo;
-        document.getElementById("resRouteName").innerText = isReturn
-            ? (fromCity + " ⇄ " + toCity + " (Return)")
-            : (fromCity + " → " + toCity);
-        document.getElementById("resRouteType").innerText = routeTypeText;
-        document.getElementById("resDist").innerText = totalDist.toLocaleString();
+
+        if (!isReturn) {
+            document.getElementById("resRouteName").innerText = fromCity + " → " + toCity;
+            document.getElementById("resRouteType").innerText = routeTypeText;
+            document.getElementById("resDist").innerText = totalDist.toLocaleString();
+        } else {
+            var routeChain = (returnToCity === fromCity)
+                ? (fromCity + " ⇄ " + toCity + " (Return)")
+                : (fromCity + " → " + toCity + " → " + returnToCity);
+            document.getElementById("resRouteName").innerText = routeChain;
+            document.getElementById("resRouteType").innerText = (routeTypeText === retRouteTypeText)
+                ? routeTypeText
+                : ("Out: " + routeTypeText + " | Ret: " + retRouteTypeText);
+            document.getElementById("resDist").innerText = totalDist.toLocaleString() + " (" + outDist + " + " + retDist + ")";
+        }
 
         document.getElementById("resWeights").innerText = isReturn
             ? (tareWeight + "T / " + grossWeight + "T (Out) & " + returnGross + "T (Ret)")
@@ -952,14 +1065,14 @@
             "Date: " + dateStr + "\n" +
             "Vehicle: " + vehicleNo + "\n" +
             "Route: " + document.getElementById("resRouteName").innerText + "\n" +
-            "Distance: " + totalDist + " KM\n" +
+            "Distance: " + document.getElementById("resDist").innerText + " KM\n" +
             "Weight: " + document.getElementById("resWeights").innerText + "\n" +
             "Average: " + effectiveAvg.toFixed(2) + " KM/L\n" +
             "Diesel: " + totalFuel.toFixed(1) + " Ltr (@ Rs." + dieselRate + ")\n" +
             "*TOTAL DIESEL COST: Rs. " + grandTotal.toLocaleString() + "*";
 
         lastExcelRow = [
-            dateStr, vehicleNo, fromCity, toCity, isReturn ? "Return" : "One-Way",
+            dateStr, vehicleNo, fromCity, toCity, isReturn ? ("Return → " + returnToCity) : "One-Way",
             totalDist, tareWeight, grossWeight, isReturn ? returnGross : "", totalNetCargo,
             effectiveAvg.toFixed(2), totalFuel.toFixed(1), dieselRate, grandTotal
         ].join("\t");
