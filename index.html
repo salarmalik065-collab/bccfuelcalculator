@@ -365,13 +365,13 @@
 
     <div class="row">
         <div class="col form-group autocomplete">
-            <label for="fromCity">Kahan Se (Origin / Industrial Area):</label>
-            <input type="text" id="fromCity" placeholder="Shehar ya Industrial Area likhein..." value="Karachi" autocomplete="off">
+            <label for="fromCity">Kahan Se (Origin / Industrial Area / Adda):</label>
+            <input type="text" id="fromCity" placeholder="Shehar, Factory ya Adda likhein..." value="Karachi" autocomplete="off">
         </div>
 
         <div class="col form-group autocomplete">
-            <label for="toCity">Kahan Tak (Destination / Industrial Area):</label>
-            <input type="text" id="toCity" placeholder="Shehar ya Industrial Area likhein..." value="Faisalabad" autocomplete="off">
+            <label for="toCity">Kahan Tak (Destination / Industrial Area / Adda):</label>
+            <input type="text" id="toCity" placeholder="Shehar, Factory ya Adda likhein..." value="Faisalabad" autocomplete="off">
         </div>
     </div>
 
@@ -385,7 +385,7 @@
                 <button type="button" class="btn-km-adj" onclick="adjustDistance(5)">+5 KM</button>
                 <button type="button" class="btn-km-adj" onclick="adjustDistance(10)">+10 KM</button>
             </div>
-            <div class="hint" id="distHint">Shehar select karein ya +/- KM se bypass adjust karein.</div>
+            <div class="hint" id="distHint">Shehar/Factory select karein ya +/- KM se bypass adjust karein.</div>
         </div>
         <div class="col form-group">
             <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
@@ -558,37 +558,85 @@
     };
 
     const cityCoords = {
-        // Major Industrial Areas, Ports & Dry Ports (Freight Hubs)
+        // Karachi, Sindh & Balochistan Ports / Industrial Areas / Adday / Plants
+        "Karachi Port (KPT / Keamari)": [24.8472, 66.9794],
+        "SAPT Terminal (Karachi)": [24.8117, 66.9756],
         "Port Qasim (Karachi)": [24.7847, 67.3497],
         "Bin Qasim Industrial Area": [24.8195, 67.3592],
+        "Hawksbay Truck Stand (Karachi)": [24.8756, 66.9219],
+        "Maripur Truck Adda (Karachi)": [24.8831, 66.9536],
         "Korangi Industrial Area (Karachi)": [24.8358, 67.1328],
         "SITE Area (Karachi)": [24.9014, 66.9936],
         "Landhi Industrial Area (Karachi)": [24.8536, 67.2114],
         "North Karachi Industrial Area": [24.9964, 67.0658],
+        "Federal B Area Industrial Zone": [24.9339, 67.0789],
+        "Dhabeji Special Economic Zone": [24.7936, 67.5153],
         "Nooriabad Industrial Estate": [25.1475, 67.8558],
         "Hub Industrial Area (SITE Hub)": [25.0531, 66.8953],
         "SITE Kotri Industrial Area": [25.3519, 68.2947],
+        "SITE Hyderabad": [25.3711, 68.3844],
         "SITE Sukkur": [27.7214, 68.8289],
+        "Daharki Fertilizer Plant (Engro/FFC)": [28.0350, 69.6550],
+        "Mirpur Mathelo Fertilizer Plant (FFC)": [28.0150, 69.5350],
+        "Quetta Industrial Estate (Sariab)": [30.1344, 66.9889],
+        "Hazarganji Truck Adda (Quetta)": [30.1231, 66.9681],
+        "Chaman Border Terminal": [30.9236, 66.4408],
+        "Taftan Border Terminal": [28.9667, 61.5833],
+        "Gwadar Port & Free Zone": [25.1119, 62.3364],
+
+        // Lahore, Faisalabad & Central Punjab Industrial Hubs / Dry Ports / Adday
         "Sundar Industrial Estate (Lahore)": [31.2944, 74.1628],
         "Quaid-e-Azam Industrial Estate (Kot Lakhpat)": [31.4647, 74.3311],
+        "Badami Bagh Truck Adda (Lahore)": [31.6008, 74.3164],
+        "Thokar Niaz Baig Truck Stand (Lahore)": [31.4714, 74.2417],
         "Manga Mandi (Lahore)": [31.3075, 74.0631],
+        "Raiwind Industrial Area": [31.2489, 74.2156],
+        "Gajjumata Industrial Area (Lahore)": [31.3867, 74.3611],
         "Kala Shah Kaku Industrial Area": [31.7244, 74.2672],
+        "Sheikhupura Road Industrial Belt": [31.6789, 74.0856],
         "Mughalpura Dry Port (Lahore)": [31.5644, 74.3653],
         "Prem Nagar Dry Port (Lahore)": [31.2589, 74.0725],
         "Khurrianwala Industrial Estate (Faisalabad)": [31.4958, 73.2683],
         "Sahianwala / M3 Industrial City (Faisalabad)": [31.6525, 73.2044],
+        "Allama Iqbal Industrial City (FIEDMC)": [31.6350, 73.2250],
         "Chak Jhumra (Faisalabad)": [31.5681, 73.1831],
         "Faisalabad Dry Port": [31.5311, 73.1708],
-        "Multan Industrial Estate": [30.1189, 71.4397],
+        "Jaranwala Industrial Area": [31.3342, 73.4194],
+        "Gujranwala Industrial Estate": [32.1617, 74.1883],
+        "Kamoke Rice & Industrial Zone": [31.9754, 74.2163],
+        "Gujrat Industrial Estate": [32.5731, 74.0787],
         "Bhalwal Industrial Estate": [32.2750, 72.9050],
         "Sialkot Dry Port (Sambrial)": [32.4783, 74.3531],
+
+        // South Punjab, Cement & Fertilizer Plants
+        "Multan Industrial Estate": [30.1189, 71.4397],
+        "Multan Dry Port": [30.1356, 71.4489],
+        "Sher Shah Road Godowns (Multan)": [30.1489, 71.4325],
+        "Kabirwala Industrial / Dairy Zone": [30.4072, 71.8617],
+        "Sahiwal Industrial Estate": [30.6525, 73.0856],
+        "Rahim Yar Khan Industrial Area": [28.4150, 70.3150],
+        "Goth Machhi Fertilizer Plant (Sadiqabad)": [28.2850, 70.1150],
+        "DG Khan Cement Zone (Zinda Pir)": [30.2450, 70.5150],
+        "Kot Adu Industrial / KAPCO Zone": [30.4667, 70.9667],
+        "Iskandarabad / Daud Khel Plants (Mianwali)": [32.8819, 71.5681],
+        "Kallar Kahar / Chakwal Cement Zone": [32.7750, 72.7050],
+
+        // Rawalpindi, Islamabad & KPK Industrial Zones / Dry Ports / Adday
+        "I-9 / I-10 Industrial Area (Islamabad)": [33.6558, 73.0436],
+        "Rawat Industrial Estate (Islamabad)": [33.4956, 73.1953],
+        "Humak Industrial Area": [33.5350, 73.1550],
+        "Taxila Heavy Industries (HMC)": [33.7456, 72.8089],
+        "Tarnol / Sangjani Truck Adda": [33.6531, 72.8856],
         "Hattar Industrial Estate (Haripur)": [33.8519, 72.8511],
         "Gadoon Amazai Industrial Estate (Swabi)": [34.1286, 72.6956],
         "Hayatabad Industrial Estate (Peshawar)": [33.9875, 71.4258],
+        "Ring Road Truck Adda (Peshawar)": [33.9756, 71.5450],
         "Azakhel Dry Port (Nowshera)": [34.0086, 71.8744],
         "Rashakai Economic Zone (M1)": [34.1131, 71.9767],
+        "Risalpur Industrial Estate": [34.0608, 71.9925],
+        "Mardan Industrial Estate": [34.1989, 72.0406],
 
-        // Sindh
+        // Sindh Cities
         "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
         "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
         "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Khairpur": [27.5295, 68.7592],
@@ -602,7 +650,7 @@
         "Kashmore": [28.4367, 69.5781], "Kandhkot": [28.2433, 69.1769], "Shahdadkot": [27.8483, 67.9083],
         "Mehar": [27.1772, 67.8214], "Hala": [25.8258, 68.4189], "Matiari": [25.5972, 68.4469],
 
-        // Punjab
+        // Punjab Cities
         "Lahore": [31.5497, 74.3436], "Faisalabad": [31.4504, 73.1350], "Rawalpindi": [33.5651, 73.0169],
         "Multan": [30.1575, 71.5249], "Gujranwala": [32.1877, 74.1945], "Sialkot": [32.4945, 74.5229],
         "Bahawalpur": [29.3544, 71.6911], "Sargodha": [32.0836, 72.6711], "Sheikhupura": [31.7145, 73.9850],
@@ -627,7 +675,7 @@
         "Kot Adu": [30.4667, 70.9667], "Taunsa Sharif": [30.7039, 70.6542], "Rajanpur": [29.1042, 70.3283],
         "Jampur": [29.6425, 70.5906],
 
-        // KPK & Islamabad
+        // KPK & Islamabad Cities
         "Islamabad": [33.6844, 73.0479], "Peshawar": [34.0151, 71.5249], "Abbottabad": [34.1463, 73.2116],
         "Swat": [34.7500, 72.3500], "Mingora": [34.7717, 72.3600], "Nowshera": [34.0158, 71.9793],
         "Charsadda": [34.1539, 71.7424], "Mardan": [34.1989, 72.0406], "Swabi": [34.1167, 72.4667],
@@ -636,7 +684,7 @@
         "Chitral": [35.8518, 71.7864], "Battagram": [34.6778, 73.0222], "Hangu": [33.5281, 71.0583],
         "Karak": [33.1114, 71.0911], "Lakki Marwat": [32.6078, 70.9114],
 
-        // Balochistan & Azad Kashmir / Northern Areas
+        // Balochistan & Azad Kashmir / Northern Areas Cities
         "Quetta": [30.1798, 66.9750], "Gwadar": [25.1216, 62.3254], "Turbat": [26.0012, 63.0456],
         "Hub": [25.0267, 66.8864], "Khuzdar": [27.7384, 66.6434], "Sibi": [29.5450, 67.8797],
         "Chaman": [30.9216, 66.4476], "Zhob": [31.3456, 69.4489], "Loralai": [30.3697, 68.5981],
@@ -964,116 +1012,3 @@
         const safeWatermark = String(comp.watermark || comp.code || "R TECH").replace(/"/g, "");
         document.getElementById("appMainHeading").innerText = "🚚 " + comp.title;
         document.getElementById("slipCompanyHeader").innerText = comp.title;
-        document.getElementById("slipPreparedBy").innerText = "Prepared By (" + safeWatermark + ")";
-        document.documentElement.style.setProperty('--wm-text', '"' + safeWatermark + '"');
-    }
-
-    (function checkSavedSession() {
-        const saved = sessionStorage.getItem("bcc_active_company");
-        if (saved) {
-            try {
-                const comp = JSON.parse(saved);
-                if (comp && comp.title) {
-                    applyCompanyBranding(comp);
-                    document.getElementById("bcc-lock-overlay").style.display = "none";
-                    document.getElementById("bcc-settings-btn").style.display = "block";
-                }
-            } catch (e) {
-                sessionStorage.removeItem("bcc_active_company");
-            }
-        }
-    })();
-
-    async function verifyCompanyLogin() {
-        const codeInput = cleanCell(document.getElementById("bcc-company-code").value).toUpperCase();
-        const pinInput = cleanCell(document.getElementById("bcc-login-pin").value);
-        const errEl = document.getElementById("bcc-login-error");
-        const btn = document.getElementById("bcc-unlock-btn");
-
-        if (!codeInput || !pinInput) {
-            errEl.innerText = "❌ Company Code aur PIN dono likhein.";
-            errEl.style.display = "block";
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = "Checking License...";
-        errEl.style.display = "none";
-
-        try {
-            const sep = GOOGLE_SHEET_CSV_URL.includes("?") ? "&" : "?";
-            const response = await fetch(GOOGLE_SHEET_CSV_URL + sep + "t=" + Date.now());
-            if (!response.ok) {
-                throw new Error("HTTP " + response.status);
-            }
-            const csvText = await response.text();
-            const lines = csvText.split(/\r?\n/).filter(l => cleanCell(l) !== "");
-
-            let matched = null;
-            for (let i = 1; i < lines.length; i++) {
-                const cols = parseCSVLine(lines[i]);
-                const rowCode = cleanCell(cols[0]).toUpperCase();
-                const rowPin = cleanCell(cols[1]);
-                const rowTitle = cleanCell(cols[2]) || (rowCode + " TRANSPORT");
-                const rowWatermark = cleanCell(cols[3]) || rowCode;
-                const rowStatus = cleanCell(cols[4]).toLowerCase() || "active";
-                const rowExpiry = cleanCell(cols[5]) || "2099-12-31";
-
-                if (rowCode === codeInput && rowPin === pinInput) {
-                    matched = {
-                        code: rowCode,
-                        title: rowTitle.toUpperCase(),
-                        watermark: rowWatermark.toUpperCase(),
-                        status: rowStatus,
-                        expiry: rowExpiry
-                    };
-                    break;
-                }
-            }
-
-            if (!matched) {
-                errEl.innerText = "❌ Company Code ya PIN ghalat hai.";
-                errEl.style.display = "block";
-            } else if (matched.status !== "active") {
-                errEl.innerText = "⛔ Aapka account block/inactive hai. Rabta karein.";
-                errEl.style.display = "block";
-            } else {
-                const todayStr = new Date().toISOString().split("T")[0];
-                if (matched.expiry && todayStr > matched.expiry) {
-                    errEl.innerText = "⏳ Aapki subscription expire ho chuki hai (" + matched.expiry + ").";
-                    errEl.style.display = "block";
-                } else {
-                    sessionStorage.setItem("bcc_active_company", JSON.stringify(matched));
-                    applyCompanyBranding(matched);
-                    document.getElementById("bcc-lock-overlay").style.display = "none";
-                    document.getElementById("bcc-settings-btn").style.display = "block";
-                }
-            }
-        } catch (err) {
-            errEl.innerText = "⚠️ Google Sheet fetch nahi ho rahi (" + err.message + "). Publish/Sharing check karein.";
-            errEl.style.display = "block";
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Unlock Karein";
-        }
-    }
-
-    function openAccountModal() {
-        document.getElementById("activeCompanyInfo").innerHTML =
-            "<strong>Company:</strong> " + activeCompany.title + "<br>" +
-            "<strong>Code:</strong> " + activeCompany.code + "<br>" +
-            "<strong>Valid Until:</strong> " + (activeCompany.expiry || "Active");
-        document.getElementById("bcc-pin-modal").style.display = "flex";
-    }
-
-    function closeAccountModal() {
-        document.getElementById("bcc-pin-modal").style.display = "none";
-    }
-
-    function lockBccNow() {
-        sessionStorage.removeItem("bcc_active_company");
-        location.reload();
-    }
-</script>
-</body>
-</html>
