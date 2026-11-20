@@ -373,7 +373,7 @@
 
     <div class="form-group">
         <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
-        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.3 | 1-14T: 3.7 | 15-22T: 3.4 | 23-28T: 3.1 | 29T+: 3.0 KM/L)" onfocus="this.select()">
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()">
     </div>
 
     <div class="return-box">
@@ -710,12 +710,27 @@
         document.getElementById("returnFields").style.display = isReturn ? "block" : "none";
     }
 
-    function getAverageByNetLoad(netLoad) {
-        if (netLoad <= 2) return 4.30;
-        else if (netLoad <= 14) return 3.70;
-        else if (netLoad <= 22) return 3.40;
-        else if (netLoad <= 28) return 3.10;
-        else return 3.00;
+    // ✅ Accurate Smooth Average: Net Cargo Load + Route Type
+    function getAverageByNetLoadAndRoute(netLoad, routeType) {
+        var safeLoad = Math.max(0, Number(netLoad) || 0);
+
+        // Base average: Khali (0T) = 4.30 KM/L, har ton load par ~0.04 KM/L kam
+        var baseAvg = 4.30 - (safeLoad * 0.04);
+
+        // Minimum floor taake bohat heavy load par bhi realistic average rahe
+        if (baseAvg < 2.65) {
+            baseAvg = 2.65;
+        }
+
+        // Route Type Adjustment
+        var routeFactor = 1.00; // Mix Route (default)
+        if (routeType === "motorway") {
+            routeFactor = 1.05; // Motorway par +5% behtar average
+        } else if (routeType === "gt") {
+            routeFactor = 0.93; // GT Road / N-5 par -7% kam average
+        }
+
+        return Number((baseAvg * routeFactor).toFixed(2));
     }
 
     let lastSlipSummary = "";
@@ -724,6 +739,7 @@
     function calculateFuel() {
         var vehicleNo = document.getElementById("vehicleNo").value.trim() || "N/A";
         var routeSelect = document.getElementById("routeType");
+        var routeTypeVal = routeSelect.value;
         var routeTypeText = routeSelect.options[routeSelect.selectedIndex].text;
 
         var fromCity = document.getElementById("fromCity").value.trim() || "Origin";
@@ -754,7 +770,9 @@
         }
 
         var outNetLoad = Math.max(0, grossWeight - tareWeight);
-        var outAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(outNetLoad);
+        var outAvg = (!isNaN(customAvg) && customAvg > 0)
+            ? customAvg
+            : getAverageByNetLoadAndRoute(outNetLoad, routeTypeVal);
         var outFuel = oneWayDist / outAvg;
 
         var totalDist = oneWayDist;
@@ -764,7 +782,9 @@
 
         if (isReturn) {
             retNetLoad = Math.max(0, returnGross - tareWeight);
-            retAvg = (!isNaN(customAvg) && customAvg > 0) ? customAvg : getAverageByNetLoad(retNetLoad);
+            retAvg = (!isNaN(customAvg) && customAvg > 0)
+                ? customAvg
+                : getAverageByNetLoadAndRoute(retNetLoad, routeTypeVal);
             var retFuel = oneWayDist / retAvg;
 
             totalDist = oneWayDist * 2;
