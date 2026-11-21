@@ -72,6 +72,20 @@
             margin-top: 4px;
         }
 
+        /* Model & Condition Box */
+        .rtech-model-box {
+            margin-bottom: 14px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .rtech-status {
+            margin-top: 6px;
+            font-size: 12.5px;
+            color: #334155;
+        }
+
         /* Quick KM Adjust Buttons */
         .km-adjust-bar {
             display: flex;
@@ -353,7 +367,7 @@
         </div>
         <div class="col form-group">
             <label for="routeType">Jaane ka Rasta (Outbound Route):</label>
-            <select id="routeType" onchange="autoCalculateDistance()">
+            <select id="routeType" onchange="autoCalculateDistance(); calculateModelAverage();">
                 <option value="gt">GT Road / N-5</option>
                 <option value="motorway">Motorway / M-9 / M-5</option>
                 <option value="mix" selected>Mix Route (Motorway + GT)</option>
@@ -394,17 +408,52 @@
     <div class="row">
         <div class="col form-group">
             <label for="tareWeight">Khali Gari (Tare Tons):</label>
-            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()" oninput="syncReturnTare()">
+            <input type="number" step="any" inputmode="decimal" id="tareWeight" value="14" onfocus="this.select()" oninput="syncReturnTare(); calculateModelAverage();">
         </div>
         <div class="col form-group">
             <label for="grossWeight">Jaate Waqt Kul Vazan (Gross Tons):</label>
-            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="47" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="grossWeight" value="47" onfocus="this.select()" oninput="calculateModelAverage()">
+        </div>
+    </div>
+
+    <!-- Model & Condition Box -->
+    <div class="rtech-model-box">
+        <div class="row">
+            <div class="col form-group" style="margin-bottom:6px;">
+                <label for="vehicleModel">Gaari / Model (Pakistan Adday Naam):</label>
+                <select id="vehicleModel" onchange="calculateModelAverage()">
+                    <option value="auto_default" data-base="4.30" data-drop="0.025">Auto Default (4.30 Tare Base)</option>
+                    <option value="hino_p11c" data-base="4.25" data-drop="0.026">Hino Profia P11C (350-380 HP)</option>
+                    <option value="hino_e13c" data-base="3.95" data-drop="0.024">Hino Profia / 700 E13C (410-450 HP)</option>
+                    <option value="isuzu_6wf1" data-base="4.10" data-drop="0.025">Isuzu Giga 6WF1 (360-390 HP)</option>
+                    <option value="isuzu_6wg1" data-base="3.95" data-drop="0.023">Isuzu Giga 6WG1 / CYZ52 (390-460 HP)</option>
+                    <option value="nissan_311" data-base="4.65" data-drop="0.032">Nissan 311 Series (PKD / CDA / PKC-311)</option>
+                    <option value="nissan_411" data-base="4.60" data-drop="0.030">Nissan 411 Series (PKD / CDA / 411 Prime)</option>
+                    <option value="nissan_cm_cp" data-base="4.75" data-drop="0.032">Nissan Condor CM / CP Series</option>
+                    <option value="nissan_bigthumb_quon" data-base="3.85" data-drop="0.024">Nissan Big Thumb / Quon</option>
+                    <option value="faw_j5m" data-base="4.40" data-drop="0.028">FAW J5M (220 / 280 HP)</option>
+                    <option value="faw_j5p" data-base="4.20" data-drop="0.026">FAW J5P (360 / 420 HP)</option>
+                    <option value="howo_sitrak" data-base="4.10" data-drop="0.025">Sinotruk HOWO NX / SITRAK C7H</option>
+                    <option value="dongfeng_shacman" data-base="4.15" data-drop="0.025">Dongfeng / Shacman Heavy</option>
+                </select>
+            </div>
+
+            <div class="col form-group" style="margin-bottom:6px;">
+                <label for="vehicleCondition">Gaari Ki Haalat:</label>
+                <select id="vehicleCondition" onchange="calculateModelAverage()">
+                    <option value="kabuli" selected>Purana / Kabuli / Used</option>
+                    <option value="naya">Naya / Local Assembled</option>
+                </select>
+            </div>
+        </div>
+        <div class="rtech-status" id="modelAveragePreview">
+            Auto Average: <strong>-- KM/L</strong>
         </div>
     </div>
 
     <div class="form-group">
         <label for="customAvg">Custom Average KM/L (Optional - Khali chhorein to auto chalega):</label>
-        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()">
+        <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()" oninput="calculateModelAverage()">
     </div>
 
     <!-- Flexible Return / Local Shifting Trip Box -->
@@ -475,6 +524,10 @@
             </div>
 
             <div class="slip-row">
+                <span>Model / Haalat:</span>
+                <span id="resModelInfo">-</span>
+            </div>
+            <div class="slip-row">
                 <span>Route:</span>
                 <span id="resRouteName">-</span>
             </div>
@@ -527,696 +580,3 @@
 
 <!-- R TECH Branded Multi-Company Login Overlay -->
 <div id="bcc-lock-overlay" style="position:fixed;inset:0;background:radial-gradient(circle at top, #1e293b 0%, #090d16 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:'Segoe UI',Arial,sans-serif;padding:20px;text-align:center;">
-  <div style="background:#162032;border:1px solid #2d3b55;padding:30px 24px;border-radius:16px;max-width:360px;width:100%;box-shadow:0 15px 35px rgba(0,0,0,0.55);">
-
-    <!-- R TECH Custom Vector Logo -->
-    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;">
-      <svg width="68" height="68" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:8px;">
-        <defs>
-          <linearGradient id="rtechGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ef4444"/>
-            <stop offset="100%" stop-color="#b91c1c"/>
-          </linearGradient>
-        </defs>
-        <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="url(#rtechGrad)" stroke="#fca5a5" stroke-width="2.5"/>
-        <text x="50" y="64" font-family="Arial Black, Segoe UI, sans-serif" font-size="46" font-weight="900" fill="#ffffff" text-anchor="middle">R</text>
-        <circle cx="76" cy="26" r="5" fill="#38bdf8"/>
-      </svg>
-      <div style="font-size:24px;font-weight:900;letter-spacing:3px;color:#ffffff;line-height:1;">
-        R <span style="color:#ef4444;">TECH</span>
-      </div>
-      <div style="font-size:11px;letter-spacing:1.8px;color:#94a3b8;text-transform:uppercase;margin-top:4px;font-weight:600;">
-        Fleet & Logistics Software
-      </div>
-    </div>
-
-    <div style="height:1px;background:#2d3b55;margin:14px 0 18px;"></div>
-
-    <p style="color:#cbd5e1;font-size:13px;margin:0 0 14px;">Apni Company Code aur PIN darj karein:</p>
-    <input id="bcc-company-code" type="text" placeholder="Company Code (maslan: BCC)" style="width:100%;box-sizing:border-box;padding:12px;font-size:15px;border-radius:8px;border:1px solid #475569;background:#0b1120;color:#fff;text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;" />
-    <input id="bcc-login-pin" type="password" inputmode="numeric" placeholder="PIN likhein..." onkeydown="if(event.key==='Enter') verifyCompanyLogin()" style="width:100%;box-sizing:border-box;padding:12px;font-size:15px;border-radius:8px;border:1px solid #475569;background:#0b1120;color:#fff;text-align:center;margin-bottom:14px;letter-spacing:2px;" />
-    <button id="bcc-unlock-btn" onclick="verifyCompanyLogin()" style="width:100%;padding:12px;font-size:16px;font-weight:bold;background:linear-gradient(135deg, #ef4444, #dc2626);color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,0.35);">Unlock Karein</button>
-    <p id="bcc-login-error" style="color:#f87171;font-size:13px;margin:12px 0 0;display:none;"></p>
-
-    <div style="margin-top:18px;font-size:10.5px;color:#64748b;">
-      © 2026 R TECH Software Solutions
-    </div>
-  </div>
-</div>
-
-<!-- Floating Account & Lock Button -->
-<button id="bcc-settings-btn" onclick="openAccountModal()" style="display:none;position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;border:1px solid #475569;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;z-index:9998;box-shadow:0 4px 10px rgba(0,0,0,0.2);">
-  ⚙️ Account / Lock
-</button>
-
-<!-- Account Info & Lock Modal -->
-<div id="bcc-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.85);align-items:center;justify-content:center;z-index:100000;font-family:'Segoe UI',Arial,sans-serif;padding:20px;">
-  <div style="background:#ffffff;color:#1e293b;padding:24px;border-radius:12px;max-width:340px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.3);text-align:center;">
-    <div style="font-size:11px;font-weight:bold;color:#ef4444;letter-spacing:1.5px;margin-bottom:4px;">R TECH LICENSE</div>
-    <h3 style="margin:0 0 10px;font-size:18px;color:#0f172a;">🏢 Active Account Details</h3>
-    <p id="activeCompanyInfo" style="font-size:13px;color:#475569;margin:0 0 16px;line-height:1.6;"></p>
-    <button onclick="lockBccNow()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:bold;cursor:pointer;margin-bottom:8px;">🔒 Logout / Lock Karein</button>
-    <button onclick="closeAccountModal()" style="width:100%;padding:9px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;">Band Karein</button>
-  </div>
-</div>
-
-<script>
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR9gfE2jb7_BYIxm2cMRhFraejEo7X6o6xqpise5oY1hAabcWb35UDn_7i8SXWPcChq_04Qtd4Ycw5o/pub?gid=0&single=true&output=csv";
-    const AUTH_STORAGE_KEY = "rtech_active_session_v1";
-
-    let activeCompany = {
-        code: "RTECH",
-        title: "R TECH FLEET & LOGISTICS",
-        watermark: "R TECH",
-        expiry: "2030-12-31"
-    };
-
-    let lastSummaryText = "";
-    let lastExcelRow = "";
-
-    const cityCoords = {
-        // Karachi, Sindh & Balochistan Ports / Industrial Areas / Adday / Plants
-        "Karachi Port (KPT / Keamari)": [24.8472, 66.9794],
-        "SAPT Terminal (Karachi)": [24.8117, 66.9756],
-        "Port Qasim (Karachi)": [24.7847, 67.3497],
-        "Bin Qasim Industrial Area": [24.8195, 67.3592],
-        "Hawksbay Truck Stand (Karachi)": [24.8756, 66.9219],
-        "Maripur Truck Adda (Karachi)": [24.8831, 66.9536],
-        "Korangi Industrial Area (Karachi)": [24.8358, 67.1328],
-        "SITE Area (Karachi)": [24.9014, 66.9936],
-        "Landhi Industrial Area (Karachi)": [24.8536, 67.2114],
-        "North Karachi Industrial Area": [24.9964, 67.0658],
-        "Federal B Area Industrial Zone": [24.9339, 67.0789],
-        "Dhabeji Special Economic Zone": [24.7936, 67.5153],
-        "Nooriabad Industrial Estate": [25.1475, 67.8558],
-        "Hub Industrial Area (SITE Hub)": [25.0531, 66.8953],
-        "SITE Kotri Industrial Area": [25.3519, 68.2947],
-        "SITE Hyderabad": [25.3711, 68.3844],
-        "SITE Sukkur": [27.7214, 68.8289],
-        "Daharki Fertilizer Plant (Engro/FFC)": [28.0350, 69.6550],
-        "Mirpur Mathelo Fertilizer Plant (FFC)": [28.0150, 69.5350],
-        "Quetta Industrial Estate (Sariab)": [30.1344, 66.9889],
-        "Hazarganji Truck Adda (Quetta)": [30.1231, 66.9681],
-        "Chaman Border Terminal": [30.9236, 66.4408],
-        "Taftan Border Terminal": [28.9667, 61.5833],
-        "Gwadar Port & Free Zone": [25.1119, 62.3364],
-
-        // Lahore, Faisalabad & Central Punjab Industrial Hubs / Dry Ports / Adday
-        "Sundar Industrial Estate (Lahore)": [31.2944, 74.1628],
-        "Quaid-e-Azam Industrial Estate (Kot Lakhpat)": [31.4647, 74.3311],
-        "Badami Bagh Truck Adda (Lahore)": [31.6008, 74.3164],
-        "Thokar Niaz Baig Truck Stand (Lahore)": [31.4714, 74.2417],
-        "Manga Mandi (Lahore)": [31.3075, 74.0631],
-        "Raiwind Industrial Area": [31.2489, 74.2156],
-        "Gajjumata Industrial Area (Lahore)": [31.3867, 74.3611],
-        "Kala Shah Kaku Industrial Area": [31.7244, 74.2672],
-        "Sheikhupura Road Industrial Belt": [31.6789, 74.0856],
-        "Mughalpura Dry Port (Lahore)": [31.5644, 74.3653],
-        "Prem Nagar Dry Port (Lahore)": [31.2589, 74.0725],
-        "Khurrianwala Industrial Estate (Faisalabad)": [31.4958, 73.2683],
-        "Sahianwala / M3 Industrial City (Faisalabad)": [31.6525, 73.2044],
-        "Allama Iqbal Industrial City (FIEDMC)": [31.6350, 73.2250],
-        "Chak Jhumra (Faisalabad)": [31.5681, 73.1831],
-        "Faisalabad Dry Port": [31.5311, 73.1708],
-        "Jaranwala Industrial Area": [31.3342, 73.4194],
-        "Gujranwala Industrial Estate": [32.1617, 74.1883],
-        "Kamoke Rice & Industrial Zone": [31.9754, 74.2163],
-        "Gujrat Industrial Estate": [32.5731, 74.0787],
-        "Bhalwal Industrial Estate": [32.2750, 72.9050],
-        "Sialkot Dry Port (Sambrial)": [32.4783, 74.3531],
-
-        // South Punjab, Cement & Fertilizer Plants
-        "Multan Industrial Estate": [30.1189, 71.4397],
-        "Multan Dry Port": [30.1356, 71.4489],
-        "Sher Shah Road Godowns (Multan)": [30.1489, 71.4325],
-        "Kabirwala Industrial / Dairy Zone": [30.4072, 71.8617],
-        "Sahiwal Industrial Estate": [30.6525, 73.0856],
-        "Rahim Yar Khan Industrial Area": [28.4150, 70.3150],
-        "Goth Machhi Fertilizer Plant (Sadiqabad)": [28.2850, 70.1150],
-        "DG Khan Cement Zone (Zinda Pir)": [30.2450, 70.5150],
-        "Kot Adu Industrial / KAPCO Zone": [30.4667, 70.9667],
-        "Iskandarabad / Daud Khel Plants (Mianwali)": [32.8819, 71.5681],
-        "Kallar Kahar / Chakwal Cement Zone": [32.7750, 72.7050],
-
-        // Rawalpindi, Islamabad & KPK Industrial Zones / Dry Ports / Adday
-        "I-9 / I-10 Industrial Area (Islamabad)": [33.6558, 73.0436],
-        "Rawat Industrial Estate (Islamabad)": [33.4956, 73.1953],
-        "Humak Industrial Area": [33.5350, 73.1550],
-        "Taxila Heavy Industries (HMC)": [33.7456, 72.8089],
-        "Tarnol / Sangjani Truck Adda": [33.6531, 72.8856],
-        "Hattar Industrial Estate (Haripur)": [33.8519, 72.8511],
-        "Gadoon Amazai Industrial Estate (Swabi)": [34.1286, 72.6956],
-        "Hayatabad Industrial Estate (Peshawar)": [33.9875, 71.4258],
-        "Ring Road Truck Adda (Peshawar)": [33.9756, 71.5450],
-        "Azakhel Dry Port (Nowshera)": [34.0086, 71.8744],
-        "Rashakai Economic Zone (M1)": [34.1131, 71.9767],
-        "Risalpur Industrial Estate": [34.0608, 71.9925],
-        "Mardan Industrial Estate": [34.1989, 72.0406],
-
-        // Sindh Cities
-        "Karachi": [24.8607, 67.0011], "Hyderabad": [25.3960, 68.3578], "Sukkur": [27.7131, 68.8492],
-        "Larkana": [27.5570, 68.2028], "Nawabshah": [26.2442, 68.4100], "Mirpur Khas": [25.5276, 69.0159],
-        "Shikarpur": [27.9556, 68.6382], "Jacobabad": [28.2769, 68.4514], "Khairpur": [27.5295, 68.7592],
-        "Dadu": [26.7319, 67.7750], "Tando Adam": [25.7682, 68.6619], "Kotri": [25.3657, 68.3083],
-        "Jamshoro": [25.4304, 68.2809], "Thatta": [24.7475, 67.9235], "Badin": [24.6558, 68.8383],
-        "Ghotki": [28.0060, 69.3161], "Daharki": [28.0467, 69.6719], "Mirpur Mathelo": [28.0211, 69.5494],
-        "Pano Aqil": [27.8561, 69.1111], "Rohri": [27.6920, 68.8950], "Sehwan": [26.4249, 67.8613],
-        "Moro": [26.6631, 68.0001], "Naushahro Feroze": [26.8401, 68.1227], "Kandiaro": [27.0592, 68.2102],
-        "Ranipur": [27.2795, 68.4981], "Umerkot": [25.3547, 69.7372], "Mithi": [24.2568, 69.7997],
-        "Sanghar": [26.0465, 68.9481], "Tando Allahyar": [25.4667, 68.7167], "Tando Muhammad Khan": [25.1222, 68.5361],
-        "Kashmore": [28.4367, 69.5781], "Kandhkot": [28.2433, 69.1769], "Shahdadkot": [27.8483, 67.9083],
-        "Mehar": [27.1772, 67.8214], "Hala": [25.8258, 68.4189], "Matiari": [25.5972, 68.4469],
-
-        // Punjab Cities
-        "Lahore": [31.5497, 74.3436], "Faisalabad": [31.4504, 73.1350], "Rawalpindi": [33.5651, 73.0169],
-        "Multan": [30.1575, 71.5249], "Gujranwala": [32.1877, 74.1945], "Sialkot": [32.4945, 74.5229],
-        "Bahawalpur": [29.3544, 71.6911], "Sargodha": [32.0836, 72.6711], "Sheikhupura": [31.7145, 73.9850],
-        "Rahim Yar Khan": [28.4212, 70.2989], "Sadiqabad": [28.3062, 70.1307], "Khanpur": [28.6453, 70.6567],
-        "Jhang": [31.2751, 72.3308], "Gujrat": [32.5731, 74.0787], "Kasur": [31.1170, 74.4446],
-        "Sahiwal": [30.6682, 73.1114], "Okara": [30.8138, 73.4534], "Depalpur": [30.6736, 73.6617],
-        "Wah Cantonment": [33.7744, 72.7153], "Dera Ghazi Khan": [30.0456, 70.6419], "Chiniot": [31.7200, 72.9789],
-        "Kamoke": [31.9754, 74.2163], "Hafizabad": [32.0707, 73.6882], "Bhalwal": [32.2619, 72.8953],
-        "Muzaffargarh": [30.0703, 71.1933], "Khanewal": [30.3017, 71.9321], "Kabirwala": [30.4072, 71.8617],
-        "Bahawalnagar": [29.9944, 73.2536], "Vehari": [30.0419, 72.3528], "Pakpattan": [30.3431, 73.3889],
-        "Mandi Bahauddin": [32.5861, 73.4917], "Attock": [33.7660, 72.3609], "Jhelum": [32.9425, 73.7257],
-        "Chakwal": [32.9328, 72.8630], "Mianwali": [32.5839, 71.5370], "Bhakkar": [31.6257, 71.0657],
-        "Layyah": [30.9693, 70.9428], "Lodhran": [29.5383, 71.6336], "Narowal": [32.1020, 74.8730],
-        "Toba Tek Singh": [30.9744, 72.4827],
-
-        // Islamabad & KPK Cities
-        "Islamabad": [33.6844, 73.0479], "Peshawar": [34.0151, 71.5249], "Mardan": [34.1986, 72.0404],
-        "Abbottabad": [34.1688, 73.2215], "Swat (Mingora)": [34.7717, 72.3602], "Nowshera": [34.0158, 71.9747],
-        "Charsadda": [34.1482, 71.7406], "Kohat": [33.5869, 71.4414], "Dera Ismail Khan": [31.8626, 70.9024],
-        "Haripur": [33.9946, 72.9333], "Mansehra": [34.3313, 73.1980], "Bannu": [32.9854, 70.6027],
-        "Swabi": [34.1206, 72.4698],
-
-        // Balochistan Cities
-        "Quetta": [30.1798, 66.9750], "Gwadar": [25.1264, 62.3225], "Turbat": [26.0031, 63.0544],
-        "Khuzdar": [27.8165, 66.6057], "Hub": [25.0209, 66.8861], "Chaman": [30.9210, 66.4597],
-        "Sibi": [29.5430, 67.8773], "Zhob": [31.3417, 69.4486], "Loralai": [30.3705, 68.5979],
-        "Turbat / Kech": [26.0031, 63.0544], "Bela": [26.2289, 66.3106], "Uthal": [25.8072, 66.6219]
-    };
-
-    const cityNames = Object.keys(cityCoords);
-
-    function haversineKM(c1, c2) {
-        const toRad = x => (x * Math.PI) / 180;
-        const R = 6371;
-        const dLat = toRad(c2[0] - c1[0]);
-        const dLon = toRad(c2[1] - c1[1]);
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRad(c1[0])) * Math.cos(toRad(c2[0])) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function findCityCoords(name) {
-        if (!name) return null;
-        const clean = name.trim().toLowerCase();
-        if (!clean) return null;
-        for (const key of cityNames) {
-            if (key.toLowerCase() === clean) return cityCoords[key];
-        }
-        for (const key of cityNames) {
-            if (key.toLowerCase().includes(clean) || clean.includes(key.toLowerCase())) {
-                return cityCoords[key];
-            }
-        }
-        return null;
-    }
-
-    function estimateRoadKM(fromName, toName, routeType) {
-        const c1 = findCityCoords(fromName);
-        const c2 = findCityCoords(toName);
-        if (!c1 || !c2) return null;
-
-        const straight = haversineKM(c1, c2);
-        if (straight < 1) return 15;
-
-        let factor = 1.24;
-        if (routeType === "motorway") factor = 1.19;
-        else if (routeType === "gt") factor = 1.28;
-
-        return Math.max(10, Math.round(straight * factor));
-    }
-
-    function autoCalculateDistance() {
-        const fromVal = document.getElementById("fromCity").value;
-        const toVal = document.getElementById("toCity").value;
-        const routeType = document.getElementById("routeType").value;
-        const est = estimateRoadKM(fromVal, toVal, routeType);
-        if (est !== null) {
-            document.getElementById("distanceKM").value = est;
-            document.getElementById("distHint").textContent = `Andazan ${est} KM (${fromVal} se ${toVal} tak) - zaroorat par +/- se adjust karein.`;
-        }
-        if (document.getElementById("isReturn").checked) {
-            autoCalculateReturnDistance();
-        }
-    }
-
-    function autoCalculateReturnDistance() {
-        const fromVal = document.getElementById("toCity").value;
-        const toVal = document.getElementById("returnToCity").value;
-        const routeType = document.getElementById("returnRouteType").value;
-        const est = estimateRoadKM(fromVal, toVal, routeType);
-        if (est !== null) {
-            document.getElementById("returnDistanceKM").value = est;
-            document.getElementById("retDistHint").textContent = `Andazan ${est} KM (${fromVal} se ${toVal} tak) - zaroorat par +/- se adjust karein.`;
-        }
-    }
-
-    function adjustDistance(delta) {
-        const el = document.getElementById("distanceKM");
-        const curr = parseFloat(el.value) || 0;
-        el.value = Math.max(1, Math.round((curr + delta) * 10) / 10);
-    }
-
-    function adjustReturnDistance(delta) {
-        const el = document.getElementById("returnDistanceKM");
-        const curr = parseFloat(el.value) || 0;
-        el.value = Math.max(0, Math.round((curr + delta) * 10) / 10);
-    }
-
-    function syncReturnDefaultCity() {
-        const retTo = document.getElementById("returnToCity");
-        const fromVal = document.getElementById("fromCity").value;
-        if (retTo && !retTo.value.trim() && fromVal.trim()) {
-            retTo.value = fromVal;
-        }
-    }
-
-    function syncReturnTare() {
-        const tareVal = parseFloat(document.getElementById("tareWeight").value) || 14;
-        const retGrossEl = document.getElementById("returnGrossWeight");
-        const retHint = retGrossEl && retGrossEl.nextElementSibling;
-        if (retHint) {
-            retHint.textContent = `Khali wapsi ho to Tare (${tareVal}T) ke barabar rakhein.`;
-        }
-    }
-
-    function toggleReturn() {
-        const checked = document.getElementById("isReturn").checked;
-        const box = document.getElementById("returnFields");
-        box.style.display = checked ? "block" : "none";
-        if (checked) {
-            syncReturnDefaultCity();
-            syncReturnTare();
-            const outKm = parseFloat(document.getElementById("distanceKM").value) || 1184;
-            const retKmEl = document.getElementById("returnDistanceKM");
-            if (!retKmEl.value || parseFloat(retKmEl.value) === 0) {
-                retKmEl.value = outKm;
-            }
-            const tareVal = parseFloat(document.getElementById("tareWeight").value) || 14;
-            const retGrossEl = document.getElementById("returnGrossWeight");
-            if (!retGrossEl.value || parseFloat(retGrossEl.value) === 0) {
-                retGrossEl.value = tareVal;
-            }
-        }
-    }
-
-    function calcAutoKMPerL(grossTons, tareTons, routeType) {
-        const netLoad = Math.max(0, grossTons - tareTons);
-        let baseAvg = 4.30;
-        if (routeType === "motorway") baseAvg = 4.55;
-        else if (routeType === "gt") baseAvg = 4.05;
-
-        const penaltyPerTon = routeType === "motorway" ? 0.022 : routeType === "gt" ? 0.028 : 0.025;
-        const avg = baseAvg - (netLoad * penaltyPerTon);
-        return Math.max(2.10, Math.round(avg * 100) / 100);
-    }
-
-    function getRouteLabel(val) {
-        if (val === "motorway") return "Motorway (M-9 / M-5 / M-2)";
-        if (val === "gt") return "GT Road (N-5)";
-        return "Mix Route (Motorway + GT)";
-    }
-
-    function calculateFuel() {
-        const vehicleNo = (document.getElementById("vehicleNo").value || "N/A").trim() || "N/A";
-        const fromCity = (document.getElementById("fromCity").value || "Origin").trim() || "Origin";
-        const toCity = (document.getElementById("toCity").value || "Destination").trim() || "Destination";
-        const routeType = document.getElementById("routeType").value;
-        const outKM = Math.max(0, parseFloat(document.getElementById("distanceKM").value) || 0);
-        const dieselRate = Math.max(0, parseFloat(document.getElementById("dieselRate").value) || 0);
-        const tareTons = Math.max(0, parseFloat(document.getElementById("tareWeight").value) || 0);
-        const grossTons = Math.max(tareTons, parseFloat(document.getElementById("grossWeight").value) || tareTons);
-        const customAvgVal = parseFloat(document.getElementById("customAvg").value);
-
-        const outNetTons = Math.max(0, grossTons - tareTons);
-        const outAvg = (!isNaN(customAvgVal) && customAvgVal > 0)
-            ? customAvgVal
-            : calcAutoKMPerL(grossTons, tareTons, routeType);
-        const outLitres = outAvg > 0 ? outKM / outAvg : 0;
-
-        let totalKM = outKM;
-        let totalLitres = outLitres;
-        let totalNetTons = outNetTons;
-        let routeDisplay = `${fromCity} → ${toCity}`;
-        let corridorDisplay = getRouteLabel(routeType);
-        let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
-        let avgDisplay = outAvg.toFixed(2);
-
-        const isReturn = document.getElementById("isReturn").checked;
-        if (isReturn) {
-            const retToCity = (document.getElementById("returnToCity").value || fromCity).trim() || fromCity;
-            const retRouteType = document.getElementById("returnRouteType").value;
-            const retKM = Math.max(0, parseFloat(document.getElementById("returnDistanceKM").value) || 0);
-            const retGrossTons = Math.max(tareTons, parseFloat(document.getElementById("returnGrossWeight").value) || tareTons);
-            const retNetTons = Math.max(0, retGrossTons - tareTons);
-
-            const retAvg = (!isNaN(customAvgVal) && customAvgVal > 0)
-                ? customAvgVal
-                : calcAutoKMPerL(retGrossTons, tareTons, retRouteType);
-            const retLitres = retAvg > 0 ? retKM / retAvg : 0;
-
-            totalKM = outKM + retKM;
-            totalLitres = outLitres + retLitres;
-            totalNetTons = outNetTons + retNetTons;
-
-            routeDisplay = `${fromCity} → ${toCity} → ${retToCity}`;
-            corridorDisplay = `Out: ${getRouteLabel(routeType)} | Ret: ${getRouteLabel(retRouteType)}`;
-            weightDisplay = `Out ${grossTons}T / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
-            const blendedAvg = totalLitres > 0 ? totalKM / totalLitres : outAvg;
-            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
-        }
-
-        const grandTotal = Math.round(totalLitres * dieselRate);
-        const perTonCost = outNetTons > 0 ? Math.round((outLitres * dieselRate) / outNetTons) : 0;
-
-        const now = new Date();
-        const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-
-        document.getElementById("slipCompanyHeader").textContent = activeCompany.title || "R TECH FLEET & LOGISTICS";
-        document.getElementById("slipPreparedBy").textContent = `Prepared By (${activeCompany.code || "R TECH"})`;
-        document.getElementById("slipDate").textContent = dateStr;
-        document.getElementById("slipVehicle").textContent = vehicleNo;
-        document.getElementById("resRouteName").textContent = routeDisplay;
-        document.getElementById("resRouteType").textContent = corridorDisplay;
-        document.getElementById("resDist").textContent = totalKM.toLocaleString();
-        document.getElementById("resWeights").textContent = weightDisplay;
-        document.getElementById("resAvg").textContent = avgDisplay;
-        document.getElementById("resRate").textContent = dieselRate.toLocaleString();
-        document.getElementById("resFuel").textContent = totalLitres.toFixed(1);
-        document.getElementById("resGrandTotal").textContent = grandTotal.toLocaleString();
-        document.getElementById("resPerTon").textContent = perTonCost.toLocaleString();
-
-        document.getElementById("resultWrapper").style.display = "block";
-        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-        lastSummaryText =
-            `*${activeCompany.title || "R TECH FLEET & LOGISTICS"}*\n` +
-            `Date: ${dateStr} | Vehicle: *${vehicleNo}*\n` +
-            `Route: ${routeDisplay}\n` +
-            `Distance: ${totalKM} KM | Avg: ${avgDisplay} KM/L\n` +
-            `Diesel: ${totalLitres.toFixed(1)} L @ Rs.${dieselRate}/L\n` +
-            `*Total Diesel Cost: Rs. ${grandTotal.toLocaleString()}*`;
-
-        lastExcelRow = [
-            dateStr, vehicleNo, routeDisplay, corridorDisplay,
-            totalKM, tareTons, grossTons, avgDisplay,
-            totalLitres.toFixed(1), dieselRate, grandTotal
-        ].join("\t");
-    }
-
-    function shareWhatsApp() {
-        if (!lastSummaryText) calculateFuel();
-        const url = "https://wa.me/?text=" + encodeURIComponent(lastSummaryText);
-        window.open(url, "_blank");
-    }
-
-    function copyForExcel() {
-        if (!lastExcelRow) calculateFuel();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(lastExcelRow).then(() => {
-                alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
-            }).catch(() => fallbackCopy(lastExcelRow));
-        } else {
-            fallbackCopy(lastExcelRow);
-        }
-    }
-
-    function fallbackCopy(text) {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
-    }
-
-    /* Autocomplete Setup */
-    function attachAutocomplete(inputId) {
-        const inp = document.getElementById(inputId);
-        if (!inp) return;
-        let currentFocus;
-
-        inp.addEventListener("input", function () {
-            const val = this.value.trim().toLowerCase();
-            closeAllLists();
-            currentFocus = -1;
-            if (!val) return;
-
-            const listDiv = document.createElement("div");
-            listDiv.setAttribute("id", this.id + "-autocomplete-list");
-            listDiv.setAttribute("class", "autocomplete-items");
-            this.parentNode.appendChild(listDiv);
-
-            const matches = cityNames.filter(c => c.toLowerCase().includes(val)).slice(0, 12);
-            matches.forEach(item => {
-                const itemDiv = document.createElement("div");
-                itemDiv.textContent = item;
-                itemDiv.addEventListener("click", function () {
-                    inp.value = item;
-                    closeAllLists();
-                    if (inputId === "fromCity") {
-                        syncReturnDefaultCity();
-                        autoCalculateDistance();
-                    } else if (inputId === "toCity") {
-                        autoCalculateDistance();
-                    } else if (inputId === "returnToCity") {
-                        autoCalculateReturnDistance();
-                    }
-                });
-                listDiv.appendChild(itemDiv);
-            });
-        });
-
-        inp.addEventListener("keydown", function (e) {
-            const list = document.getElementById(this.id + "-autocomplete-list");
-            if (!list) return;
-            const items = list.getElementsByTagName("div");
-            if (e.keyCode === 40) {
-                currentFocus++;
-                addActive(items);
-            } else if (e.keyCode === 38) {
-                currentFocus--;
-                addActive(items);
-            } else if (e.keyCode === 13) {
-                if (currentFocus > -1 && items[currentFocus]) {
-                    e.preventDefault();
-                    items[currentFocus].click();
-                }
-            }
-        });
-
-        function addActive(items) {
-            if (!items || !items.length) return;
-            removeActive(items);
-            if (currentFocus >= items.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = items.length - 1;
-            items[currentFocus].classList.add("autocomplete-active");
-        }
-
-        function removeActive(items) {
-            for (let i = 0; i < items.length; i++) {
-                items[i].classList.remove("autocomplete-active");
-            }
-        }
-
-        function closeAllLists(elmnt) {
-            const items = document.getElementsByClassName("autocomplete-items");
-            for (let i = 0; i < items.length; i++) {
-                if (elmnt !== items[i] && elmnt !== inp) {
-                    items[i].parentNode.removeChild(items[i]);
-                }
-            }
-        }
-
-        document.addEventListener("click", function (e) {
-            closeAllLists(e.target);
-        });
-    }
-
-    /* Multi-Company Auth & Sheet Verification */
-    function parseCSVLine(line) {
-        const result = [];
-        let cur = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (ch === '"') {
-                inQuotes = !inQuotes;
-            } else if (ch === "," && !inQuotes) {
-                result.push(cur.trim());
-                cur = "";
-            } else {
-                cur += ch;
-            }
-        }
-        result.push(cur.trim());
-        return result;
-    }
-
-    async function fetchCompaniesFromSheet() {
-        const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now(), { cache: "no-store" });
-        if (!res.ok) throw new Error("Sheet fetch failed");
-        const text = await res.text();
-        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (lines.length < 2) return [];
-
-        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
-        const codeIdx = headers.findIndex(h => h.includes("code") || h.includes("company"));
-        const pinIdx = headers.findIndex(h => h.includes("pin") || h.includes("pass"));
-        const titleIdx = headers.findIndex(h => h.includes("title") || h.includes("name"));
-        const wmIdx = headers.findIndex(h => h.includes("watermark"));
-        const expIdx = headers.findIndex(h => h.includes("exp") || h.includes("valid"));
-        const activeIdx = headers.findIndex(h => h.includes("status") || h.includes("active"));
-
-        const companies = [];
-        for (let i = 1; i < lines.length; i++) {
-            const cols = parseCSVLine(lines[i]);
-            const code = (cols[codeIdx >= 0 ? codeIdx : 0] || "").toUpperCase();
-            const pin = (cols[pinIdx >= 0 ? pinIdx : 1] || "");
-            if (!code && !pin) continue;
-            companies.push({
-                code,
-                pin,
-                title: (titleIdx >= 0 && cols[titleIdx]) ? cols[titleIdx] : `${code} FLEET & LOGISTICS`,
-                watermark: (wmIdx >= 0 && cols[wmIdx]) ? cols[wmIdx] : code,
-                expiry: (expIdx >= 0 && cols[expIdx]) ? cols[expIdx] : "",
-                status: (activeIdx >= 0 && cols[activeIdx]) ? cols[activeIdx].toLowerCase() : "active"
-            });
-        }
-        return companies;
-    }
-
-    function applyCompanyBranding(comp) {
-        activeCompany = comp;
-        document.documentElement.style.setProperty("--wm-text", `"${comp.watermark || comp.code || "R TECH"}"`);
-        document.getElementById("slipCompanyHeader").textContent = comp.title || "R TECH FLEET & LOGISTICS";
-        document.getElementById("slipPreparedBy").textContent = `Prepared By (${comp.code || "R TECH"})`;
-    }
-
-    function unlockSessionUI(comp) {
-        applyCompanyBranding(comp);
-        document.getElementById("bcc-lock-overlay").style.display = "none";
-        document.getElementById("bcc-settings-btn").style.display = "block";
-    }
-
-    async function verifyCompanyLogin() {
-        const codeInput = document.getElementById("bcc-company-code");
-        const pinInput = document.getElementById("bcc-login-pin");
-        const errEl = document.getElementById("bcc-login-error");
-        const btn = document.getElementById("bcc-unlock-btn");
-
-        const code = (codeInput.value || "").trim().toUpperCase();
-        const pin = (pinInput.value || "").trim();
-
-        errEl.style.display = "none";
-        if (!code || !pin) {
-            errEl.textContent = "Baraye meharbani Company Code aur PIN dono likhein.";
-            errEl.style.display = "block";
-            return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = "Checking...";
-
-        try {
-            const list = await fetchCompaniesFromSheet();
-            const matched = list.find(c => c.code === code && c.pin === pin);
-
-            if (!matched) {
-                errEl.textContent = "Ghalat Company Code ya PIN! Dobara check karein.";
-                errEl.style.display = "block";
-                return;
-            }
-
-            if (matched.status === "inactive" || matched.status === "disabled" || matched.status === "blocked") {
-                errEl.textContent = "Yeh Company Code is waqt inactive hai.";
-                errEl.style.display = "block";
-                return;
-            }
-
-            if (matched.expiry) {
-                const expDate = new Date(matched.expiry);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                if (!isNaN(expDate.getTime()) && expDate < today) {
-                    errEl.textContent = `Is company ka license (${matched.expiry}) expire ho chuka hai.`;
-                    errEl.style.display = "block";
-                    return;
-                }
-            }
-
-            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(matched));
-            unlockSessionUI(matched);
-        } catch (err) {
-            errEl.textContent = "Internet ya Google Sheet connect karne mein masla aaya. Dobara koshish karein.";
-            errEl.style.display = "block";
-        } finally {
-            btn.disabled = false;
-            btn.textContent = "Unlock Karein";
-        }
-    }
-
-    function openAccountModal() {
-        const info =
-            `<strong>Company:</strong> ${activeCompany.title}<br>` +
-            `<strong>Code:</strong> ${activeCompany.code}<br>` +
-            `<strong>Expiry:</strong> ${activeCompany.expiry || "Active"}`;
-        document.getElementById("activeCompanyInfo").innerHTML = info;
-        document.getElementById("bcc-pin-modal").style.display = "flex";
-    }
-
-    function closeAccountModal() {
-        document.getElementById("bcc-pin-modal").style.display = "none";
-    }
-
-    function lockBccNow() {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        closeAccountModal();
-        document.getElementById("bcc-login-pin").value = "";
-        document.getElementById("bcc-lock-overlay").style.display = "flex";
-        document.getElementById("bcc-settings-btn").style.display = "none";
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-        attachAutocomplete("fromCity");
-        attachAutocomplete("toCity");
-        attachAutocomplete("returnToCity");
-        syncReturnDefaultCity();
-        syncReturnTare();
-
-        try {
-            const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (parsed && parsed.code) {
-                    unlockSessionUI(parsed);
-                }
-            }
-        } catch (e) {}
-
-        // Step 4 (Aakhri PWA Step): Register Service Worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("sw.js")
-                .then(() => console.log("PWA Service Worker Registered"))
-                .catch((err) => console.log("SW Error:", err));
-        }
-    });
-</script>
-</body>
-</html>
