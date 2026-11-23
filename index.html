@@ -280,7 +280,7 @@
             font-weight: 600;
         }
 
-        /* Local Trips Box */
+        /* Local / Extra Intercity Trips Box */
         .local-box {
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
@@ -866,23 +866,23 @@
         <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()" oninput="calculateModelAverage()">
     </div>
 
-    <!-- Multiple Local Trips Section (Counted Inside Rawangi & Wapsi) -->
+    <!-- Multiple Local & Intercity Extra Trips Section (Counted Inside Rawangi & Wapsi) -->
     <div class="local-box">
         <label class="local-checkbox-label">
             <input type="checkbox" id="hasLocalTrips" onchange="toggleLocalTrips(); calculateModelAverage();">
-            Local Trips / City Shifting shamil karein (Rawangi &amp; Wapsi ke andar count honge)
+            Local / Extra City-to-City Trips shamil karein (Rawangi &amp; Wapsi ke andar count honge)
         </label>
 
         <div id="localTripsFields" style="display:none;">
             <div class="local-sub-header">
-                <span>🏙️ Gaari ke Tamam Local Trips (Port / Godown / Factory Rounds)</span>
+                <span>🏙️🛣️ Gaari ke Tamam Local ya Sheher-to-Sheher Extra Trips</span>
                 <span id="localTripsCountBadge">0 Trips</span>
             </div>
 
             <div id="localTripsList"></div>
 
-            <button type="button" class="btn-local-add" onclick="addLocalTripRow()">+ Naya Local Trip Add Karein</button>
-            <div class="local-summary-strip" id="localSummaryStrip">Kul Local Faasla: 0 KM | Andazan Local Diesel: 0.0 L</div>
+            <button type="button" class="btn-local-add" onclick="addLocalTripRow()">+ Naya Local / Extra Trip Add Karein</button>
+            <div class="local-summary-strip" id="localSummaryStrip">Kul Extra Trips: 0 | Kul Faasla: 0 KM | Andazan Diesel: 0.0 L</div>
         </div>
     </div>
 
@@ -916,7 +916,7 @@
                 </select>
             </div>
 
-            <!-- Wapsi Motorway Entry & Exit Interchanges (Exact Same Complete List as Outbound) -->
+            <!-- Wapsi Motorway Entry & Exit Interchanges -->
             <div class="row">
                 <div class="col form-group">
                     <label for="returnEntryInterchange">Wapsi MW Entry Interchange (Gari Kahan Se In Hoi):</label>
@@ -1090,7 +1090,7 @@
                 <span id="resRouteName">-</span>
             </div>
             <div class="slip-row" id="slipLocalRow" style="display:none;">
-                <span>Local Trips:</span>
+                <span>Extra / Local Trips:</span>
                 <span id="resLocalTrips">-</span>
             </div>
             <div class="slip-row">
@@ -1469,7 +1469,7 @@
         return "Not Selected (N-5 / Local)";
     }
 
-    /* Comprehensive Corridor & Stop Route Detail Builder (Works identically for both Outbound & Return) */
+    /* Comprehensive Corridor & Stop Route Detail Builder */
     function getCorridorRouteDetail(fromName, toName, routeType, entryIC, exitIC) {
         const f = (fromName || "").trim() || "Origin";
         const t = (toName || "").trim() || "Destination";
@@ -1551,6 +1551,7 @@
         if (!basePath) {
             if (routeType === "motorway") basePath = `${f} → Motorway Corridor → ${t}`;
             else if (routeType === "mix") basePath = `${f} → Mix Highway / Bypass Corridor → ${t}`;
+            else if (routeType === "local") basePath = `${f} → Local Shifting → ${t}`;
             else basePath = `${f} → GT / N-5 Highway Corridor → ${t}`;
         }
 
@@ -1563,7 +1564,7 @@
     /* Pakistan Trailer Average Speed (40 to 50 km/h) & Driving Time Calculator */
     function getPakistanTrailerSpeed(routeType, netLoadTons, fromName, toName, isWeakEngine) {
         if (routeType === "local") return 28;
-        let baseSpeed = 45; // Mix route default (40-50 range ka darmiyan)
+        let baseSpeed = 45;
         if (routeType === "motorway") baseSpeed = 50;
         else if (routeType === "gt") baseSpeed = 40;
 
@@ -1573,7 +1574,6 @@
         if (netLoadTons >= 30) baseSpeed -= 2;
         if (isWeakEngine) baseSpeed -= 2;
 
-        // Keep strictly calibrated inside Pakistan realistic trailer band (38–50 km/h)
         return Math.max(38, Math.min(50, Math.round(baseSpeed)));
     }
 
@@ -1662,6 +1662,7 @@
     }
 
     function estimateRoadKM(fromName, toName, routeType) {
+        const effRoute = routeType === "local" ? "gt" : routeType;
         const h1 = normalizeHubKey(fromName);
         const h2 = normalizeHubKey(toName);
         if (h1 && h2 && h1 !== h2) {
@@ -1669,7 +1670,7 @@
             const pair2 = `${h2}|${h1}`;
             const entry = exactCorridorKM[pair1] || exactCorridorKM[pair2];
             if (entry) {
-                const mode = routeType === "motorway" ? "motorway" : (routeType === "gt" ? "gt" : "mix");
+                const mode = effRoute === "motorway" ? "motorway" : (effRoute === "gt" ? "gt" : "mix");
                 return { km: entry[mode], isExact: true };
             }
         }
@@ -1682,8 +1683,8 @@
         if (straight < 1) return { km: 15, isExact: false };
 
         let factor = 1.24;
-        if (routeType === "motorway") factor = 1.19;
-        else if (routeType === "gt") factor = 1.28;
+        if (effRoute === "motorway") factor = 1.19;
+        else if (effRoute === "gt") factor = 1.28;
 
         return { km: Math.max(10, Math.round(straight * factor)), isExact: false };
     }
@@ -1770,7 +1771,7 @@
         }
     }
 
-    /* Multiple Local Trips Management */
+    /* Multiple Local & Intercity Extra Trips Management */
     function toggleLocalTrips() {
         const checked = !!document.getElementById("hasLocalTrips")?.checked;
         const box = document.getElementById("localTripsFields");
@@ -1783,7 +1784,27 @@
         calculateModelAverage();
     }
 
-    function addLocalTripRow(fromDefault = "", toDefault = "", kmDefault = 25, grossDefault = "") {
+    function autoCalculateLocalCardKM(card) {
+        if (!card) return;
+        const fromVal = card.querySelector(".local-from")?.value || "";
+        const toVal = card.querySelector(".local-to")?.value || "";
+        const routeVal = card.querySelector(".local-route")?.value || "local";
+        const kmEl = card.querySelector(".local-km");
+        if (!kmEl) return;
+
+        const res = estimateRoadKM(fromVal, toVal, routeVal);
+        if (res !== null) {
+            kmEl.value = res.km;
+            // If distance is intercity (> 55 km) and route is still local, switch automatically to mix highway
+            const routeSel = card.querySelector(".local-route");
+            if (res.km > 55 && routeSel && routeSel.value === "local") {
+                routeSel.value = "mix";
+            }
+        }
+        calculateModelAverage();
+    }
+
+    function addLocalTripRow(fromDefault = "", toDefault = "", kmDefault = 25, grossDefault = "", routeDefault = "local") {
         const listEl = document.getElementById("localTripsList");
         if (!listEl) return;
 
@@ -1801,22 +1822,31 @@
 
         card.innerHTML = `
             <div class="local-trip-card-header">
-                <span class="local-trip-title">Local Trip #${listEl.children.length + 1}</span>
+                <span class="local-trip-title">Extra / Local Trip #${listEl.children.length + 1}</span>
                 <button type="button" class="btn-local-remove" onclick="removeLocalTripRow(this)">✕ Hatayein</button>
             </div>
             <div class="row">
                 <div class="col form-group autocomplete" style="margin-bottom:8px;">
-                    <label>Local Kahan Se:</label>
-                    <input type="text" id="${fromInputId}" class="local-from" value="${fromDefault}" placeholder="Maslan: Port Qasim / Factory" autocomplete="off" oninput="calculateModelAverage()">
+                    <label>Kahan Se (Shehar / Port / Adda):</label>
+                    <input type="text" id="${fromInputId}" class="local-from" value="${fromDefault}" placeholder="Maslan: Karachi ya Port Qasim" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
                 </div>
                 <div class="col form-group autocomplete" style="margin-bottom:8px;">
-                    <label>Local Kahan Tak:</label>
-                    <input type="text" id="${toInputId}" class="local-to" value="${toDefault}" placeholder="Maslan: Korangi / Godown" autocomplete="off" oninput="calculateModelAverage()">
+                    <label>Kahan Tak (Shehar / Godown):</label>
+                    <input type="text" id="${toInputId}" class="local-to" value="${toDefault}" placeholder="Maslan: Hyderabad ya Korangi" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
                 </div>
             </div>
             <div class="row">
                 <div class="col form-group" style="margin-bottom:4px;">
-                    <label>Local Faasla (KM):</label>
+                    <label>Rasta (Local ya Highway):</label>
+                    <select class="local-route" onchange="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
+                        <option value="local" ${routeDefault === "local" ? "selected" : ""}>Local City (Sheher ke Andar)</option>
+                        <option value="mix" ${routeDefault === "mix" ? "selected" : ""}>Mix Route (Sheher-to-Sheher)</option>
+                        <option value="gt" ${routeDefault === "gt" ? "selected" : ""}>GT Road / N-5</option>
+                        <option value="motorway" ${routeDefault === "motorway" ? "selected" : ""}>Motorway (M-9 / M-5 / M-2)</option>
+                    </select>
+                </div>
+                <div class="col form-group" style="margin-bottom:4px;">
+                    <label>Faasla (KM):</label>
                     <input type="number" step="any" inputmode="decimal" class="local-km" value="${kmDefault}" onfocus="this.select()" oninput="calculateModelAverage()">
                 </div>
                 <div class="col form-group" style="margin-bottom:4px;">
@@ -1844,7 +1874,7 @@
         const cards = document.querySelectorAll("#localTripsList .local-trip-card");
         cards.forEach((c, i) => {
             const title = c.querySelector(".local-trip-title");
-            if (title) title.textContent = `Local Trip #${i + 1}`;
+            if (title) title.textContent = `Extra / Local Trip #${i + 1}`;
         });
         const badge = document.getElementById("localTripsCountBadge");
         if (badge) badge.textContent = `${cards.length} Trip${cards.length === 1 ? "" : "s"}`;
@@ -1864,16 +1894,16 @@
         let totalHours = 0;
 
         cards.forEach((card, index) => {
-            const fromVal = (card.querySelector(".local-from")?.value || "").trim() || `Local Point ${index + 1}A`;
-            const toVal = (card.querySelector(".local-to")?.value || "").trim() || `Local Point ${index + 1}B`;
+            const fromVal = (card.querySelector(".local-from")?.value || "").trim() || `Point ${index + 1}A`;
+            const toVal = (card.querySelector(".local-to")?.value || "").trim() || `Point ${index + 1}B`;
+            const routeVal = card.querySelector(".local-route")?.value || "local";
             const km = Math.max(0, safeFloat(card.querySelector(".local-km")?.value, 0));
             const gross = Math.max(tareTons, safeFloat(card.querySelector(".local-gross")?.value, tareTons));
             const netTons = Math.max(0, gross - tareTons);
 
-            // Local city driving has ~10% extra stop-and-go consumption factor
-            const avg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(gross, tareTons, "local", fromVal, toVal);
+            const avg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(gross, tareTons, routeVal, fromVal, toVal);
             const litres = avg > 0 ? km / avg : 0;
-            const speed = getPakistanTrailerSpeed("local", netTons, fromVal, toVal, isWeakEngine);
+            const speed = getPakistanTrailerSpeed(routeVal, netTons, fromVal, toVal, isWeakEngine);
             const hours = speed > 0 ? km / speed : 0;
 
             totalKM += km;
@@ -1885,6 +1915,7 @@
                 index: index + 1,
                 from: fromVal,
                 to: toVal,
+                routeType: routeVal,
                 km,
                 gross,
                 netTons,
@@ -2252,7 +2283,7 @@
         let routeFactor = 0.98;
         if (routeType === "motorway") routeFactor = 1.03;
         else if (routeType === "gt") routeFactor = 0.94;
-        else if (routeType === "local") routeFactor = 0.88; // City traffic & gear shifting factor
+        else if (routeType === "local") routeFactor = 0.88;
 
         const terrain = getTerrainAdjustment(fromName, toName, routeType);
         const rawAvg = (profile.baseAvg - (netLoad * profile.dropPerTon)) * routeFactor * terrain.factor;
@@ -2287,11 +2318,11 @@
             customInput.placeholder = `Auto (${profile.condLabel}: ${autoAvg.toFixed(2)} KM/L)`;
         }
 
-        // Update Local Trips Summary Strip
+        // Update Extra / Local Trips Summary Strip
         const localData = getLocalTripsData(tareTons, hasCustom, customVal, profile.isWeak);
         const localStrip = document.getElementById("localSummaryStrip");
         if (localStrip) {
-            localStrip.textContent = `Kul Local Trips: ${localData.trips.length} | Kul Local Faasla: ${localData.totalKM} KM | Andazan Local Diesel: ${localData.totalLitres.toFixed(1)} L`;
+            localStrip.textContent = `Kul Extra Trips: ${localData.trips.length} | Kul Faasla: ${localData.totalKM} KM | Andazan Diesel: ${localData.totalLitres.toFixed(1)} L`;
         }
 
         if (previewEl) {
@@ -2308,9 +2339,9 @@
             let localPreviewNote = "";
             let localRoutePreviewHtml = "";
             if (localData.enabled && localData.trips.length > 0) {
-                localPreviewNote = ` | <strong>Local (${localData.trips.length}):</strong> ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
+                localPreviewNote = ` | <strong>Extra/Local (${localData.trips.length}):</strong> ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
                 const listDesc = localData.trips.map(t => `#${t.index}: ${t.from} → ${t.to} (${t.km} KM, ${t.gross}T)`).join(" ; ");
-                localRoutePreviewHtml = `<br>🏙️ <strong>Local Trips:</strong> ${listDesc}`;
+                localRoutePreviewHtml = `<br>🏙️🛣️ <strong>Extra / Local Trips:</strong> ${listDesc}`;
             }
 
             let returnPreviewNote = "";
@@ -2349,6 +2380,7 @@
     function getRouteLabel(val) {
         if (val === "motorway") return "Motorway (M-9 / M-5 / M-2)";
         if (val === "gt") return "GT Road (N-5)";
+        if (val === "local") return "Local City";
         return "Mix Route (Motorway + GT)";
     }
 
@@ -2379,7 +2411,7 @@
         const outSpeed = getPakistanTrailerSpeed(routeType, outNetTons, fromCity, toCity, profile.isWeak);
         const outHours = outSpeed > 0 ? outKM / outSpeed : 0;
 
-        // Local Trips Calculation
+        // Local & Extra Intercity Trips Calculation
         const localData = getLocalTripsData(tareTons, hasCustomAvg, customAvgVal, profile.isWeak);
         const hasActiveLocals = localData.enabled && localData.trips.length > 0;
 
@@ -2404,8 +2436,8 @@
                 .join(" | ");
             if (localRowEl) localRowEl.style.display = "flex";
             if (localResEl) localResEl.textContent = `${localData.trips.length} Trip(s) • ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
-            routeDetailDisplay = `Jaana: ${routeDetailDisplay} | Local (${localData.trips.length}): ${localSummaryText}`;
-            corridorDisplay = `${corridorDisplay} + Local (${localData.totalKM} KM)`;
+            routeDetailDisplay = `Jaana: ${routeDetailDisplay} | Extra/Local (${localData.trips.length}): ${localSummaryText}`;
+            corridorDisplay = `${corridorDisplay} + Extra/Local (${localData.totalKM} KM)`;
         } else {
             if (localRowEl) localRowEl.style.display = "none";
         }
@@ -2434,18 +2466,18 @@
             totalHours += retHours;
 
             routeDisplay = (retFromCity.toLowerCase() === toCity.toLowerCase())
-                ? `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Local)` : ""} → ${retToCity}`
-                : `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Local)` : ""} | ${retFromCity} → ${retToCity}`;
+                ? `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Extra)` : ""} → ${retToCity}`
+                : `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Extra)` : ""} | ${retFromCity} → ${retToCity}`;
 
             const retIcSummary = getInterchangeSummary(retEntryIC, retExitIC);
             icDisplay = `Jaana (${icDisplay}) | Wapsi (${retIcSummary})`;
             const retDetail = getCorridorRouteDetail(retFromCity, retToCity, retRouteType, retEntryIC, retExitIC);
             routeDetailDisplay = `${routeDetailDisplay} | Wapsi: ${retDetail}`;
-            corridorDisplay = `Out: ${getRouteLabel(routeType)}${hasActiveLocals ? ` + Local` : ""} | Ret: ${getRouteLabel(retRouteType)}`;
-            weightDisplay = `Out ${grossTons}T${hasActiveLocals ? ` + Local` : ""} / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
+            corridorDisplay = `Out: ${getRouteLabel(routeType)}${hasActiveLocals ? ` + Extra` : ""} | Ret: ${getRouteLabel(retRouteType)}`;
+            weightDisplay = `Out ${grossTons}T${hasActiveLocals ? ` + Extra` : ""} / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
         } else if (hasActiveLocals) {
-            routeDisplay = `${fromCity} → ${toCity} (+${localData.trips.length} Local)`;
-            weightDisplay = `Out ${grossTons}T + Local ${localData.trips.length}Tps (Tare ${tareTons}T)`;
+            routeDisplay = `${fromCity} → ${toCity} (+${localData.trips.length} Extra)`;
+            weightDisplay = `Out ${grossTons}T + Extra ${localData.trips.length}Tps (Tare ${tareTons}T)`;
         }
 
         const blendedSpeed = totalHours > 0 ? Math.round(totalKM / totalHours) : outSpeed;
@@ -2454,12 +2486,12 @@
         const blendedAvg = totalLitres > 0 ? totalKM / totalLitres : outAvg;
         let avgDisplay = outAvg.toFixed(2);
         if (isReturn && hasActiveLocals) {
-            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Loc ${localData.totalLitres > 0 ? (localData.totalKM / localData.totalLitres).toFixed(2) : outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ext ${localData.totalLitres > 0 ? (localData.totalKM / localData.totalLitres).toFixed(2) : outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
         } else if (isReturn) {
             avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
         } else if (hasActiveLocals) {
             const locAvg = localData.totalLitres > 0 ? (localData.totalKM / localData.totalLitres).toFixed(2) : outAvg.toFixed(2);
-            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Loc ${locAvg})`;
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ext ${locAvg})`;
         }
 
         const grandTotal = Math.round(totalLitres * dieselRate);
@@ -2497,7 +2529,7 @@
             `Date: ${dateStr} | Vehicle: *${vehicleNo}*\n` +
             `Model/Haalat: ${modelInfoDisplay}\n` +
             `Route: ${routeDisplay}\n` +
-            (hasActiveLocals ? `Local Trips (${localData.trips.length}): ${localSummaryText}\n` : "") +
+            (hasActiveLocals ? `Extra/Local Trips (${localData.trips.length}): ${localSummaryText}\n` : "") +
             `Interchanges: ${icDisplay}\n` +
             `Route Detail: ${routeDetailDisplay}\n` +
             `Distance: ${totalKM} KM (${speedTimeDisplay}) | Avg: ${avgDisplay} KM/L\n` +
@@ -2562,16 +2594,16 @@
                 itemDiv.addEventListener("click", function () {
                     inp.value = item;
                     closeAllLists();
-                    if (!isLocalField) {
-                        if (inputId === "fromCity") {
-                            syncReturnDefaultCity();
-                            autoCalculateDistance();
-                        } else if (inputId === "toCity") {
-                            syncReturnFromCity();
-                            autoCalculateDistance();
-                        } else if (inputId === "returnFromCity" || inputId === "returnToCity") {
-                            autoCalculateReturnDistance();
-                        }
+                    if (isLocalField) {
+                        autoCalculateLocalCardKM(inp.closest(".local-trip-card"));
+                    } else if (inputId === "fromCity") {
+                        syncReturnDefaultCity();
+                        autoCalculateDistance();
+                    } else if (inputId === "toCity") {
+                        syncReturnFromCity();
+                        autoCalculateDistance();
+                    } else if (inputId === "returnFromCity" || inputId === "returnToCity") {
+                        autoCalculateReturnDistance();
                     }
                     calculateModelAverage();
                 });
