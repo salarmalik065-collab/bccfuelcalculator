@@ -442,35 +442,53 @@
     <div class="rtech-model-box">
         <div class="row">
             <div class="col form-group" style="margin-bottom:8px;">
-                <label for="vehicleModel">Gaari Model &amp; HP (Naya / Purana):</label>
+                <label for="vehicleModel">Gaari Model &amp; HP (Chote se Bade):</label>
                 <select id="vehicleModel" onchange="calculateModelAverage()">
-                    <optgroup label="Naye / Fresh Models">
-                        <option value="nissan_311_new" data-era="Naya / Fresh" data-base="4.70" data-drop="0.028">Naya — Nissan 311 Series (CP/CM ~230-280 HP)</option>
-                        <option value="nissan_411_new" data-era="Naya / Fresh" data-base="4.65" data-drop="0.027">Naya — Nissan 411 Series (CP/CM ~250-320 HP)</option>
-                        <option value="hino_p11c_new" data-era="Naya / Fresh" data-base="4.40" data-drop="0.024">Naya — Hino Profia P11C (~350-380 HP)</option>
-                        <option value="isuzu_6wf1_new" data-era="Naya / Fresh" data-base="4.20" data-drop="0.023">Naya — Isuzu Giga 6WF1 (~360-390 HP)</option>
-                        <option value="nissan_howo_new" data-era="Naya / Fresh" data-base="4.15" data-drop="0.023">Naya — Nissan GE13 / HOWO / SITRAK (~370-420 HP)</option>
-                        <option value="hino_e13c_new" data-era="Naya / Fresh" data-base="4.05" data-drop="0.022">Naya — Hino 700 / Profia E13C (~410-450 HP)</option>
-                        <option value="isuzu_6wg1_new" data-era="Naya / Fresh" data-base="4.00" data-drop="0.021">Naya — Isuzu Giga 6WG1 / CYZ52 (~390-460 HP)</option>
+                    <option value="auto_default" data-era="Standard" data-base="4.30" data-drop="0.025">Auto Default (4.30 Tare Base)</option>
+
+                    <optgroup label="HINO — Chote se Bade Models (HP ke Mutabiq)">
+                        <option value="hino_300" data-era="Hino Light" data-base="6.20" data-drop="0.065">Hino 300 / Dutro Mini Truck (130-150 HP)</option>
+                        <option value="hino_500_j08c" data-era="Hino Medium" data-base="4.85" data-drop="0.036">Hino 500 Ranger / FC / FG J08C-J08E (210-260 HP)</option>
+                        <option value="hino_500_fm2p" data-era="Hino 10-Wheeler" data-base="4.40" data-drop="0.028">Hino 500 FM2P / SG1J P11C (320-350 HP)</option>
+                        <option value="hino_profia_p11c" data-era="Hino Heavy" data-base="4.25" data-drop="0.026" selected>Hino Profia P11C Prime Mover (350-380 HP)</option>
+                        <option value="hino_700_e13c" data-era="Hino Super Heavy" data-base="3.95" data-drop="0.024">Hino Profia / 700 E13C (410-480 HP)</option>
                     </optgroup>
-                    <optgroup label="Purane / Kabuli / Used Models">
-                        <option value="nissan_311_old" data-era="Purana / Kabuli" data-base="4.35" data-drop="0.032" selected>Purana / Kabuli — Nissan 311 Series (CP/CM ~230-280 HP)</option>
-                        <option value="nissan_411_old" data-era="Purana / Kabuli" data-base="4.30" data-drop="0.031">Purana / Kabuli — Nissan 411 Series (CP/CM ~250-320 HP)</option>
-                        <option value="hino_p11c_old" data-era="Purana / Kabuli" data-base="4.05" data-drop="0.027">Purana / Kabuli — Hino Profia P11C (~350-380 HP)</option>
-                        <option value="isuzu_6wf1_old" data-era="Purana / Kabuli" data-base="3.90" data-drop="0.026">Purana / Kabuli — Isuzu Giga 6WF1 (~360-390 HP)</option>
-                        <option value="nissan_howo_old" data-era="Purana / Kabuli" data-base="3.85" data-drop="0.026">Purana / Kabuli — Nissan GE13 / HOWO / FAW (~370-420 HP)</option>
-                        <option value="hino_e13c_old" data-era="Purana / Kabuli" data-base="3.80" data-drop="0.025">Purana / Kabuli — Hino 700 / Profia E13C (~410-450 HP)</option>
-                        <option value="isuzu_6wg1_old" data-era="Purana / Kabuli" data-base="3.75" data-drop="0.024">Purana / Kabuli — Isuzu Giga 6WG1 / CYZ52 (~390-460 HP)</option>
+
+                    <optgroup label="ISUZU — Chote se Bade Models (HP ke Mutabiq)">
+                        <option value="isuzu_elf" data-era="Isuzu Light" data-base="6.30" data-drop="0.068">Isuzu ELF NPR / NQR Shehzore-Plus (130-175 HP)</option>
+                        <option value="isuzu_forward" data-era="Isuzu Medium" data-base="4.80" data-drop="0.035">Isuzu Forward FTR / FVR 6HK1 (240-300 HP)</option>
+                        <option value="isuzu_6uz1" data-era="Isuzu Heavy" data-base="4.15" data-drop="0.025">Isuzu Giga 6UZ1 (350-380 HP)</option>
+                        <option value="isuzu_6wf1" data-era="Isuzu Heavy" data-base="4.10" data-drop="0.025">Isuzu Giga 6WF1 (360-390 HP)</option>
+                        <option value="isuzu_6wg1" data-era="Isuzu Super Heavy" data-base="3.95" data-drop="0.023">Isuzu Giga 6WG1 / CYZ52 (390-460 HP)</option>
+                    </optgroup>
+
+                    <optgroup label="SINOTRUK (HOWO / SITRAK) — Chote se Bade Models">
+                        <option value="sino_light" data-era="Sinotruk Light" data-base="5.40" data-drop="0.048">Sinotruk HOWO Light / Hohan (160-240 HP)</option>
+                        <option value="sino_howo_336" data-era="Sinotruk Standard" data-base="4.20" data-drop="0.027">Sinotruk HOWO 336 HP (Prime Mover / Dumper)</option>
+                        <option value="sino_howo_371" data-era="Sinotruk Heavy" data-base="4.10" data-drop="0.025">Sinotruk HOWO 371 HP (Container / Trailer)</option>
+                        <option value="sino_howo_nx_a7" data-era="Sinotruk Heavy" data-base="4.05" data-drop="0.024">Sinotruk HOWO NX / A7 / T7H (380-420 HP)</option>
+                        <option value="sino_sitrak_c7h" data-era="Sinotruk Super Heavy" data-base="3.95" data-drop="0.023">Sinotruk SITRAK C7H / G7 (430-480 HP)</option>
+                    </optgroup>
+
+                    <optgroup label="NISSAN / UD &amp; FAW / CHINESE — Adday Models">
+                        <option value="nissan_cm_cp" data-era="Nissan Medium" data-base="4.75" data-drop="0.032">Nissan Condor CM / CP Series (210-260 HP)</option>
+                        <option value="nissan_311" data-era="Nissan Adday" data-base="4.65" data-drop="0.032">Nissan 311 Series PKD / CDA / PKC (230-280 HP)</option>
+                        <option value="nissan_411" data-era="Nissan Adday" data-base="4.60" data-drop="0.030">Nissan 411 Series PKD / CDA / Prime (250-320 HP)</option>
+                        <option value="nissan_bigthumb_quon" data-era="Nissan Heavy" data-base="3.90" data-drop="0.024">Nissan Big Thumb / UD Quon GE13 (370-420 HP)</option>
+                        <option value="faw_j5m" data-era="FAW Medium" data-base="4.40" data-drop="0.028">FAW J5M (220 / 280 HP)</option>
+                        <option value="faw_j5p" data-era="FAW Heavy" data-base="4.15" data-drop="0.025">FAW J5P / V2 (360 / 420 HP)</option>
+                        <option value="dongfeng_shacman" data-era="Chinese Heavy" data-base="4.10" data-drop="0.025">Dongfeng / Shacman / JAC Heavy (380-430 HP)</option>
                     </optgroup>
                 </select>
             </div>
 
             <div class="col form-group" style="margin-bottom:8px;">
-                <label for="engineCondition">Engine Ki Haalat (Fit / Kamzor):</label>
-                <select id="engineCondition" onchange="calculateModelAverage()">
-                    <option value="fit" data-label="Fit / Normal" data-avg-delta="0" data-drop-delta="0" selected>Fit / Normal (Engine Bilkul Theek)</option>
-                    <option value="weak" data-label="Kamzor / Weak" data-avg-delta="-0.38" data-drop-delta="0.006">Kamzor / Weak (Engine Kamzor / Load Par Drop)</option>
-                    <option value="overhauled" data-label="Fresh Overhauled" data-avg-delta="-0.10" data-drop-delta="0.002">Fresh Overhauled (Engine Repair / Setting)</option>
+                <label for="vehicleCondition">Naya / Purana &amp; Engine Haalat:</label>
+                <select id="vehicleCondition" onchange="calculateModelAverage()">
+                    <option value="naya_fit" data-label="Naya / Zero-Meter (Fit)" data-avg-delta="0.15" data-drop-delta="-0.002">Naya / Zero-Meter (Fit Engine)</option>
+                    <option value="kabuli_fit" data-label="Purana / Kabuli (Fit)" data-avg-delta="-0.12" data-drop-delta="0" selected>Purana / Kabuli (Fit Engine)</option>
+                    <option value="overhauled" data-label="Overhauled / Repair (Normal)" data-avg-delta="-0.22" data-drop-delta="0.002">Overhauled / Local Pump Setting</option>
+                    <option value="weak" data-label="Kamzor / Weak Engine" data-avg-delta="-0.48" data-drop-delta="0.006">Kamzor / Weak Engine (Blow-by / Slow Pull)</option>
                 </select>
             </div>
         </div>
@@ -792,4 +810,300 @@
         "Swabi": [34.1206, 72.4698],
 
         // Balochistan Cities
-        "Quetta": [30.1798
+        "Quetta": [30.1798, 66.9750], "Gwadar": [25.1264, 62.3225], "Turbat": [26.0031, 63.0544],
+        "Khuzdar": [27.8165, 66.6057], "Hub": [25.0209, 66.8861], "Chaman": [30.9210, 66.4597],
+        "Sibi": [29.5430, 67.8773], "Zhob": [31.3417, 69.4486], "Loralai": [30.3705, 68.5979],
+        "Turbat / Kech": [26.0031, 63.0544], "Bela": [26.2289, 66.3106], "Uthal": [25.8072, 66.6219]
+    };
+
+    const cityNames = Object.keys(cityCoords);
+
+    function safeFloat(val, fallback) {
+        const n = parseFloat(val);
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    function haversineKM(c1, c2) {
+        const toRad = x => (x * Math.PI) / 180;
+        const R = 6371;
+        const dLat = toRad(c2[0] - c1[0]);
+        const dLon = toRad(c2[1] - c1[1]);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(c1[0])) * Math.cos(toRad(c2[0])) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function findCityCoords(name) {
+        if (!name) return null;
+        const clean = name.trim().toLowerCase();
+        if (!clean) return null;
+        for (const key of cityNames) {
+            if (key.toLowerCase() === clean) return cityCoords[key];
+        }
+        for (const key of cityNames) {
+            if (key.toLowerCase().includes(clean) || clean.includes(key.toLowerCase())) {
+                return cityCoords[key];
+            }
+        }
+        return null;
+    }
+
+    function estimateRoadKM(fromName, toName, routeType) {
+        const c1 = findCityCoords(fromName);
+        const c2 = findCityCoords(toName);
+        if (!c1 || !c2) return null;
+
+        const straight = haversineKM(c1, c2);
+        if (straight < 1) return 15;
+
+        let factor = 1.24;
+        if (routeType === "motorway") factor = 1.19;
+        else if (routeType === "gt") factor = 1.28;
+
+        return Math.max(10, Math.round(straight * factor));
+    }
+
+    function autoCalculateDistance() {
+        const fromEl = document.getElementById("fromCity");
+        const toEl = document.getElementById("toCity");
+        const routeEl = document.getElementById("routeType");
+        const distEl = document.getElementById("distanceKM");
+        const hintEl = document.getElementById("distHint");
+        if (!fromEl || !toEl || !routeEl || !distEl) return;
+
+        const est = estimateRoadKM(fromEl.value, toEl.value, routeEl.value);
+        if (est !== null) {
+            distEl.value = est;
+            if (hintEl) {
+                hintEl.textContent = `Andazan ${est} KM (${fromEl.value} se ${toEl.value} tak) - zaroorat par +/- se adjust karein.`;
+            }
+        }
+        if (document.getElementById("isReturn")?.checked) {
+            autoCalculateReturnDistance();
+        }
+    }
+
+    function autoCalculateReturnDistance() {
+        const toEl = document.getElementById("toCity");
+        const retToEl = document.getElementById("returnToCity");
+        const retRouteEl = document.getElementById("returnRouteType");
+        const retDistEl = document.getElementById("returnDistanceKM");
+        const retHintEl = document.getElementById("retDistHint");
+        if (!toEl || !retToEl || !retRouteEl || !retDistEl) return;
+
+        const est = estimateRoadKM(toEl.value, retToEl.value, retRouteEl.value);
+        if (est !== null) {
+            retDistEl.value = est;
+            if (retHintEl) {
+                retHintEl.textContent = `Andazan ${est} KM (${toEl.value} se ${retToEl.value} tak) - zaroorat par +/- se adjust karein.`;
+            }
+        }
+    }
+
+    function adjustDistance(delta) {
+        const el = document.getElementById("distanceKM");
+        if (!el) return;
+        const curr = safeFloat(el.value, 0);
+        el.value = Math.max(1, Math.round((curr + delta) * 10) / 10);
+    }
+
+    function adjustReturnDistance(delta) {
+        const el = document.getElementById("returnDistanceKM");
+        if (!el) return;
+        const curr = safeFloat(el.value, 0);
+        el.value = Math.max(0, Math.round((curr + delta) * 10) / 10);
+    }
+
+    function syncReturnDefaultCity() {
+        const retTo = document.getElementById("returnToCity");
+        const fromVal = document.getElementById("fromCity")?.value || "";
+        if (retTo && !retTo.value.trim() && fromVal.trim()) {
+            retTo.value = fromVal;
+        }
+    }
+
+    function syncReturnTare() {
+        const tareVal = safeFloat(document.getElementById("tareWeight")?.value, 14);
+        const retGrossEl = document.getElementById("returnGrossWeight");
+        const retHint = retGrossEl && retGrossEl.nextElementSibling;
+        if (retHint) {
+            retHint.textContent = `Khali wapsi ho to Tare (${tareVal}T) ke barabar rakhein.`;
+        }
+    }
+
+    function toggleReturn() {
+        const checked = !!document.getElementById("isReturn")?.checked;
+        const box = document.getElementById("returnFields");
+        if (box) {
+            box.style.display = checked ? "block" : "none";
+        }
+        if (checked) {
+            syncReturnDefaultCity();
+            syncReturnTare();
+            const outKm = safeFloat(document.getElementById("distanceKM")?.value, 1184);
+            const retKmEl = document.getElementById("returnDistanceKM");
+            if (retKmEl && (!retKmEl.value || safeFloat(retKmEl.value, 0) === 0)) {
+                retKmEl.value = outKm;
+            }
+            const tareVal = safeFloat(document.getElementById("tareWeight")?.value, 14);
+            const retGrossEl = document.getElementById("returnGrossWeight");
+            if (retGrossEl && (!retGrossEl.value || safeFloat(retGrossEl.value, 0) === 0)) {
+                retGrossEl.value = tareVal;
+            }
+        }
+    }
+
+    function getSelectedModelProfile() {
+        const modelEl = document.getElementById("vehicleModel");
+        const condEl = document.getElementById("vehicleCondition");
+
+        const opt = modelEl && modelEl.selectedIndex >= 0 ? modelEl.options[modelEl.selectedIndex] : null;
+        const condOpt = condEl && condEl.selectedIndex >= 0 ? condEl.options[condEl.selectedIndex] : null;
+
+        const key = modelEl ? modelEl.value : "hino_profia_p11c";
+        const brandBadge = opt?.dataset?.era || "Standard";
+        const baseAvg = safeFloat(opt?.dataset?.base, 4.25);
+        const dropPerTon = safeFloat(opt?.dataset?.drop, 0.026);
+        const fullText = opt ? opt.textContent.trim() : "Hino Profia P11C Prime Mover (350-380 HP)";
+
+        const condKey = condEl ? condEl.value : "kabuli_fit";
+        const condLabel = condOpt?.dataset?.label || "Purana / Kabuli (Fit)";
+        const condAvgDelta = safeFloat(condOpt?.dataset?.avgDelta, -0.12);
+        const condDropDelta = safeFloat(condOpt?.dataset?.dropDelta, 0);
+
+        const effectiveBase = Math.max(1.80, baseAvg + condAvgDelta);
+        const effectiveDrop = Math.max(0.008, dropPerTon + condDropDelta);
+
+        return {
+            key,
+            brandBadge,
+            fullText,
+            condKey,
+            condLabel,
+            isWeak: condKey === "weak",
+            baseAvg: effectiveBase,
+            dropPerTon: effectiveDrop
+        };
+    }
+
+    function calcAutoKMPerL(grossTons, tareTons, routeType) {
+        const profile = getSelectedModelProfile();
+        const netLoad = Math.max(0, grossTons - tareTons);
+
+        let routeFactor = 0.98; // Mix Route
+        if (routeType === "motorway") routeFactor = 1.03;
+        else if (routeType === "gt") routeFactor = 0.94;
+
+        const rawAvg = (profile.baseAvg - (netLoad * profile.dropPerTon)) * routeFactor;
+        const clamped = Math.max(1.80, Math.min(7.50, rawAvg));
+        return Math.round(clamped * 100) / 100;
+    }
+
+    function calculateModelAverage() {
+        const tareTons = Math.max(0, safeFloat(document.getElementById("tareWeight")?.value, 14));
+        const grossTons = Math.max(tareTons, safeFloat(document.getElementById("grossWeight")?.value, tareTons));
+        const routeType = document.getElementById("routeType")?.value || "mix";
+        const customInput = document.getElementById("customAvg");
+        const previewEl = document.getElementById("modelAveragePreview");
+
+        const profile = getSelectedModelProfile();
+        const autoAvg = calcAutoKMPerL(grossTons, tareTons, routeType);
+        const customVal = safeFloat(customInput?.value, NaN);
+        const hasCustom = Number.isFinite(customVal) && customVal > 0;
+
+        if (customInput) {
+            customInput.placeholder = `Auto (${profile.condLabel}: ${autoAvg.toFixed(2)} KM/L)`;
+        }
+
+        if (previewEl) {
+            const netLoad = Math.max(0, grossTons - tareTons);
+            const activeVal = hasCustom ? customVal.toFixed(2) : autoAvg.toFixed(2);
+            const modeText = hasCustom ? "Custom Override" : "Auto Formula";
+            const weakHtml = profile.isWeak
+                ? `<span class="rtech-weak-badge">⚠️ ENGINE KAMZOR</span>`
+                : "";
+
+            previewEl.innerHTML =
+                `<span class="rtech-era-badge">${profile.brandBadge}</span>` +
+                `<strong>${profile.fullText}</strong><br>` +
+                `Haalat: <strong>${profile.condLabel}</strong>${weakHtml} | ` +
+                `Active Average: <strong>${activeVal} KM/L</strong> ` +
+                `<span>(${modeText} | Khali Base: ${profile.baseAvg.toFixed(2)} | Net Load: ${netLoad.toFixed(1)}T)</span>`;
+        }
+
+        return hasCustom ? customVal : autoAvg;
+    }
+
+    function getRouteLabel(val) {
+        if (val === "motorway") return "Motorway (M-9 / M-5 / M-2)";
+        if (val === "gt") return "GT Road (N-5)";
+        return "Mix Route (Motorway + GT)";
+    }
+
+    function calculateFuel() {
+        const vehicleNo = (document.getElementById("vehicleNo")?.value || "N/A").trim() || "N/A";
+        const fromCity = (document.getElementById("fromCity")?.value || "Origin").trim() || "Origin";
+        const toCity = (document.getElementById("toCity")?.value || "Destination").trim() || "Destination";
+        const routeType = document.getElementById("routeType")?.value || "mix";
+        const outKM = Math.max(0, safeFloat(document.getElementById("distanceKM")?.value, 0));
+        const dieselRate = Math.max(0, safeFloat(document.getElementById("dieselRate")?.value, 0));
+        const tareTons = Math.max(0, safeFloat(document.getElementById("tareWeight")?.value, 0));
+        const grossTons = Math.max(tareTons, safeFloat(document.getElementById("grossWeight")?.value, tareTons));
+        const customAvgVal = safeFloat(document.getElementById("customAvg")?.value, NaN);
+        const hasCustomAvg = Number.isFinite(customAvgVal) && customAvgVal > 0;
+
+        const profile = getSelectedModelProfile();
+        const modelInfoDisplay = `${profile.fullText} [${profile.condLabel}${profile.isWeak ? " ⚠️" : ""}]`;
+
+        const outNetTons = Math.max(0, grossTons - tareTons);
+        const outAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(grossTons, tareTons, routeType);
+        const outLitres = outAvg > 0 ? outKM / outAvg : 0;
+
+        let totalKM = outKM;
+        let totalLitres = outLitres;
+        let routeDisplay = `${fromCity} → ${toCity}`;
+        let corridorDisplay = getRouteLabel(routeType);
+        let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
+        let avgDisplay = outAvg.toFixed(2);
+
+        const isReturn = !!document.getElementById("isReturn")?.checked;
+        if (isReturn) {
+            const retToCity = (document.getElementById("returnToCity")?.value || fromCity).trim() || fromCity;
+            const retRouteType = document.getElementById("returnRouteType")?.value || "mix";
+            const retKM = Math.max(0, safeFloat(document.getElementById("returnDistanceKM")?.value, 0));
+            const retGrossTons = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
+
+            const retAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(retGrossTons, tareTons, retRouteType);
+            const retLitres = retAvg > 0 ? retKM / retAvg : 0;
+
+            totalKM = outKM + retKM;
+            totalLitres = outLitres + retLitres;
+
+            routeDisplay = `${fromCity} → ${toCity} → ${retToCity}`;
+            corridorDisplay = `Out: ${getRouteLabel(routeType)} | Ret: ${getRouteLabel(retRouteType)}`;
+            weightDisplay = `Out ${grossTons}T / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
+            const blendedAvg = totalLitres > 0 ? totalKM / totalLitres : outAvg;
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
+        }
+
+        const grandTotal = Math.round(totalLitres * dieselRate);
+        const perTonCost = outNetTons > 0 ? Math.round((outLitres * dieselRate) / outNetTons) : 0;
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+        document.getElementById("slipCompanyHeader").textContent = activeCompany.title || "R TECH FLEET & LOGISTICS";
+        document.getElementById("slipPreparedBy").textContent = `Prepared By (${activeCompany.code || "R TECH"})`;
+        document.getElementById("slipDate").textContent = dateStr;
+        document.getElementById("slipVehicle").textContent = vehicleNo;
+        document.getElementById("resModelInfo").textContent = modelInfoDisplay;
+        document.getElementById("resRouteName").textContent = routeDisplay;
+        document.getElementById("resRouteType").textContent = corridorDisplay;
+        document.getElementById("resDist").textContent = totalKM.toLocaleString();
+        document.getElementById("resWeights").textContent = weightDisplay;
+        document.getElementById("resAvg").textContent = avgDisplay;
+        document.getElementById("resRate").textContent = dieselRate.toLocaleString();
+        document.getElementById("resFuel").textContent = totalLitres.toFixed(1);
+        document.getElementById("resGrandTotal").textContent = grandTotal.toLocaleString();
