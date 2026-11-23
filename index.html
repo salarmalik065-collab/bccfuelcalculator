@@ -203,6 +203,17 @@
             font-size: 11px;
             margin-left: 4px;
         }
+        .rtech-speed-badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 4px;
+        }
         .rtech-route-detail {
             margin-top: 6px;
             padding: 6px 9px;
@@ -497,9 +508,9 @@
         <div class="col form-group">
             <label for="routeType">Jaane ka Rasta (Outbound Route):</label>
             <select id="routeType" onchange="autoCalculateDistance(); calculateModelAverage();">
-                <option value="gt">GT Road / N-5</option>
-                <option value="motorway">Motorway / M-9 / M-5</option>
-                <option value="mix" selected>Mix Route (Motorway + GT)</option>
+                <option value="gt">GT Road / N-5 (Avg ~40 km/h)</option>
+                <option value="motorway">Motorway / M-9 / M-5 (Avg ~50 km/h)</option>
+                <option value="mix" selected>Mix Route (Motorway + GT | Avg ~45 km/h)</option>
             </select>
         </div>
     </div>
@@ -541,7 +552,7 @@
         </div>
     </div>
 
-    <!-- Motorway Entry & Exit Interchanges -->
+    <!-- Motorway Entry & Exit Interchanges (Outbound) -->
     <div class="row">
         <div class="col form-group">
             <label for="entryInterchange">MW Entry Interchange (Gari Kahan Se In Hoi):</label>
@@ -672,14 +683,14 @@
 
         <div class="col form-group autocomplete">
             <label for="toCity">Kahan Tak (Destination / Factory):</label>
-            <input type="text" id="toCity" placeholder="Shehar, Factory ya Adda likhein..." value="Faisalabad" autocomplete="off" oninput="calculateModelAverage()">
+            <input type="text" id="toCity" placeholder="Shehar, Factory ya Adda likhein..." value="Faisalabad" autocomplete="off" oninput="syncReturnFromCity(); calculateModelAverage();">
         </div>
     </div>
 
     <div class="row">
         <div class="col form-group">
             <label for="distanceKM">Jaane ka Faasla (Outbound KM):</label>
-            <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()">
+            <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()" oninput="calculateModelAverage()">
             <div class="km-adjust-bar" title="Factory bypass ya sheher ke andar ka farq adjust karein">
                 <button type="button" class="btn-km-adj" onclick="adjustDistance(-10)">-10 KM</button>
                 <button type="button" class="btn-km-adj" onclick="adjustDistance(-5)">-5 KM</button>
@@ -769,7 +780,7 @@
         <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()" oninput="calculateModelAverage()">
     </div>
 
-    <!-- Flexible Return / Local Shifting Trip Box -->
+    <!-- Flexible Return / Local Shifting Trip Box (Mirrors Outbound Options) -->
     <div class="return-box">
         <label class="checkbox-label">
             <input type="checkbox" id="isReturn" onchange="toggleReturn(); calculateModelAverage();">
@@ -777,98 +788,146 @@
         </label>
 
         <div id="returnFields" style="display:none;">
-            <div class="return-sub-header">Wapsi / Next Leg ki Tafseel (Destination se Aage)</div>
+            <div class="return-sub-header">Wapsi / Local Trip ki Mukammal Tafseel (Rawangi ki Tarah Same Options)</div>
 
             <div class="row">
                 <div class="col form-group autocomplete">
-                    <label for="returnToCity">Wapsi Kahan Tak (Same Shehar, Doosra Shehar ya Local):</label>
-                    <input type="text" id="returnToCity" placeholder="Shehar ya Local point likhein..." autocomplete="off" oninput="calculateModelAverage()">
+                    <label for="returnFromCity">Wapsi Kahan Se (Return Origin / Factory):</label>
+                    <input type="text" id="returnFromCity" placeholder="Shehar, Factory ya Adda likhein..." autocomplete="off" oninput="autoCalculateReturnDistance(); calculateModelAverage();">
                 </div>
-                <div class="col form-group">
-                    <label for="returnRouteType">Wapsi ka Rasta (Return Route):</label>
-                    <select id="returnRouteType" onchange="autoCalculateReturnDistance(); calculateModelAverage();">
-                        <option value="gt">GT Road / N-5</option>
-                        <option value="motorway">Motorway / M-9 / M-5</option>
-                        <option value="mix" selected>Mix Route / Local</option>
-                    </select>
+                <div class="col form-group autocomplete">
+                    <label for="returnToCity">Wapsi Kahan Tak (Same Shehar, Doosra Shehar ya Local):</label>
+                    <input type="text" id="returnToCity" placeholder="Shehar, Factory ya Local point likhein..." autocomplete="off" oninput="autoCalculateReturnDistance(); calculateModelAverage();">
                 </div>
             </div>
 
+            <div class="form-group">
+                <label for="returnRouteType">Wapsi ka Rasta (Return Route):</label>
+                <select id="returnRouteType" onchange="autoCalculateReturnDistance(); calculateModelAverage();">
+                    <option value="gt">GT Road / N-5 (Avg ~40 km/h)</option>
+                    <option value="motorway">Motorway / M-9 / M-5 (Avg ~50 km/h)</option>
+                    <option value="mix" selected>Mix Route / Local (Motorway + GT | Avg ~45 km/h)</option>
+                </select>
+            </div>
+
+            <!-- Wapsi Motorway Entry & Exit Interchanges (Exact Same Complete List as Outbound) -->
             <div class="row">
                 <div class="col form-group">
-                    <label for="returnEntryInterchange">Wapsi MW Entry Interchange:</label>
+                    <label for="returnEntryInterchange">Wapsi MW Entry Interchange (Gari Kahan Se In Hoi):</label>
                     <select id="returnEntryInterchange" onchange="calculateModelAverage()">
                         <option value="">-- Koi Interchange Nahi / GT Only --</option>
                         <optgroup label="M-9 (Karachi – Hyderabad)">
-                            <option value="M-9: Hyderabad / Jamshoro Interchange">M-9: Hyderabad / Jamshoro Interchange</option>
-                            <option value="M-9: Nooriabad Interchange">M-9: Nooriabad Interchange</option>
-                            <option value="M-9: Gadap / Super Highway">M-9: Gadap / Super Highway</option>
                             <option value="M-9: Karachi Toll Plaza / Kathore">M-9: Karachi Toll Plaza / Kathore</option>
+                            <option value="M-9: Gadap / Super Highway">M-9: Gadap / Super Highway</option>
+                            <option value="M-9: Nooriabad Interchange">M-9: Nooriabad Interchange</option>
+                            <option value="M-9: Jamshoro / Hyderabad Interchange">M-9: Jamshoro / Hyderabad Interchange</option>
                         </optgroup>
                         <optgroup label="M-5 (Multan – Sukkur)">
-                            <option value="M-5: Multan South / Shujabad">M-5: Multan South / Shujabad</option>
-                            <option value="M-5: Rahim Yar Khan / Sadiqabad">M-5: Rahim Yar Khan / Sadiqabad</option>
+                            <option value="M-5: Rohri / Sukkur Interchange">M-5: Rohri / Sukkur Interchange</option>
                             <option value="M-5: Ghotki / Ubauro Interchange">M-5: Ghotki / Ubauro Interchange</option>
-                            <option value="M-5: Sukkur / Rohri Interchange">M-5: Sukkur / Rohri Interchange</option>
+                            <option value="M-5: Sadiqabad / Rahim Yar Khan">M-5: Sadiqabad / Rahim Yar Khan</option>
+                            <option value="M-5: Zahir Pir Interchange">M-5: Zahir Pir Interchange</option>
+                            <option value="M-5: Jalalpur Pirwala Interchange">M-5: Jalalpur Pirwala Interchange</option>
+                            <option value="M-5: Shujabad / Multan South">M-5: Shujabad / Multan South</option>
                         </optgroup>
                         <optgroup label="M-4 (Pindi Bhattian – Multan)">
-                            <option value="M-4: Multan Interchange">M-4: Multan Interchange</option>
-                            <option value="M-4: Abdul Hakeem Interchange">M-4: Abdul Hakeem Interchange</option>
-                            <option value="M-4: Gojra / Toba Tek Singh">M-4: Gojra / Toba Tek Singh</option>
-                            <option value="M-4: Faisalabad North / Sahianwala">M-4: Faisalabad North / Sahianwala</option>
                             <option value="M-4: Pindi Bhattian Interchange">M-4: Pindi Bhattian Interchange</option>
+                            <option value="M-4: Chiniot Interchange">M-4: Chiniot Interchange</option>
+                            <option value="M-4: Faisalabad North / Sahianwala">M-4: Faisalabad North / Sahianwala</option>
+                            <option value="M-4: Gojra Interchange">M-4: Gojra Interchange</option>
+                            <option value="M-4: Toba Tek Singh Interchange">M-4: Toba Tek Singh Interchange</option>
+                            <option value="M-4: Abdul Hakeem Interchange">M-4: Abdul Hakeem Interchange</option>
+                            <option value="M-4: Kabirwala / Shamkot">M-4: Kabirwala / Shamkot</option>
+                            <option value="M-4: Multan Interchange">M-4: Multan Interchange</option>
+                        </optgroup>
+                        <optgroup label="M-3 (Lahore – Abdul Hakeem)">
+                            <option value="M-3: Faizpur / Lahore Interchange">M-3: Faizpur / Lahore Interchange</option>
+                            <option value="M-3: Sheikhupura / Jaranwala">M-3: Sheikhupura / Jaranwala</option>
+                            <option value="M-3: Samundari / Rajana">M-3: Samundari / Rajana</option>
+                            <option value="M-3: Abdul Hakeem Interchange">M-3: Abdul Hakeem Interchange</option>
                         </optgroup>
                         <optgroup label="M-2 (Lahore – Islamabad)">
-                            <option value="M-2: Islamabad Toll Plaza">M-2: Islamabad Toll Plaza</option>
-                            <option value="M-2: Chakri / Balkasar / Chakwal">M-2: Chakri / Balkasar / Chakwal</option>
+                            <option value="M-2: Kala Shah Kaku Interchange">M-2: Kala Shah Kaku Interchange</option>
+                            <option value="M-2: Khanqah Dogran / Pindi Bhattian">M-2: Khanqah Dogran / Pindi Bhattian</option>
+                            <option value="M-2: Salam / Kot Momin">M-2: Salam / Kot Momin</option>
+                            <option value="M-2: Bhera / Lillah Interchange">M-2: Bhera / Lillah Interchange</option>
                             <option value="M-2: Kallar Kahar Interchange">M-2: Kallar Kahar Interchange</option>
-                            <option value="M-2: Lillah / Bhera / Salam">M-2: Lillah / Bhera / Salam</option>
-                            <option value="M-2: Pindi Bhattian / Kala Shah Kaku">M-2: Pindi Bhattian / Kala Shah Kaku</option>
+                            <option value="M-2: Balkasar / Chakwal Interchange">M-2: Balkasar / Chakwal Interchange</option>
+                            <option value="M-2: Neela Dulah / Chakri">M-2: Neela Dulah / Chakri</option>
+                            <option value="M-2: Islamabad Toll Plaza">M-2: Islamabad Toll Plaza</option>
                         </optgroup>
-                        <optgroup label="M-1, M-3, M-11 & M-14">
-                            <option value="M-1: Peshawar / Rashakai / Burhan / Islamabad">M-1: Peshawar / Rashakai / Burhan / Islamabad</option>
-                            <option value="M-3: Abdul Hakeem / Jaranwala / Faizpur">M-3: Abdul Hakeem / Jaranwala / Faizpur</option>
-                            <option value="M-11: Sialkot / Kala Shah Kaku">M-11: Sialkot / Kala Shah Kaku</option>
-                            <option value="M-14: Mianwali / Hakla Interchange">M-14: Mianwali / Hakla Interchange</option>
+                        <optgroup label="M-1 (Islamabad – Peshawar)">
+                            <option value="M-1: Islamabad / Tarnol Interchange">M-1: Islamabad / Tarnol Interchange</option>
+                            <option value="M-1: Fateh Jang / Wah Cantt">M-1: Fateh Jang / Wah Cantt</option>
+                            <option value="M-1: Burhan / Ghazi Interchange">M-1: Burhan / Ghazi Interchange</option>
+                            <option value="M-1: Rashakai Interchange">M-1: Rashakai Interchange</option>
+                            <option value="M-1: Nowshera / Peshawar Interchange">M-1: Nowshera / Peshawar Interchange</option>
+                        </optgroup>
+                        <optgroup label="M-11, M-14, M-15 & M-16">
+                            <option value="M-11: Kala Shah Kaku / Muridke / Sialkot">M-11: Kala Shah Kaku / Muridke / Sialkot</option>
+                            <option value="M-14: Hakla / Pindi Gheb / Mianwali / DIK">M-14: Hakla / Pindi Gheb / Mianwali / DIK</option>
+                            <option value="M-15: Hasan Abdal / Haripur / Abbottabad / Mansehra">M-15: Hasan Abdal / Haripur / Abbottabad / Mansehra</option>
+                            <option value="M-16: Swabi / Chakdara Interchange">M-16: Swabi / Chakdara Interchange</option>
                         </optgroup>
                     </select>
                 </div>
 
                 <div class="col form-group">
-                    <label for="returnExitInterchange">Wapsi MW Exit Interchange:</label>
+                    <label for="returnExitInterchange">Wapsi MW Exit Interchange (Gari Kahan Se Out Hoi):</label>
                     <select id="returnExitInterchange" onchange="calculateModelAverage()">
                         <option value="">-- Koi Interchange Nahi / GT Only --</option>
                         <optgroup label="M-9 (Karachi – Hyderabad)">
-                            <option value="M-9: Karachi Toll Plaza / Kathore">M-9: Karachi Toll Plaza / Kathore</option>
-                            <option value="M-9: Gadap / Super Highway">M-9: Gadap / Super Highway</option>
-                            <option value="M-9: Nooriabad Interchange">M-9: Nooriabad Interchange</option>
                             <option value="M-9: Hyderabad / Jamshoro Interchange">M-9: Hyderabad / Jamshoro Interchange</option>
+                            <option value="M-9: Nooriabad Interchange">M-9: Nooriabad Interchange</option>
+                            <option value="M-9: Gadap / Super Highway">M-9: Gadap / Super Highway</option>
+                            <option value="M-9: Karachi Toll Plaza / Kathore">M-9: Karachi Toll Plaza / Kathore</option>
                         </optgroup>
                         <optgroup label="M-5 (Multan – Sukkur)">
-                            <option value="M-5: Sukkur / Rohri Interchange">M-5: Sukkur / Rohri Interchange</option>
-                            <option value="M-5: Ghotki / Ubauro Interchange">M-5: Ghotki / Ubauro Interchange</option>
-                            <option value="M-5: Rahim Yar Khan / Sadiqabad">M-5: Rahim Yar Khan / Sadiqabad</option>
                             <option value="M-5: Multan South / Shujabad">M-5: Multan South / Shujabad</option>
+                            <option value="M-5: Jalalpur Pirwala Interchange">M-5: Jalalpur Pirwala Interchange</option>
+                            <option value="M-5: Zahir Pir Interchange">M-5: Zahir Pir Interchange</option>
+                            <option value="M-5: Rahim Yar Khan / Sadiqabad">M-5: Rahim Yar Khan / Sadiqabad</option>
+                            <option value="M-5: Ghotki / Ubauro Interchange">M-5: Ghotki / Ubauro Interchange</option>
+                            <option value="M-5: Sukkur / Rohri Interchange">M-5: Sukkur / Rohri Interchange</option>
                         </optgroup>
                         <optgroup label="M-4 (Pindi Bhattian – Multan)">
-                            <option value="M-4: Pindi Bhattian Interchange">M-4: Pindi Bhattian Interchange</option>
-                            <option value="M-4: Faisalabad North / Sahianwala">M-4: Faisalabad North / Sahianwala</option>
-                            <option value="M-4: Gojra / Toba Tek Singh">M-4: Gojra / Toba Tek Singh</option>
-                            <option value="M-4: Abdul Hakeem Interchange">M-4: Abdul Hakeem Interchange</option>
                             <option value="M-4: Multan Interchange">M-4: Multan Interchange</option>
+                            <option value="M-4: Kabirwala / Shamkot">M-4: Kabirwala / Shamkot</option>
+                            <option value="M-4: Abdul Hakeem Interchange">M-4: Abdul Hakeem Interchange</option>
+                            <option value="M-4: Toba Tek Singh Interchange">M-4: Toba Tek Singh Interchange</option>
+                            <option value="M-4: Gojra Interchange">M-4: Gojra Interchange</option>
+                            <option value="M-4: Faisalabad North / Sahianwala">M-4: Faisalabad North / Sahianwala</option>
+                            <option value="M-4: Chiniot Interchange">M-4: Chiniot Interchange</option>
+                            <option value="M-4: Pindi Bhattian Interchange">M-4: Pindi Bhattian Interchange</option>
+                        </optgroup>
+                        <optgroup label="M-3 (Lahore – Abdul Hakeem)">
+                            <option value="M-3: Abdul Hakeem Interchange">M-3: Abdul Hakeem Interchange</option>
+                            <option value="M-3: Samundari / Rajana">M-3: Samundari / Rajana</option>
+                            <option value="M-3: Sheikhupura / Jaranwala">M-3: Sheikhupura / Jaranwala</option>
+                            <option value="M-3: Faizpur / Lahore Interchange">M-3: Faizpur / Lahore Interchange</option>
                         </optgroup>
                         <optgroup label="M-2 (Lahore – Islamabad)">
-                            <option value="M-2: Kala Shah Kaku / Pindi Bhattian">M-2: Kala Shah Kaku / Pindi Bhattian</option>
-                            <option value="M-2: Salam / Bhera / Lillah">M-2: Salam / Bhera / Lillah</option>
-                            <option value="M-2: Kallar Kahar Interchange">M-2: Kallar Kahar Interchange</option>
-                            <option value="M-2: Chakwal / Balkasar / Chakri">M-2: Chakwal / Balkasar / Chakri</option>
                             <option value="M-2: Islamabad Toll Plaza">M-2: Islamabad Toll Plaza</option>
+                            <option value="M-2: Chakri / Neela Dulah">M-2: Chakri / Neela Dulah</option>
+                            <option value="M-2: Balkasar / Chakwal Interchange">M-2: Balkasar / Chakwal Interchange</option>
+                            <option value="M-2: Kallar Kahar Interchange">M-2: Kallar Kahar Interchange</option>
+                            <option value="M-2: Lillah / Bhera Interchange">M-2: Lillah / Bhera Interchange</option>
+                            <option value="M-2: Kot Momin / Salam">M-2: Kot Momin / Salam</option>
+                            <option value="M-2: Pindi Bhattian / Khanqah Dogran">M-2: Pindi Bhattian / Khanqah Dogran</option>
+                            <option value="M-2: Kala Shah Kaku Interchange">M-2: Kala Shah Kaku Interchange</option>
                         </optgroup>
-                        <optgroup label="M-1, M-3, M-11 & M-14">
-                            <option value="M-1: Islamabad / Burhan / Rashakai / Peshawar">M-1: Islamabad / Burhan / Rashakai / Peshawar</option>
-                            <option value="M-3: Faizpur / Jaranwala / Abdul Hakeem">M-3: Faizpur / Jaranwala / Abdul Hakeem</option>
-                            <option value="M-11: Kala Shah Kaku / Sialkot">M-11: Kala Shah Kaku / Sialkot</option>
-                            <option value="M-14: Hakla / Mianwali Interchange">M-14: Hakla / Mianwali Interchange</option>
+                        <optgroup label="M-1 (Islamabad – Peshawar)">
+                            <option value="M-1: Peshawar / Nowshera Interchange">M-1: Peshawar / Nowshera Interchange</option>
+                            <option value="M-1: Rashakai Interchange">M-1: Rashakai Interchange</option>
+                            <option value="M-1: Ghazi / Burhan Interchange">M-1: Ghazi / Burhan Interchange</option>
+                            <option value="M-1: Wah Cantt / Fateh Jang">M-1: Wah Cantt / Fateh Jang</option>
+                            <option value="M-1: Tarnol / Islamabad Interchange">M-1: Tarnol / Islamabad Interchange</option>
+                        </optgroup>
+                        <optgroup label="M-11, M-14, M-15 & M-16">
+                            <option value="M-11: Sialkot / Muridke / Kala Shah Kaku">M-11: Sialkot / Muridke / Kala Shah Kaku</option>
+                            <option value="M-14: DIK / Mianwali / Pindi Gheb / Hakla">M-14: DIK / Mianwali / Pindi Gheb / Hakla</option>
+                            <option value="M-15: Mansehra / Abbottabad / Haripur / Hasan Abdal">M-15: Mansehra / Abbottabad / Haripur / Hasan Abdal</option>
+                            <option value="M-16: Chakdara / Swabi Interchange">M-16: Chakdara / Swabi Interchange</option>
                         </optgroup>
                     </select>
                 </div>
@@ -877,7 +936,7 @@
             <div class="row">
                 <div class="col form-group">
                     <label for="returnDistanceKM">Wapsi / Local Faasla (KM):</label>
-                    <input type="number" step="any" inputmode="decimal" id="returnDistanceKM" value="1184" placeholder="Wapsi ya local KM likhein" onfocus="this.select()">
+                    <input type="number" step="any" inputmode="decimal" id="returnDistanceKM" value="1184" placeholder="Wapsi ya local KM likhein" onfocus="this.select()" oninput="calculateModelAverage()">
                     <div class="km-adjust-bar" title="Local shifting ya bypass KM adjust karein">
                         <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(-10)">-10 KM</button>
                         <button type="button" class="btn-km-adj" onclick="adjustReturnDistance(-5)">-5 KM</button>
@@ -937,8 +996,8 @@
                 <span id="resRouteType">-</span>
             </div>
             <div class="slip-row">
-                <span>Kul Faasla (Distance):</span>
-                <span><span id="resDist">0</span> KM</span>
+                <span>Kul Faasla &amp; Safar Waqt:</span>
+                <span><span id="resDist">0</span> KM (<span id="resSpeedTime">-</span>)</span>
             </div>
             <div class="slip-row">
                 <span>Vazan (Tare / Gross / Net):</span>
@@ -1299,7 +1358,7 @@
         return "Not Selected (N-5 / Local)";
     }
 
-    /* Comprehensive Corridor & Stop Route Detail Builder for Every Route Type */
+    /* Comprehensive Corridor & Stop Route Detail Builder (Works identically for both Outbound & Return) */
     function getCorridorRouteDetail(fromName, toName, routeType, entryIC, exitIC) {
         const f = (fromName || "").trim() || "Origin";
         const t = (toName || "").trim() || "Destination";
@@ -1332,6 +1391,20 @@
                 else if (routeType === "mix") basePath = `${f} → Chakwal / Motorway-GT Link → ${t}`;
                 else basePath = `${f} → Gujranwala → Gujrat → Jhelum → Sohawa (N-5) → ${t}`;
             }
+        } else if (southHubs.includes(h2)) {
+            if (northHubs.includes(h1)) {
+                if (routeType === "motorway") basePath = `${f} → Kallar Kahar (M-2) → Pindi Bhattian → Multan (M-5) → Sukkur → Hyderabad (M-9) → ${t}`;
+                else if (routeType === "mix") basePath = `${f} → Chakwal → Talagang → Mianwali → Multan/Sukkur Belt → Hyderabad → ${t}`;
+                else basePath = `${f} → Sohawa → Jhelum → Gujrat → Lahore → Sahiwal → Multan → Sukkur → Hyderabad (N-5) → ${t}`;
+            } else if (centralPunjabHubs.includes(h1)) {
+                if (routeType === "motorway") basePath = `${f} (M-3/M-4) → Multan (M-5) → Sukkur → Hyderabad (M-9) → ${t}`;
+                else if (routeType === "mix") basePath = `${f} → Khanewal/Sahiwal → Multan → Sukkur → Hyderabad → ${t}`;
+                else basePath = `${f} → Okara → Sahiwal → Multan → Bahawalpur → Sukkur → Moro → Hyderabad (N-5) → ${t}`;
+            } else if (midSouthHubs.includes(h1)) {
+                if (routeType === "motorway") basePath = `${f} → Sukkur (M-5) → Hyderabad (M-9) → ${t}`;
+                else if (routeType === "mix") basePath = `${f} → Sukkur → Moro → Hyderabad → ${t}`;
+                else basePath = `${f} → Sukkur → Moro → Nawabshah → Hyderabad (N-5) → ${t}`;
+            }
         } else if (centralPunjabHubs.includes(h2)) {
             if (southHubs.includes(h1)) {
                 if (routeType === "motorway") basePath = `${f} → Hyderabad (M-9) → Sukkur → Multan (M-5) → ${t} (M-4/M-3)`;
@@ -1341,6 +1414,10 @@
                 if (routeType === "motorway") basePath = `${f} → Khanewal / Gojra / M-4/M-3 → ${t}`;
                 else if (routeType === "mix") basePath = `${f} → Khanewal → Sahiwal / Chichawatni → ${t}`;
                 else basePath = `${f} → Bahawalpur → Mian Channu → Sahiwal → Okara (N-5) → ${t}`;
+            } else if (northHubs.includes(h1)) {
+                if (routeType === "motorway") basePath = `${f} → Kallar Kahar (M-2) → Pindi Bhattian → ${t}`;
+                else if (routeType === "mix") basePath = `${f} → Chakwal → Mianwali / Sargodha → ${t}`;
+                else basePath = `${f} → Sohawa → Jhelum → Gujrat → Gujranwala → Lahore (N-5) → ${t}`;
             }
         } else if (kpkHubs.includes(h2)) {
             if (southHubs.includes(h1)) {
@@ -1370,6 +1447,30 @@
             return `${basePath} [IC In: ${entryIC || "N/A"} | IC Out: ${exitIC || "N/A"}]`;
         }
         return basePath;
+    }
+
+    /* Pakistan Trailer Average Speed (40 to 50 km/h) & Driving Time Calculator */
+    function getPakistanTrailerSpeed(routeType, netLoadTons, fromName, toName, isWeakEngine) {
+        let baseSpeed = 45; // Mix route default (40-50 range ka darmiyan)
+        if (routeType === "motorway") baseSpeed = 50;
+        else if (routeType === "gt") baseSpeed = 40;
+
+        const touchesHill = isBalochistanMountainCity(fromName) || isBalochistanMountainCity(toName) ||
+                            isSaltRangeOrKpkCity(fromName) || isSaltRangeOrKpkCity(toName);
+        if (touchesHill) baseSpeed -= 3;
+        if (netLoadTons >= 30) baseSpeed -= 2;
+        if (isWeakEngine) baseSpeed -= 2;
+
+        // Keep strictly calibrated inside Pakistan realistic trailer band (38–50 km/h)
+        return Math.max(38, Math.min(50, Math.round(baseSpeed)));
+    }
+
+    function formatHoursToHrMin(hoursFloat) {
+        if (!Number.isFinite(hoursFloat) || hoursFloat <= 0) return "0h 0m";
+        const totalMins = Math.round(hoursFloat * 60);
+        const hrs = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        return `${hrs}h ${mins}m`;
     }
 
     /* Smart Net Elevation & Terrain Formula (Charhai vs Utrai) */
@@ -1496,19 +1597,21 @@
     }
 
     function autoCalculateReturnDistance() {
+        const retFromEl = document.getElementById("returnFromCity");
         const toEl = document.getElementById("toCity");
         const retToEl = document.getElementById("returnToCity");
         const retRouteEl = document.getElementById("returnRouteType");
         const retDistEl = document.getElementById("returnDistanceKM");
         const retHintEl = document.getElementById("retDistHint");
-        if (!toEl || !retToEl || !retRouteEl || !retDistEl) return;
+        if (!retToEl || !retRouteEl || !retDistEl) return;
 
-        const res = estimateRoadKM(toEl.value, retToEl.value, retRouteEl.value);
+        const originName = (retFromEl && retFromEl.value.trim()) ? retFromEl.value : (toEl ? toEl.value : "");
+        const res = estimateRoadKM(originName, retToEl.value, retRouteEl.value);
         if (res !== null) {
             retDistEl.value = res.km;
             if (retHintEl) {
                 const tag = res.isExact ? "Exact Highway KM" : "Andazan KM";
-                retHintEl.textContent = `${tag}: ${res.km} KM (${toEl.value} se ${retToEl.value} tak) - zaroorat par +/- se adjust karein.`;
+                retHintEl.textContent = `${tag}: ${res.km} KM (${originName} se ${retToEl.value} tak) - zaroorat par +/- se adjust karein.`;
             }
         }
     }
@@ -1518,6 +1621,7 @@
         if (!el) return;
         const curr = safeFloat(el.value, 0);
         el.value = Math.max(1, Math.round((curr + delta) * 10) / 10);
+        calculateModelAverage();
     }
 
     function adjustReturnDistance(delta) {
@@ -1525,6 +1629,15 @@
         if (!el) return;
         const curr = safeFloat(el.value, 0);
         el.value = Math.max(0, Math.round((curr + delta) * 10) / 10);
+        calculateModelAverage();
+    }
+
+    function syncReturnFromCity() {
+        const retFrom = document.getElementById("returnFromCity");
+        const toVal = document.getElementById("toCity")?.value || "";
+        if (retFrom && toVal.trim()) {
+            retFrom.value = toVal;
+        }
     }
 
     function syncReturnDefaultCity() {
@@ -1551,6 +1664,11 @@
             box.style.display = checked ? "block" : "none";
         }
         if (checked) {
+            const retFrom = document.getElementById("returnFromCity");
+            const toVal = document.getElementById("toCity")?.value || "";
+            if (retFrom && !retFrom.value.trim() && toVal.trim()) {
+                retFrom.value = toVal;
+            }
             syncReturnDefaultCity();
             syncReturnTare();
             const outKm = safeFloat(document.getElementById("distanceKM")?.value, 1184);
@@ -1908,11 +2026,15 @@
         const toCity = document.getElementById("toCity")?.value || "";
         const entryIC = document.getElementById("entryInterchange")?.value || "";
         const exitIC = document.getElementById("exitInterchange")?.value || "";
+        const outKM = Math.max(0, safeFloat(document.getElementById("distanceKM")?.value, 0));
         const customInput = document.getElementById("customAvg");
         const previewEl = document.getElementById("modelAveragePreview");
 
         const profile = getSelectedModelProfile();
+        const outNetLoad = Math.max(0, grossTons - tareTons);
         const outTerrain = getTerrainAdjustment(fromCity, toCity, routeType);
+        const outSpeed = getPakistanTrailerSpeed(routeType, outNetLoad, fromCity, toCity, profile.isWeak);
+        const outHrs = outSpeed > 0 ? (outKM / outSpeed) : 0;
         const routeDetailText = getCorridorRouteDetail(fromCity, toCity, routeType, entryIC, exitIC);
         const icSummary = getInterchangeSummary(entryIC, exitIC);
         const autoAvg = calcAutoKMPerL(grossTons, tareTons, routeType, fromCity, toCity);
@@ -1924,7 +2046,6 @@
         }
 
         if (previewEl) {
-            const netLoad = Math.max(0, grossTons - tareTons);
             const activeVal = hasCustom ? customVal.toFixed(2) : autoAvg.toFixed(2);
             const modeText = hasCustom ? "Custom Override" : "Auto Formula";
             const weakHtml = profile.isWeak
@@ -1933,25 +2054,36 @@
             const terrainHtml = outTerrain.label
                 ? `<span class="rtech-terrain-badge">${outTerrain.label}</span>`
                 : "";
+            const speedHtml = `<span class="rtech-speed-badge">⏱️ Avg Speed: ${outSpeed} km/h (~${formatHoursToHrMin(outHrs)})</span>`;
 
             let returnPreviewNote = "";
+            let returnRoutePreviewHtml = "";
             if (document.getElementById("isReturn")?.checked) {
-                const retToCity = document.getElementById("returnToCity")?.value || fromCity;
+                const retFromCity = (document.getElementById("returnFromCity")?.value || toCity).trim() || toCity;
+                const retToCity = (document.getElementById("returnToCity")?.value || fromCity).trim() || fromCity;
                 const retGross = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
+                const retNetLoad = Math.max(0, retGross - tareTons);
                 const retRoute = document.getElementById("returnRouteType")?.value || "mix";
-                const retAvg = hasCustom ? customVal : calcAutoKMPerL(retGross, tareTons, retRoute, toCity, retToCity);
-                const retTerrain = getTerrainAdjustment(toCity, retToCity, retRoute);
+                const retEntryIC = document.getElementById("returnEntryInterchange")?.value || "";
+                const retExitIC = document.getElementById("returnExitInterchange")?.value || "";
+                const retAvg = hasCustom ? customVal : calcAutoKMPerL(retGross, tareTons, retRoute, retFromCity, retToCity);
+                const retTerrain = getTerrainAdjustment(retFromCity, retToCity, retRoute);
+                const retSpeed = getPakistanTrailerSpeed(retRoute, retNetLoad, retFromCity, retToCity, profile.isWeak);
                 const retTag = retTerrain.label ? ` [${retTerrain.label}]` : "";
-                returnPreviewNote = ` | <strong>Wapsi Avg:</strong> ${retAvg.toFixed(2)} KM/L${retTag}`;
+                returnPreviewNote = ` | <strong>Wapsi Avg:</strong> ${retAvg.toFixed(2)} KM/L (${retSpeed} km/h)${retTag}`;
+
+                const retIcSummary = getInterchangeSummary(retEntryIC, retExitIC);
+                const retDetailText = getCorridorRouteDetail(retFromCity, retToCity, retRoute, retEntryIC, retExitIC);
+                returnRoutePreviewHtml = `<br>🔄 <strong>Wapsi IC:</strong> ${retIcSummary}<br>🛣️ <strong>Wapsi Route:</strong> ${retDetailText}`;
             }
 
             previewEl.innerHTML =
                 `<span class="rtech-era-badge">${profile.brandBadge}</span>` +
-                `<strong>${profile.fullText}</strong>${terrainHtml}<br>` +
+                `<strong>${profile.fullText}</strong>${terrainHtml}${speedHtml}<br>` +
                 `Haalat: <strong>${profile.condLabel}</strong>${weakHtml} | ` +
                 `Jaate Avg: <strong>${activeVal} KM/L</strong>${returnPreviewNote} ` +
-                `<span>(${modeText} | Khali Base: ${profile.baseAvg.toFixed(2)} | Net Load: ${netLoad.toFixed(1)}T)</span>` +
-                `<div class="rtech-route-detail">🚦 <strong>Interchange:</strong> ${icSummary}<br>🛣️ <strong>Route Detail:</strong> ${routeDetailText}</div>`;
+                `<span>(${modeText} | Khali Base: ${profile.baseAvg.toFixed(2)} | Net Load: ${outNetLoad.toFixed(1)}T)</span>` +
+                `<div class="rtech-route-detail">🚦 <strong>Jaate Interchange:</strong> ${icSummary}<br>🛣️ <strong>Jaate Route:</strong> ${routeDetailText}${returnRoutePreviewHtml}</div>`;
         }
 
         return hasCustom ? customVal : autoAvg;
@@ -1987,19 +2119,24 @@
         const outNetTons = Math.max(0, grossTons - tareTons);
         const outAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(grossTons, tareTons, routeType, fromCity, toCity);
         const outLitres = outAvg > 0 ? outKM / outAvg : 0;
+        const outSpeed = getPakistanTrailerSpeed(routeType, outNetTons, fromCity, toCity, profile.isWeak);
+        const outHours = outSpeed > 0 ? outKM / outSpeed : 0;
 
         let totalKM = outKM;
         let totalLitres = outLitres;
         let totalNetTons = outNetTons;
+        let totalHours = outHours;
         let routeDisplay = `${fromCity} → ${toCity}`;
         let icDisplay = getInterchangeSummary(entryIC, exitIC);
         let routeDetailDisplay = getCorridorRouteDetail(fromCity, toCity, routeType, entryIC, exitIC);
         let corridorDisplay = getRouteLabel(routeType);
         let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
         let avgDisplay = outAvg.toFixed(2);
+        let speedTimeDisplay = `~${outSpeed} km/h | ${formatHoursToHrMin(outHours)}`;
 
         const isReturn = !!document.getElementById("isReturn")?.checked;
         if (isReturn) {
+            const retFromCity = (document.getElementById("returnFromCity")?.value || toCity).trim() || toCity;
             const retToCity = (document.getElementById("returnToCity")?.value || fromCity).trim() || fromCity;
             const retRouteType = document.getElementById("returnRouteType")?.value || "mix";
             const retEntryIC = document.getElementById("returnEntryInterchange")?.value || "";
@@ -2008,17 +2145,26 @@
             const retGrossTons = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
             const retNetTons = Math.max(0, retGrossTons - tareTons);
 
-            const retAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(retGrossTons, tareTons, retRouteType, toCity, retToCity);
+            const retAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(retGrossTons, tareTons, retRouteType, retFromCity, retToCity);
             const retLitres = retAvg > 0 ? retKM / retAvg : 0;
+            const retSpeed = getPakistanTrailerSpeed(retRouteType, retNetTons, retFromCity, retToCity, profile.isWeak);
+            const retHours = retSpeed > 0 ? retKM / retSpeed : 0;
 
             totalKM = outKM + retKM;
             totalLitres = outLitres + retLitres;
             totalNetTons = outNetTons + retNetTons;
+            totalHours = outHours + retHours;
 
-            routeDisplay = `${fromCity} → ${toCity} → ${retToCity}`;
+            const blendedSpeed = totalHours > 0 ? Math.round(totalKM / totalHours) : outSpeed;
+            speedTimeDisplay = `~${blendedSpeed} km/h | ${formatHoursToHrMin(totalHours)}`;
+
+            routeDisplay = (retFromCity.toLowerCase() === toCity.toLowerCase())
+                ? `${fromCity} → ${toCity} → ${retToCity}`
+                : `${fromCity} → ${toCity} | ${retFromCity} → ${retToCity}`;
+
             const retIcSummary = getInterchangeSummary(retEntryIC, retExitIC);
             icDisplay = `Jaana (${icDisplay}) | Wapsi (${retIcSummary})`;
-            const retDetail = getCorridorRouteDetail(toCity, retToCity, retRouteType, retEntryIC, retExitIC);
+            const retDetail = getCorridorRouteDetail(retFromCity, retToCity, retRouteType, retEntryIC, retExitIC);
             routeDetailDisplay = `Jaana: ${routeDetailDisplay} | Wapsi: ${retDetail}`;
             corridorDisplay = `Out: ${getRouteLabel(routeType)} | Ret: ${getRouteLabel(retRouteType)}`;
             weightDisplay = `Out ${grossTons}T / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
@@ -2042,6 +2188,7 @@
         document.getElementById("resRouteDetail").textContent = routeDetailDisplay;
         document.getElementById("resRouteType").textContent = corridorDisplay;
         document.getElementById("resDist").textContent = totalKM.toLocaleString();
+        document.getElementById("resSpeedTime").textContent = speedTimeDisplay;
         document.getElementById("resWeights").textContent = weightDisplay;
         document.getElementById("resAvg").textContent = avgDisplay;
         document.getElementById("resRate").textContent = dieselRate.toLocaleString();
@@ -2062,13 +2209,13 @@
             `Route: ${routeDisplay}\n` +
             `Interchanges: ${icDisplay}\n` +
             `Route Detail: ${routeDetailDisplay}\n` +
-            `Distance: ${totalKM} KM | Avg: ${avgDisplay} KM/L\n` +
+            `Distance: ${totalKM} KM (${speedTimeDisplay}) | Avg: ${avgDisplay} KM/L\n` +
             `Diesel: ${totalLitres.toFixed(1)} L @ Rs.${dieselRate}/L\n` +
             `*Total Diesel Cost: Rs. ${grandTotal.toLocaleString()}*`;
 
         lastExcelRow = [
             dateStr, vehicleNo, profile.brandBadge, profile.fullText, profile.condLabel,
-            routeDisplay, icDisplay, routeDetailDisplay, corridorDisplay, totalKM, tareTons, grossTons,
+            routeDisplay, icDisplay, routeDetailDisplay, corridorDisplay, totalKM, speedTimeDisplay, tareTons, grossTons,
             avgDisplay, totalLitres.toFixed(1), dieselRate, grandTotal
         ].join("\t");
     }
@@ -2128,8 +2275,9 @@
                         syncReturnDefaultCity();
                         autoCalculateDistance();
                     } else if (inputId === "toCity") {
+                        syncReturnFromCity();
                         autoCalculateDistance();
-                    } else if (inputId === "returnToCity") {
+                    } else if (inputId === "returnFromCity" || inputId === "returnToCity") {
                         autoCalculateReturnDistance();
                     }
                     calculateModelAverage();
@@ -2355,7 +2503,9 @@
     window.addEventListener("DOMContentLoaded", () => {
         attachAutocomplete("fromCity");
         attachAutocomplete("toCity");
+        attachAutocomplete("returnFromCity");
         attachAutocomplete("returnToCity");
+        syncReturnFromCity();
         syncReturnDefaultCity();
         syncReturnTare();
         refreshSavedVehiclesUI();
