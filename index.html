@@ -84,7 +84,7 @@
             margin-top: 8px;
             font-size: 12.5px;
             color: #334155;
-            line-height: 1.45;
+            line-height: 1.5;
         }
         .rtech-weak-badge {
             display: inline-block;
@@ -505,7 +505,7 @@
     <!-- Flexible Return / Local Shifting Trip Box -->
     <div class="return-box">
         <label class="checkbox-label">
-            <input type="checkbox" id="isReturn" onchange="toggleReturn()">
+            <input type="checkbox" id="isReturn" onchange="toggleReturn(); calculateModelAverage();">
             Wapsi / Agla Trip (Return ya Local Shifting) shamil karein
         </label>
 
@@ -519,7 +519,7 @@
                 </div>
                 <div class="col form-group">
                     <label for="returnRouteType">Wapsi ka Rasta (Return Route):</label>
-                    <select id="returnRouteType" onchange="autoCalculateReturnDistance()">
+                    <select id="returnRouteType" onchange="autoCalculateReturnDistance(); calculateModelAverage();">
                         <option value="gt">GT Road / N-5</option>
                         <option value="motorway">Motorway / M-9 / M-5</option>
                         <option value="mix" selected>Mix Route / Local</option>
@@ -542,7 +542,7 @@
 
                 <div class="col form-group">
                     <label for="returnGrossWeight">Wapsi par Kul Vazan (Gross Tons):</label>
-                    <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()">
+                    <input type="number" step="any" inputmode="decimal" id="returnGrossWeight" value="14" onfocus="this.select()" oninput="calculateModelAverage()">
                     <div class="hint">Khali wapsi ho to Tare (14T) ke barabar rakhein.</div>
                 </div>
             </div>
@@ -1025,11 +1025,19 @@
                 ? `<span class="rtech-weak-badge">⚠️ ENGINE KAMZOR</span>`
                 : "";
 
+            let returnPreviewNote = "";
+            if (document.getElementById("isReturn")?.checked) {
+                const retGross = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
+                const retRoute = document.getElementById("returnRouteType")?.value || "mix";
+                const retAvg = hasCustom ? customVal : calcAutoKMPerL(retGross, tareTons, retRoute);
+                returnPreviewNote = ` | <strong>Wapsi Avg:</strong> ${retAvg.toFixed(2)} KM/L`;
+            }
+
             previewEl.innerHTML =
                 `<span class="rtech-era-badge">${profile.brandBadge}</span>` +
                 `<strong>${profile.fullText}</strong><br>` +
                 `Haalat: <strong>${profile.condLabel}</strong>${weakHtml} | ` +
-                `Active Average: <strong>${activeVal} KM/L</strong> ` +
+                `Jaate Avg: <strong>${activeVal} KM/L</strong>${returnPreviewNote} ` +
                 `<span>(${modeText} | Khali Base: ${profile.baseAvg.toFixed(2)} | Net Load: ${netLoad.toFixed(1)}T)</span>`;
         }
 
@@ -1063,6 +1071,7 @@
 
         let totalKM = outKM;
         let totalLitres = outLitres;
+        let totalNetTons = outNetTons;
         let routeDisplay = `${fromCity} → ${toCity}`;
         let corridorDisplay = getRouteLabel(routeType);
         let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
@@ -1074,12 +1083,14 @@
             const retRouteType = document.getElementById("returnRouteType")?.value || "mix";
             const retKM = Math.max(0, safeFloat(document.getElementById("returnDistanceKM")?.value, 0));
             const retGrossTons = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
+            const retNetTons = Math.max(0, retGrossTons - tareTons);
 
             const retAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(retGrossTons, tareTons, retRouteType);
             const retLitres = retAvg > 0 ? retKM / retAvg : 0;
 
             totalKM = outKM + retKM;
             totalLitres = outLitres + retLitres;
+            totalNetTons = outNetTons + retNetTons;
 
             routeDisplay = `${fromCity} → ${toCity} → ${retToCity}`;
             corridorDisplay = `Out: ${getRouteLabel(routeType)} | Ret: ${getRouteLabel(retRouteType)}`;
@@ -1089,7 +1100,7 @@
         }
 
         const grandTotal = Math.round(totalLitres * dieselRate);
-        const perTonCost = outNetTons > 0 ? Math.round((outLitres * dieselRate) / outNetTons) : 0;
+        const perTonCost = totalNetTons > 0 ? Math.round(grandTotal / totalNetTons) : 0;
 
         const now = new Date();
         const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -1107,3 +1118,333 @@
         document.getElementById("resRate").textContent = dieselRate.toLocaleString();
         document.getElementById("resFuel").textContent = totalLitres.toFixed(1);
         document.getElementById("resGrandTotal").textContent = grandTotal.toLocaleString();
+        document.getElementById("resPerTon").textContent = perTonCost.toLocaleString();
+
+        const wrapper = document.getElementById("resultWrapper");
+        if (wrapper) {
+            wrapper.style.display = "block";
+            wrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        lastSummaryText =
+            `*${activeCompany.title || "R TECH FLEET & LOGISTICS"}*\n` +
+            `Date: ${dateStr} | Vehicle: *${vehicleNo}*\n` +
+            `Model/Haalat: ${modelInfoDisplay}\n` +
+            `Route: ${routeDisplay}\n` +
+            `Distance: ${totalKM} KM | Avg: ${avgDisplay} KM/L\n` +
+            `Diesel: ${totalLitres.toFixed(1)} L @ Rs.${dieselRate}/L\n` +
+            `*Total Diesel Cost: Rs. ${grandTotal.toLocaleString()}*`;
+
+        lastExcelRow = [
+            dateStr, vehicleNo, profile.brandBadge, profile.fullText, profile.condLabel,
+            routeDisplay, corridorDisplay, totalKM, tareTons, grossTons,
+            avgDisplay, totalLitres.toFixed(1), dieselRate, grandTotal
+        ].join("\t");
+    }
+
+    function shareWhatsApp() {
+        if (!lastSummaryText) calculateFuel();
+        const url = "https://wa.me/?text=" + encodeURIComponent(lastSummaryText);
+        window.open(url, "_blank");
+    }
+
+    function copyForExcel() {
+        if (!lastExcelRow) calculateFuel();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(lastExcelRow).then(() => {
+                alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
+            }).catch(() => fallbackCopy(lastExcelRow));
+        } else {
+            fallbackCopy(lastExcelRow);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
+    }
+
+    /* Autocomplete Setup */
+    function attachAutocomplete(inputId) {
+        const inp = document.getElementById(inputId);
+        if (!inp) return;
+        let currentFocus;
+
+        inp.addEventListener("input", function () {
+            const val = this.value.trim().toLowerCase();
+            closeAllLists();
+            currentFocus = -1;
+            if (!val) return;
+
+            const listDiv = document.createElement("div");
+            listDiv.setAttribute("id", this.id + "-autocomplete-list");
+            listDiv.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(listDiv);
+
+            const matches = cityNames.filter(c => c.toLowerCase().includes(val)).slice(0, 12);
+            matches.forEach(item => {
+                const itemDiv = document.createElement("div");
+                itemDiv.textContent = item;
+                itemDiv.addEventListener("click", function () {
+                    inp.value = item;
+                    closeAllLists();
+                    if (inputId === "fromCity") {
+                        syncReturnDefaultCity();
+                        autoCalculateDistance();
+                    } else if (inputId === "toCity") {
+                        autoCalculateDistance();
+                    } else if (inputId === "returnToCity") {
+                        autoCalculateReturnDistance();
+                    }
+                });
+                listDiv.appendChild(itemDiv);
+            });
+        });
+
+        inp.addEventListener("keydown", function (e) {
+            const list = document.getElementById(this.id + "-autocomplete-list");
+            if (!list) return;
+            const items = list.getElementsByTagName("div");
+            if (e.keyCode === 40) {
+                currentFocus++;
+                addActive(items);
+            } else if (e.keyCode === 38) {
+                currentFocus--;
+                addActive(items);
+            } else if (e.keyCode === 13) {
+                if (currentFocus > -1 && items[currentFocus]) {
+                    e.preventDefault();
+                    items[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(items) {
+            if (!items || !items.length) return;
+            removeActive(items);
+            if (currentFocus >= items.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = items.length - 1;
+            items[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(items) {
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            const items = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < items.length; i++) {
+                if (elmnt !== items[i] && elmnt !== inp) {
+                    items[i].parentNode.removeChild(items[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    /* Multi-Company Auth & Sheet Verification */
+    function parseCSVLine(line) {
+        const result = [];
+        let cur = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                inQuotes = !inQuotes;
+            } else if (ch === "," && !inQuotes) {
+                result.push(cur.trim());
+                cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim());
+        return result;
+    }
+
+    async function fetchCompaniesFromSheet() {
+        const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("Sheet fetch failed");
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        if (lines.length < 2) return [];
+
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
+        const codeIdx = headers.findIndex(h => h.includes("code") || h.includes("company"));
+        const pinIdx = headers.findIndex(h => h.includes("pin") || h.includes("pass"));
+        const titleIdx = headers.findIndex(h => h.includes("title") || h.includes("name"));
+        const wmIdx = headers.findIndex(h => h.includes("watermark"));
+        const expIdx = headers.findIndex(h => h.includes("exp") || h.includes("valid"));
+        const activeIdx = headers.findIndex(h => h.includes("status") || h.includes("active"));
+
+        const companies = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            const code = (cols[codeIdx >= 0 ? codeIdx : 0] || "").toUpperCase();
+            const pin = (cols[pinIdx >= 0 ? pinIdx : 1] || "");
+            if (!code && !pin) continue;
+            companies.push({
+                code,
+                pin,
+                title: (titleIdx >= 0 && cols[titleIdx]) ? cols[titleIdx] : `${code} FLEET & LOGISTICS`,
+                watermark: (wmIdx >= 0 && cols[wmIdx]) ? cols[wmIdx] : code,
+                expiry: (expIdx >= 0 && cols[expIdx]) ? cols[expIdx] : "",
+                status: (activeIdx >= 0 && cols[activeIdx]) ? cols[activeIdx].toLowerCase() : "active"
+            });
+        }
+        return companies;
+    }
+
+    function applyCompanyBranding(comp) {
+        activeCompany = comp;
+        document.documentElement.style.setProperty("--wm-text", `"${comp.watermark || comp.code || "R TECH"}"`);
+        const hdr = document.getElementById("slipCompanyHeader");
+        const prep = document.getElementById("slipPreparedBy");
+        if (hdr) hdr.textContent = comp.title || "R TECH FLEET & LOGISTICS";
+        if (prep) prep.textContent = `Prepared By (${comp.code || "R TECH"})`;
+    }
+
+    function unlockSessionUI(comp) {
+        applyCompanyBranding(comp);
+        const overlay = document.getElementById("bcc-lock-overlay");
+        const btn = document.getElementById("bcc-settings-btn");
+        if (overlay) overlay.style.display = "none";
+        if (btn) btn.style.display = "block";
+    }
+
+    async function verifyCompanyLogin() {
+        const codeInput = document.getElementById("bcc-company-code");
+        const pinInput = document.getElementById("bcc-login-pin");
+        const errEl = document.getElementById("bcc-login-error");
+        const btn = document.getElementById("bcc-unlock-btn");
+
+        const code = (codeInput?.value || "").trim().toUpperCase();
+        const pin = (pinInput?.value || "").trim();
+
+        if (errEl) errEl.style.display = "none";
+        if (!code || !pin) {
+            if (errEl) {
+                errEl.textContent = "Baraye meharbani Company Code aur PIN dono likhein.";
+                errEl.style.display = "block";
+            }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+        }
+
+        try {
+            const list = await fetchCompaniesFromSheet();
+            const matched = list.find(c => c.code === code && c.pin === pin);
+
+            if (!matched) {
+                if (errEl) {
+                    errEl.textContent = "Ghalat Company Code ya PIN! Dobara check karein.";
+                    errEl.style.display = "block";
+                }
+                return;
+            }
+
+            if (matched.status === "inactive" || matched.status === "disabled" || matched.status === "blocked") {
+                if (errEl) {
+                    errEl.textContent = "Yeh Company Code is waqt inactive hai.";
+                    errEl.style.display = "block";
+                }
+                return;
+            }
+
+            if (matched.expiry) {
+                const expDate = new Date(matched.expiry);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (!isNaN(expDate.getTime()) && expDate < today) {
+                    if (errEl) {
+                        errEl.textContent = `Is company ka license (${matched.expiry}) expire ho chuka hai.`;
+                        errEl.style.display = "block";
+                    }
+                    return;
+                }
+            }
+
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(matched));
+            unlockSessionUI(matched);
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = "Internet ya Google Sheet connect karne mein masla aaya. Dobara koshish karein.";
+                errEl.style.display = "block";
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Unlock Karein";
+            }
+        }
+    }
+
+    function openAccountModal() {
+        const info =
+            `<strong>Company:</strong> ${activeCompany.title}<br>` +
+            `<strong>Code:</strong> ${activeCompany.code}<br>` +
+            `<strong>Expiry:</strong> ${activeCompany.expiry || "Active"}`;
+        const infoEl = document.getElementById("activeCompanyInfo");
+        const modalEl = document.getElementById("bcc-pin-modal");
+        if (infoEl) infoEl.innerHTML = info;
+        if (modalEl) modalEl.style.display = "flex";
+    }
+
+    function closeAccountModal() {
+        const modalEl = document.getElementById("bcc-pin-modal");
+        if (modalEl) modalEl.style.display = "none";
+    }
+
+    function lockBccNow() {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        closeAccountModal();
+        const pinEl = document.getElementById("bcc-login-pin");
+        const overlay = document.getElementById("bcc-lock-overlay");
+        const btn = document.getElementById("bcc-settings-btn");
+        if (pinEl) pinEl.value = "";
+        if (overlay) overlay.style.display = "flex";
+        if (btn) btn.style.display = "none";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        attachAutocomplete("fromCity");
+        attachAutocomplete("toCity");
+        attachAutocomplete("returnToCity");
+        syncReturnDefaultCity();
+        syncReturnTare();
+        calculateModelAverage();
+
+        try {
+            const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.code) {
+                    unlockSessionUI(parsed);
+                }
+            }
+        } catch (e) {}
+
+        // Step 4 (Aakhri PWA Step): Register Service Worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js")
+                .then(() => console.log("PWA Service Worker Registered"))
+                .catch((err) => console.log("SW Error:", err));
+        }
+    });
+</script>
+</body>
+</html>
