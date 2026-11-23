@@ -1208,6 +1208,12 @@
     const AUTH_STORAGE_KEY = "rtech_active_session_v1";
     const VEHICLE_PROFILES_KEY = "rtech_vehicle_profiles_v1";
 
+    // Offline / Fallback Master Logins (Agar Google Sheet connect na ho to yeh chalega)
+    const FALLBACK_COMPANIES = [
+        { code: "BCC", pin: "1234", title: "BCC FLEET & LOGISTICS", watermark: "BCC", expiry: "2030-12-31", status: "active" },
+        { code: "RTECH", pin: "7860", title: "R TECH FLEET & LOGISTICS", watermark: "R TECH", expiry: "2030-12-31", status: "active" }
+    ];
+
     let activeCompany = {
         code: "RTECH",
         title: "R TECH FLEET & LOGISTICS",
@@ -2357,4 +2363,524 @@
                 const retExitIC = document.getElementById("returnExitInterchange")?.value || "";
                 const retAvg = hasCustom ? customVal : calcAutoKMPerL(retGross, tareTons, retRoute, retFromCity, retToCity);
                 const retTerrain = getTerrainAdjustment(retFromCity, retToCity, retRoute);
-                const
+                const retSpeed = getPakistanTrailerSpeed(retRoute, retNetLoad, retFromCity, retToCity, profile.isWeak);
+                const retTag = retTerrain.label ? ` [${retTerrain.label}]` : "";
+                returnPreviewNote = ` | <strong>Wapsi Avg:</strong> ${retAvg.toFixed(2)} KM/L (${retSpeed} km/h)${retTag}`;
+
+                const retIcSummary = getInterchangeSummary(retEntryIC, retExitIC);
+                const retDetailText = getCorridorRouteDetail(retFromCity, retToCity, retRoute, retEntryIC, retExitIC);
+                returnRoutePreviewHtml = `<br>🔄 <strong>Wapsi IC:</strong> ${retIcSummary}<br>🛣️ <strong>Wapsi Route:</strong> ${retDetailText}`;
+            }
+
+            previewEl.innerHTML =
+                `<span class="rtech-era-badge">${profile.brandBadge}</span>` +
+                `<strong>${profile.fullText}</strong>${terrainHtml}${speedHtml}<br>` +
+                `Haalat: <strong>${profile.condLabel}</strong>${weakHtml} | ` +
+                `Jaate Avg: <strong>${activeVal} KM/L</strong>${localPreviewNote}${returnPreviewNote} ` +
+                `<span>(${modeText} | Khali Base: ${profile.baseAvg.toFixed(2)} | Net Load: ${outNetLoad.toFixed(1)}T)</span>` +
+                `<div class="rtech-route-detail">🚦 <strong>Jaate Interchange:</strong> ${icSummary}<br>🛣️ <strong>Jaate Route:</strong> ${routeDetailText}${localRoutePreviewHtml}${returnRoutePreviewHtml}</div>`;
+        }
+
+        return hasCustom ? customVal : autoAvg;
+    }
+
+    function getRouteLabel(val) {
+        if (val === "motorway") return "Motorway (M-9 / M-5 / M-2)";
+        if (val === "gt") return "GT Road (N-5)";
+        if (val === "local") return "Local City";
+        return "Mix Route (Motorway + GT)";
+    }
+
+    function calculateFuel() {
+        const vehicleNo = (document.getElementById("vehicleNo")?.value || "N/A").trim() || "N/A";
+        const fromCity = (document.getElementById("fromCity")?.value || "Origin").trim() || "Origin";
+        const toCity = (document.getElementById("toCity")?.value || "Destination").trim() || "Destination";
+        const routeType = document.getElementById("routeType")?.value || "mix";
+        const entryIC = document.getElementById("entryInterchange")?.value || "";
+        const exitIC = document.getElementById("exitInterchange")?.value || "";
+        const outKM = Math.max(0, safeFloat(document.getElementById("distanceKM")?.value, 0));
+        const dieselRate = Math.max(0, safeFloat(document.getElementById("dieselRate")?.value, 0));
+        const tareTons = Math.max(0, safeFloat(document.getElementById("tareWeight")?.value, 0));
+        const grossTons = Math.max(tareTons, safeFloat(document.getElementById("grossWeight")?.value, tareTons));
+        const customAvgVal = safeFloat(document.getElementById("customAvg")?.value, NaN);
+        const hasCustomAvg = Number.isFinite(customAvgVal) && customAvgVal > 0;
+
+        const profile = getSelectedModelProfile();
+        saveVehicleMemory(vehicleNo, profile.key, profile.condKey, tareTons);
+
+        const outTerrain = getTerrainAdjustment(fromCity, toCity, routeType);
+        const terrainNote = outTerrain.label ? ` • ${outTerrain.label}` : "";
+        const modelInfoDisplay = `${profile.fullText} [${profile.condLabel}${profile.isWeak ? " ⚠️" : ""}]${terrainNote}`;
+
+        const outNetTons = Math.max(0, grossTons - tareTons);
+        const outAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(grossTons, tareTons, routeType, fromCity, toCity);
+        const outLitres = outAvg > 0 ? outKM / outAvg : 0;
+        const outSpeed = getPakistanTrailerSpeed(routeType, outNetTons, fromCity, toCity, profile.isWeak);
+        const outHours = outSpeed > 0 ? outKM / outSpeed : 0;
+
+        // Local & Extra Intercity Trips Calculation
+        const localData = getLocalTripsData(tareTons, hasCustomAvg, customAvgVal, profile.isWeak);
+        const hasActiveLocals = localData.enabled && localData.trips.length > 0;
+
+        let totalKM = outKM + localData.totalKM;
+        let totalLitres = outLitres + localData.totalLitres;
+        let totalNetTons = outNetTons + localData.totalNetTons;
+        let totalHours = outHours + localData.totalHours;
+
+        let routeDisplay = `${fromCity} → ${toCity}`;
+        let icDisplay = getInterchangeSummary(entryIC, exitIC);
+        let routeDetailDisplay = getCorridorRouteDetail(fromCity, toCity, routeType, entryIC, exitIC);
+        let corridorDisplay = getRouteLabel(routeType);
+        let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
+
+        const localRowEl = document.getElementById("slipLocalRow");
+        const localResEl = document.getElementById("resLocalTrips");
+        let localSummaryText = "None";
+
+        if (hasActiveLocals) {
+            localSummaryText = localData.trips
+                .map(t => `#${t.index} ${t.from}→${t.to} (${t.km}KM, ${t.gross}T)`)
+                .join(" | ");
+            if (localRowEl) localRowEl.style.display = "flex";
+            if (localResEl) localResEl.textContent = `${localData.trips.length} Trip(s) • ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
+            routeDetailDisplay = `Jaana: ${routeDetailDisplay} | Extra/Local (${localData.trips.length}): ${localSummaryText}`;
+            corridorDisplay = `${corridorDisplay} + Extra/Local (${localData.totalKM} KM)`;
+        } else {
+            if (localRowEl) localRowEl.style.display = "none";
+        }
+
+        const isReturn = !!document.getElementById("isReturn")?.checked;
+        let retAvg = 0;
+
+        if (isReturn) {
+            const retFromCity = (document.getElementById("returnFromCity")?.value || toCity).trim() || toCity;
+            const retToCity = (document.getElementById("returnToCity")?.value || fromCity).trim() || fromCity;
+            const retRouteType = document.getElementById("returnRouteType")?.value || "mix";
+            const retEntryIC = document.getElementById("returnEntryInterchange")?.value || "";
+            const retExitIC = document.getElementById("returnExitInterchange")?.value || "";
+            const retKM = Math.max(0, safeFloat(document.getElementById("returnDistanceKM")?.value, 0));
+            const retGrossTons = Math.max(tareTons, safeFloat(document.getElementById("returnGrossWeight")?.value, tareTons));
+            const retNetTons = Math.max(0, retGrossTons - tareTons);
+
+            retAvg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(retGrossTons, tareTons, retRouteType, retFromCity, retToCity);
+            const retLitres = retAvg > 0 ? retKM / retAvg : 0;
+            const retSpeed = getPakistanTrailerSpeed(retRouteType, retNetTons, retFromCity, retToCity, profile.isWeak);
+            const retHours = retSpeed > 0 ? retKM / retSpeed : 0;
+
+            totalKM += retKM;
+            totalLitres += retLitres;
+            totalNetTons += retNetTons;
+            totalHours += retHours;
+
+            routeDisplay = (retFromCity.toLowerCase() === toCity.toLowerCase())
+                ? `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Extra)` : ""} → ${retToCity}`
+                : `${fromCity} → ${toCity}${hasActiveLocals ? ` (+${localData.trips.length} Extra)` : ""} | ${retFromCity} → ${retToCity}`;
+
+            const retIcSummary = getInterchangeSummary(retEntryIC, retExitIC);
+            icDisplay = `Jaana (${icDisplay}) | Wapsi (${retIcSummary})`;
+            const retDetail = getCorridorRouteDetail(retFromCity, retToCity, retRouteType, retEntryIC, retExitIC);
+            routeDetailDisplay = `${routeDetailDisplay} | Wapsi: ${retDetail}`;
+            corridorDisplay = `Out: ${getRouteLabel(routeType)}${hasActiveLocals ? ` + Extra` : ""} | Ret: ${getRouteLabel(retRouteType)}`;
+            weightDisplay = `Out ${grossTons}T${hasActiveLocals ? ` + Extra` : ""} / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
+        } else if (hasActiveLocals) {
+            routeDisplay = `${fromCity} → ${toCity} (+${localData.trips.length} Extra)`;
+            weightDisplay = `Out ${grossTons}T + Extra ${localData.trips.length}Tps (Tare ${tareTons}T)`;
+        }
+
+        const blendedSpeed = totalHours > 0 ? Math.round(totalKM / totalHours) : outSpeed;
+        const speedTimeDisplay = `~${blendedSpeed} km/h | ${formatHoursToHrMin(totalHours)}`;
+
+        const blendedAvg = totalLitres > 0 ? totalKM / totalLitres : outAvg;
+        let avgDisplay = outAvg.toFixed(2);
+        if (isReturn && hasActiveLocals) {
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ext ${localData.totalLitres > 0 ? (localData.totalKM / localData.totalLitres).toFixed(2) : outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
+        } else if (isReturn) {
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
+        } else if (hasActiveLocals) {
+            const locAvg = localData.totalLitres > 0 ? (localData.totalKM / localData.totalLitres).toFixed(2) : outAvg.toFixed(2);
+            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ext ${locAvg})`;
+        }
+
+        const grandTotal = Math.round(totalLitres * dieselRate);
+        const perTonCost = totalNetTons > 0 ? Math.round(grandTotal / totalNetTons) : 0;
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+        document.getElementById("slipCompanyHeader").textContent = activeCompany.title || "R TECH FLEET & LOGISTICS";
+        document.getElementById("slipPreparedBy").textContent = `Prepared By (${activeCompany.code || "R TECH"})`;
+        document.getElementById("slipDate").textContent = dateStr;
+        document.getElementById("slipVehicle").textContent = vehicleNo;
+        document.getElementById("resModelInfo").textContent = modelInfoDisplay;
+        document.getElementById("resRouteName").textContent = routeDisplay;
+        document.getElementById("resInterchanges").textContent = icDisplay;
+        document.getElementById("resRouteDetail").textContent = routeDetailDisplay;
+        document.getElementById("resRouteType").textContent = corridorDisplay;
+        document.getElementById("resDist").textContent = totalKM.toLocaleString();
+        document.getElementById("resSpeedTime").textContent = speedTimeDisplay;
+        document.getElementById("resWeights").textContent = weightDisplay;
+        document.getElementById("resAvg").textContent = avgDisplay;
+        document.getElementById("resRate").textContent = dieselRate.toLocaleString();
+        document.getElementById("resFuel").textContent = totalLitres.toFixed(1);
+        document.getElementById("resGrandTotal").textContent = grandTotal.toLocaleString();
+        document.getElementById("resPerTon").textContent = perTonCost.toLocaleString();
+
+        const wrapper = document.getElementById("resultWrapper");
+        if (wrapper) {
+            wrapper.style.display = "block";
+            wrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        lastSummaryText =
+            `*${activeCompany.title || "R TECH FLEET & LOGISTICS"}*\n` +
+            `Date: ${dateStr} | Vehicle: *${vehicleNo}*\n` +
+            `Model/Haalat: ${modelInfoDisplay}\n` +
+            `Route: ${routeDisplay}\n` +
+            (hasActiveLocals ? `Extra/Local Trips (${localData.trips.length}): ${localSummaryText}\n` : "") +
+            `Interchanges: ${icDisplay}\n` +
+            `Route Detail: ${routeDetailDisplay}\n` +
+            `Distance: ${totalKM} KM (${speedTimeDisplay}) | Avg: ${avgDisplay} KM/L\n` +
+            `Diesel: ${totalLitres.toFixed(1)} L @ Rs.${dieselRate}/L\n` +
+            `*Total Diesel Cost: Rs. ${grandTotal.toLocaleString()}*`;
+
+        lastExcelRow = [
+            dateStr, vehicleNo, profile.brandBadge, profile.fullText, profile.condLabel,
+            routeDisplay, localSummaryText, icDisplay, routeDetailDisplay, corridorDisplay, totalKM, speedTimeDisplay, tareTons, grossTons,
+            avgDisplay, totalLitres.toFixed(1), dieselRate, grandTotal
+        ].join("\t");
+    }
+
+    function shareWhatsApp() {
+        if (!lastSummaryText) calculateFuel();
+        const url = "https://wa.me/?text=" + encodeURIComponent(lastSummaryText);
+        window.open(url, "_blank");
+    }
+
+    function copyForExcel() {
+        if (!lastExcelRow) calculateFuel();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(lastExcelRow).then(() => {
+                alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
+            }).catch(() => fallbackCopy(lastExcelRow));
+        } else {
+            fallbackCopy(lastExcelRow);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
+    }
+
+    /* Autocomplete Setup */
+    function attachAutocomplete(inputId, isLocalField = false) {
+        const inp = document.getElementById(inputId);
+        if (!inp) return;
+        let currentFocus;
+
+        inp.addEventListener("input", function () {
+            const val = this.value.trim().toLowerCase();
+            closeAllLists();
+            currentFocus = -1;
+            if (!val) return;
+
+            const listDiv = document.createElement("div");
+            listDiv.setAttribute("id", this.id + "-autocomplete-list");
+            listDiv.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(listDiv);
+
+            const matches = cityNames.filter(c => c.toLowerCase().includes(val)).slice(0, 12);
+            matches.forEach(item => {
+                const itemDiv = document.createElement("div");
+                itemDiv.textContent = item;
+                itemDiv.addEventListener("click", function () {
+                    inp.value = item;
+                    closeAllLists();
+                    if (isLocalField) {
+                        autoCalculateLocalCardKM(inp.closest(".local-trip-card"));
+                    } else if (inputId === "fromCity") {
+                        syncReturnDefaultCity();
+                        autoCalculateDistance();
+                    } else if (inputId === "toCity") {
+                        syncReturnFromCity();
+                        autoCalculateDistance();
+                    } else if (inputId === "returnFromCity" || inputId === "returnToCity") {
+                        autoCalculateReturnDistance();
+                    }
+                    calculateModelAverage();
+                });
+                listDiv.appendChild(itemDiv);
+            });
+        });
+
+        inp.addEventListener("keydown", function (e) {
+            const list = document.getElementById(this.id + "-autocomplete-list");
+            if (!list) return;
+            const items = list.getElementsByTagName("div");
+            if (e.keyCode === 40) {
+                currentFocus++;
+                addActive(items);
+            } else if (e.keyCode === 38) {
+                currentFocus--;
+                addActive(items);
+            } else if (e.keyCode === 13) {
+                if (currentFocus > -1 && items[currentFocus]) {
+                    e.preventDefault();
+                    items[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(items) {
+            if (!items || !items.length) return;
+            removeActive(items);
+            if (currentFocus >= items.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = items.length - 1;
+            items[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(items) {
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            const items = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < items.length; i++) {
+                if (elmnt !== items[i] && elmnt !== inp) {
+                    items[i].parentNode.removeChild(items[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    /* Multi-Company Auth & Sheet Verification */
+    function parseCSVLine(line) {
+        const result = [];
+        let cur = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                inQuotes = !inQuotes;
+            } else if (ch === "," && !inQuotes) {
+                result.push(cur.trim());
+                cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        result.push(cur.trim());
+        return result;
+    }
+
+    function isCompanyExpired(expiryStr) {
+        if (!expiryStr) return false;
+        const expDate = new Date(expiryStr);
+        if (isNaN(expDate.getTime())) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return expDate < today;
+    }
+
+    async function fetchCompaniesFromSheet() {
+        const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("Sheet fetch failed");
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        if (lines.length < 2) return [];
+
+        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
+        const codeIdx = headers.findIndex(h => h.includes("code") || h.includes("company"));
+        const pinIdx = headers.findIndex(h => h.includes("pin") || h.includes("pass"));
+        const titleIdx = headers.findIndex(h => h.includes("title") || h.includes("name"));
+        const wmIdx = headers.findIndex(h => h.includes("watermark"));
+        const expIdx = headers.findIndex(h => h.includes("exp") || h.includes("valid"));
+        const activeIdx = headers.findIndex(h => h.includes("status") || h.includes("active"));
+
+        const companies = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = parseCSVLine(lines[i]);
+            const code = (cols[codeIdx >= 0 ? codeIdx : 0] || "").toUpperCase();
+            const pin = (cols[pinIdx >= 0 ? pinIdx : 1] || "");
+            if (!code && !pin) continue;
+            companies.push({
+                code,
+                pin,
+                title: (titleIdx >= 0 && cols[titleIdx]) ? cols[titleIdx] : `${code} FLEET & LOGISTICS`,
+                watermark: (wmIdx >= 0 && cols[wmIdx]) ? cols[wmIdx] : code,
+                expiry: (expIdx >= 0 && cols[expIdx]) ? cols[expIdx] : "",
+                status: (activeIdx >= 0 && cols[activeIdx]) ? cols[activeIdx].toLowerCase() : "active"
+            });
+        }
+        return companies;
+    }
+
+    function applyCompanyBranding(comp) {
+        activeCompany = comp;
+        document.documentElement.style.setProperty("--wm-text", `"${comp.watermark || comp.code || "R TECH"}"`);
+        const hdr = document.getElementById("slipCompanyHeader");
+        const prep = document.getElementById("slipPreparedBy");
+        if (hdr) hdr.textContent = comp.title || "R TECH FLEET & LOGISTICS";
+        if (prep) prep.textContent = `Prepared By (${comp.code || "R TECH"})`;
+    }
+
+    function unlockSessionUI(comp) {
+        applyCompanyBranding(comp);
+        const overlay = document.getElementById("bcc-lock-overlay");
+        const btn = document.getElementById("bcc-settings-btn");
+        if (overlay) overlay.style.display = "none";
+        if (btn) btn.style.display = "block";
+    }
+
+    async function verifyCompanyLogin() {
+        const codeInput = document.getElementById("bcc-company-code");
+        const pinInput = document.getElementById("bcc-login-pin");
+        const errEl = document.getElementById("bcc-login-error");
+        const btn = document.getElementById("bcc-unlock-btn");
+
+        const code = (codeInput?.value || "").trim().toUpperCase();
+        const pin = (pinInput?.value || "").trim();
+
+        if (errEl) errEl.style.display = "none";
+        if (!code || !pin) {
+            if (errEl) {
+                errEl.textContent = "Baraye meharbani Company Code aur PIN dono likhein.";
+                errEl.style.display = "block";
+            }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+        }
+
+        try {
+            let list = [];
+            try {
+                list = await fetchCompaniesFromSheet();
+            } catch (sheetErr) {
+                console.warn("Sheet fetch failed, using fallback list:", sheetErr);
+                list = FALLBACK_COMPANIES;
+            }
+
+            if (!list || list.length === 0) {
+                list = FALLBACK_COMPANIES;
+            }
+
+            let matched = list.find(c => c.code === code && c.pin === pin);
+            if (!matched) {
+                matched = FALLBACK_COMPANIES.find(c => c.code === code && c.pin === pin);
+            }
+
+            if (!matched) {
+                if (errEl) {
+                    errEl.textContent = "Ghalat Company Code ya PIN! Dobara check karein.";
+                    errEl.style.display = "block";
+                }
+                return;
+            }
+
+            if (matched.status === "inactive" || matched.status === "disabled" || matched.status === "blocked") {
+                if (errEl) {
+                    errEl.textContent = "Yeh Company Code is waqt inactive hai.";
+                    errEl.style.display = "block";
+                }
+                return;
+            }
+
+            if (isCompanyExpired(matched.expiry)) {
+                if (errEl) {
+                    errEl.textContent = `Is company ka license (${matched.expiry}) expire ho chuka hai.`;
+                    errEl.style.display = "block";
+                }
+                return;
+            }
+
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(matched));
+            unlockSessionUI(matched);
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = "Error: " + (err.message || "Login mein masla aaya.");
+                errEl.style.display = "block";
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Unlock Karein";
+            }
+        }
+    }
+
+    function openAccountModal() {
+        const info =
+            `<strong>Company:</strong> ${activeCompany.title}<br>` +
+            `<strong>Code:</strong> ${activeCompany.code}<br>` +
+            `<strong>Expiry:</strong> ${activeCompany.expiry || "Active"}`;
+        const infoEl = document.getElementById("activeCompanyInfo");
+        const modalEl = document.getElementById("bcc-pin-modal");
+        if (infoEl) infoEl.innerHTML = info;
+        if (modalEl) modalEl.style.display = "flex";
+    }
+
+    function closeAccountModal() {
+        const modalEl = document.getElementById("bcc-pin-modal");
+        if (modalEl) modalEl.style.display = "none";
+    }
+
+    function lockBccNow() {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        closeAccountModal();
+        const pinEl = document.getElementById("bcc-login-pin");
+        const overlay = document.getElementById("bcc-lock-overlay");
+        const btn = document.getElementById("bcc-settings-btn");
+        if (pinEl) pinEl.value = "";
+        if (overlay) overlay.style.display = "flex";
+        if (btn) btn.style.display = "none";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        attachAutocomplete("fromCity");
+        attachAutocomplete("toCity");
+        attachAutocomplete("returnFromCity");
+        attachAutocomplete("returnToCity");
+        syncReturnFromCity();
+        syncReturnDefaultCity();
+        syncReturnTare();
+        refreshSavedVehiclesUI();
+        loadVehicleMemory();
+        calculateModelAverage();
+
+        try {
+            const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.code && !isCompanyExpired(parsed.expiry)) {
+                    unlockSessionUI(parsed);
+                } else {
+                    localStorage.removeItem(AUTH_STORAGE_KEY);
+                }
+            }
+        } catch (e) {}
+
+        // Register Service Worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js")
+                .then(() => console.log("PWA Service Worker Registered"))
+                .catch((err) => console.log("SW Error:", err));
+        }
+    });
+</script>
+</body>
+</html>
