@@ -71,6 +71,13 @@
             color: #666;
             margin-top: 4px;
         }
+        .veh-mem-hint {
+            font-size: 11.5px;
+            color: #0f766e;
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
 
         /* Model & Condition Box */
         .rtech-model-box {
@@ -326,4 +333,102 @@
         }
         .btn-print { flex: 1; background-color: #333; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
         .btn-whatsapp { flex: 1; background-color: #25D366; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
-        .btn-excel { flex: 1; background-color: #217346; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;
+        .btn-excel { flex: 1; background-color: #217346; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        /* R TECH Animated Logo Styles */
+        @keyframes rtechFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.03); }
+        }
+        @keyframes rtechPulseGlow {
+            0%, 100% { filter: drop-shadow(0 4px 10px rgba(239, 68, 68, 0.35)); }
+            50% { filter: drop-shadow(0 8px 20px rgba(239, 68, 68, 0.72)); }
+        }
+        @keyframes rtechDotBlink {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.45); opacity: 0.55; }
+        }
+        #bcc-lock-overlay svg {
+            animation: rtechFloat 3.2s ease-in-out infinite, rtechPulseGlow 3.2s ease-in-out infinite;
+            transform-origin: center;
+        }
+        #bcc-lock-overlay svg circle {
+            animation: rtechDotBlink 1.8s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            body { background: #fff; padding: 0; margin: 0; }
+            body * { visibility: hidden; animation: none !important; }
+            #bcc-settings-btn, #bcc-lock-overlay, #bcc-pin-modal, .rtech-footer-badge { display: none !important; }
+            #printableSlip, #printableSlip * { visibility: visible; }
+            #printableSlip {
+                position: absolute;
+                left: 50%;
+                top: 10mm;
+                transform: translateX(-50%);
+                width: 135mm;
+                max-width: 135mm;
+                border: 1.5px solid #000;
+                box-shadow: none;
+                padding: 12px 16px;
+                background: #fff;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .row { flex-direction: column; gap: 0; }
+            .action-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="appMainHeading">🚚 R TECH Fuel Calculator</h2>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="vehicleNo">Gaari Number (Optional):</label>
+            <input type="text" id="vehicleNo" placeholder="Maslan: TLH-990" value="JT-5697" oninput="loadVehicleMemory()" onblur="loadVehicleMemory()">
+            <div class="veh-mem-hint" id="vehMemoryStatus"></div>
+        </div>
+        <div class="col form-group">
+            <label for="routeType">Jaane ka Rasta (Outbound Route):</label>
+            <select id="routeType" onchange="autoCalculateDistance(); calculateModelAverage();">
+                <option value="gt">GT Road / N-5</option>
+                <option value="motorway">Motorway / M-9 / M-5</option>
+                <option value="mix" selected>Mix Route (Motorway + GT)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group autocomplete">
+            <label for="fromCity">Kahan Se (Origin / Port / Adda):</label>
+            <input type="text" id="fromCity" placeholder="Shehar, Factory ya Adda likhein..." value="Karachi" autocomplete="off" oninput="syncReturnDefaultCity()">
+        </div>
+
+        <div class="col form-group autocomplete">
+            <label for="toCity">Kahan Tak (Destination / Factory):</label>
+            <input type="text" id="toCity" placeholder="Shehar, Factory ya Adda likhein..." value="Faisalabad" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col form-group">
+            <label for="distanceKM">Jaane ka Faasla (Outbound KM):</label>
+            <input type="number" step="any" inputmode="decimal" id="distanceKM" value="1184" placeholder="Auto fill ya khud likhein" onfocus="this.select()">
+            <div class="km-adjust-bar" title="Factory bypass ya sheher ke andar ka farq adjust karein">
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(-10)">-10 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(-5)">-5 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(5)">+5 KM</button>
+                <button type="button" class="btn-km-adj" onclick="adjustDistance(10)">+10 KM</button>
+            </div>
+            <div class="hint" id="distHint">Shehar/Factory select karein ya +/- KM se bypass adjust karein.</div>
+        </div>
+        <div class="col form-group">
+            <label for="dieselRate">Diesel Rate (Rs / Litre):</label>
+            <input type="number" step="any" inputmode="decimal" id="dieselRate" value="344
