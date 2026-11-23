@@ -81,9 +81,31 @@
             background: #f8fafc;
         }
         .rtech-status {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 12.5px;
             color: #334155;
+            line-height: 1.45;
+        }
+        .rtech-weak-badge {
+            display: inline-block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            margin-left: 4px;
+        }
+        .rtech-era-badge {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #0f172a;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 4px;
         }
 
         /* Quick KM Adjust Buttons */
@@ -416,33 +438,39 @@
         </div>
     </div>
 
-    <!-- Model & Condition Box -->
+    <!-- Model, HP, Era & Engine Condition Box -->
     <div class="rtech-model-box">
         <div class="row">
-            <div class="col form-group" style="margin-bottom:6px;">
-                <label for="vehicleModel">Gaari / Model (Pakistan Adday Naam):</label>
+            <div class="col form-group" style="margin-bottom:8px;">
+                <label for="vehicleModel">Gaari Model &amp; HP (Naya / Purana):</label>
                 <select id="vehicleModel" onchange="calculateModelAverage()">
-                    <option value="auto_default" data-base="4.30" data-drop="0.025">Auto Default (4.30 Tare Base)</option>
-                    <option value="hino_p11c" data-base="4.25" data-drop="0.026">Hino Profia P11C (350-380 HP)</option>
-                    <option value="hino_e13c" data-base="3.95" data-drop="0.024">Hino Profia / 700 E13C (410-450 HP)</option>
-                    <option value="isuzu_6wf1" data-base="4.10" data-drop="0.025">Isuzu Giga 6WF1 (360-390 HP)</option>
-                    <option value="isuzu_6wg1" data-base="3.95" data-drop="0.023">Isuzu Giga 6WG1 / CYZ52 (390-460 HP)</option>
-                    <option value="nissan_311" data-base="4.65" data-drop="0.032">Nissan 311 Series (PKD / CDA / PKC-311)</option>
-                    <option value="nissan_411" data-base="4.60" data-drop="0.030">Nissan 411 Series (PKD / CDA / 411 Prime)</option>
-                    <option value="nissan_cm_cp" data-base="4.75" data-drop="0.032">Nissan Condor CM / CP Series</option>
-                    <option value="nissan_bigthumb_quon" data-base="3.85" data-drop="0.024">Nissan Big Thumb / Quon</option>
-                    <option value="faw_j5m" data-base="4.40" data-drop="0.028">FAW J5M (220 / 280 HP)</option>
-                    <option value="faw_j5p" data-base="4.20" data-drop="0.026">FAW J5P (360 / 420 HP)</option>
-                    <option value="howo_sitrak" data-base="4.10" data-drop="0.025">Sinotruk HOWO NX / SITRAK C7H</option>
-                    <option value="dongfeng_shacman" data-base="4.15" data-drop="0.025">Dongfeng / Shacman Heavy</option>
+                    <optgroup label="Naye / Fresh Models">
+                        <option value="nissan_311_new" data-era="Naya / Fresh" data-base="4.70" data-drop="0.028">Naya — Nissan 311 Series (CP/CM ~230-280 HP)</option>
+                        <option value="nissan_411_new" data-era="Naya / Fresh" data-base="4.65" data-drop="0.027">Naya — Nissan 411 Series (CP/CM ~250-320 HP)</option>
+                        <option value="hino_p11c_new" data-era="Naya / Fresh" data-base="4.40" data-drop="0.024">Naya — Hino Profia P11C (~350-380 HP)</option>
+                        <option value="isuzu_6wf1_new" data-era="Naya / Fresh" data-base="4.20" data-drop="0.023">Naya — Isuzu Giga 6WF1 (~360-390 HP)</option>
+                        <option value="nissan_howo_new" data-era="Naya / Fresh" data-base="4.15" data-drop="0.023">Naya — Nissan GE13 / HOWO / SITRAK (~370-420 HP)</option>
+                        <option value="hino_e13c_new" data-era="Naya / Fresh" data-base="4.05" data-drop="0.022">Naya — Hino 700 / Profia E13C (~410-450 HP)</option>
+                        <option value="isuzu_6wg1_new" data-era="Naya / Fresh" data-base="4.00" data-drop="0.021">Naya — Isuzu Giga 6WG1 / CYZ52 (~390-460 HP)</option>
+                    </optgroup>
+                    <optgroup label="Purane / Kabuli / Used Models">
+                        <option value="nissan_311_old" data-era="Purana / Kabuli" data-base="4.35" data-drop="0.032" selected>Purana / Kabuli — Nissan 311 Series (CP/CM ~230-280 HP)</option>
+                        <option value="nissan_411_old" data-era="Purana / Kabuli" data-base="4.30" data-drop="0.031">Purana / Kabuli — Nissan 411 Series (CP/CM ~250-320 HP)</option>
+                        <option value="hino_p11c_old" data-era="Purana / Kabuli" data-base="4.05" data-drop="0.027">Purana / Kabuli — Hino Profia P11C (~350-380 HP)</option>
+                        <option value="isuzu_6wf1_old" data-era="Purana / Kabuli" data-base="3.90" data-drop="0.026">Purana / Kabuli — Isuzu Giga 6WF1 (~360-390 HP)</option>
+                        <option value="nissan_howo_old" data-era="Purana / Kabuli" data-base="3.85" data-drop="0.026">Purana / Kabuli — Nissan GE13 / HOWO / FAW (~370-420 HP)</option>
+                        <option value="hino_e13c_old" data-era="Purana / Kabuli" data-base="3.80" data-drop="0.025">Purana / Kabuli — Hino 700 / Profia E13C (~410-450 HP)</option>
+                        <option value="isuzu_6wg1_old" data-era="Purana / Kabuli" data-base="3.75" data-drop="0.024">Purana / Kabuli — Isuzu Giga 6WG1 / CYZ52 (~390-460 HP)</option>
+                    </optgroup>
                 </select>
             </div>
 
-            <div class="col form-group" style="margin-bottom:6px;">
-                <label for="vehicleCondition">Gaari Ki Haalat:</label>
-                <select id="vehicleCondition" onchange="calculateModelAverage()">
-                    <option value="kabuli" selected>Purana / Kabuli / Used</option>
-                    <option value="naya">Naya / Local Assembled</option>
+            <div class="col form-group" style="margin-bottom:8px;">
+                <label for="engineCondition">Engine Ki Haalat (Fit / Kamzor):</label>
+                <select id="engineCondition" onchange="calculateModelAverage()">
+                    <option value="fit" data-label="Fit / Normal" data-avg-delta="0" data-drop-delta="0" selected>Fit / Normal (Engine Bilkul Theek)</option>
+                    <option value="weak" data-label="Kamzor / Weak" data-avg-delta="-0.38" data-drop-delta="0.006">Kamzor / Weak (Engine Kamzor / Load Par Drop)</option>
+                    <option value="overhauled" data-label="Fresh Overhauled" data-avg-delta="-0.10" data-drop-delta="0.002">Fresh Overhauled (Engine Repair / Setting)</option>
                 </select>
             </div>
         </div>
@@ -524,7 +552,7 @@
             </div>
 
             <div class="slip-row">
-                <span>Model / Haalat:</span>
+                <span>Model / HP / Haalat:</span>
                 <span id="resModelInfo">-</span>
             </div>
             <div class="slip-row">
@@ -764,586 +792,4 @@
         "Swabi": [34.1206, 72.4698],
 
         // Balochistan Cities
-        "Quetta": [30.1798, 66.9750], "Gwadar": [25.1264, 62.3225], "Turbat": [26.0031, 63.0544],
-        "Khuzdar": [27.8165, 66.6057], "Hub": [25.0209, 66.8861], "Chaman": [30.9210, 66.4597],
-        "Sibi": [29.5430, 67.8773], "Zhob": [31.3417, 69.4486], "Loralai": [30.3705, 68.5979],
-        "Turbat / Kech": [26.0031, 63.0544], "Bela": [26.2289, 66.3106], "Uthal": [25.8072, 66.6219]
-    };
-
-    const cityNames = Object.keys(cityCoords);
-
-    function haversineKM(c1, c2) {
-        const toRad = x => (x * Math.PI) / 180;
-        const R = 6371;
-        const dLat = toRad(c2[0] - c1[0]);
-        const dLon = toRad(c2[1] - c1[1]);
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRad(c1[0])) * Math.cos(toRad(c2[0])) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function findCityCoords(name) {
-        if (!name) return null;
-        const clean = name.trim().toLowerCase();
-        if (!clean) return null;
-        for (const key of cityNames) {
-            if (key.toLowerCase() === clean) return cityCoords[key];
-        }
-        for (const key of cityNames) {
-            if (key.toLowerCase().includes(clean) || clean.includes(key.toLowerCase())) {
-                return cityCoords[key];
-            }
-        }
-        return null;
-    }
-
-    function estimateRoadKM(fromName, toName, routeType) {
-        const c1 = findCityCoords(fromName);
-        const c2 = findCityCoords(toName);
-        if (!c1 || !c2) return null;
-
-        const straight = haversineKM(c1, c2);
-        if (straight < 1) return 15;
-
-        let factor = 1.24;
-        if (routeType === "motorway") factor = 1.19;
-        else if (routeType === "gt") factor = 1.28;
-
-        return Math.max(10, Math.round(straight * factor));
-    }
-
-    function autoCalculateDistance() {
-        const fromVal = document.getElementById("fromCity").value;
-        const toVal = document.getElementById("toCity").value;
-        const routeType = document.getElementById("routeType").value;
-        const est = estimateRoadKM(fromVal, toVal, routeType);
-        if (est !== null) {
-            document.getElementById("distanceKM").value = est;
-            document.getElementById("distHint").textContent = `Andazan ${est} KM (${fromVal} se ${toVal} tak) - zaroorat par +/- se adjust karein.`;
-        }
-        if (document.getElementById("isReturn").checked) {
-            autoCalculateReturnDistance();
-        }
-    }
-
-    function autoCalculateReturnDistance() {
-        const fromVal = document.getElementById("toCity").value;
-        const toVal = document.getElementById("returnToCity").value;
-        const routeType = document.getElementById("returnRouteType").value;
-        const est = estimateRoadKM(fromVal, toVal, routeType);
-        if (est !== null) {
-            document.getElementById("returnDistanceKM").value = est;
-            document.getElementById("retDistHint").textContent = `Andazan ${est} KM (${fromVal} se ${toVal} tak) - zaroorat par +/- se adjust karein.`;
-        }
-    }
-
-    function adjustDistance(delta) {
-        const el = document.getElementById("distanceKM");
-        const curr = parseFloat(el.value) || 0;
-        el.value = Math.max(1, Math.round((curr + delta) * 10) / 10);
-    }
-
-    function adjustReturnDistance(delta) {
-        const el = document.getElementById("returnDistanceKM");
-        const curr = parseFloat(el.value) || 0;
-        el.value = Math.max(0, Math.round((curr + delta) * 10) / 10);
-    }
-
-    function syncReturnDefaultCity() {
-        const retTo = document.getElementById("returnToCity");
-        const fromVal = document.getElementById("fromCity").value;
-        if (retTo && !retTo.value.trim() && fromVal.trim()) {
-            retTo.value = fromVal;
-        }
-    }
-
-    function syncReturnTare() {
-        const tareVal = parseFloat(document.getElementById("tareWeight").value) || 14;
-        const retGrossEl = document.getElementById("returnGrossWeight");
-        const retHint = retGrossEl && retGrossEl.nextElementSibling;
-        if (retHint) {
-            retHint.textContent = `Khali wapsi ho to Tare (${tareVal}T) ke barabar rakhein.`;
-        }
-    }
-
-    function toggleReturn() {
-        const checked = document.getElementById("isReturn").checked;
-        const box = document.getElementById("returnFields");
-        box.style.display = checked ? "block" : "none";
-        if (checked) {
-            syncReturnDefaultCity();
-            syncReturnTare();
-            const outKm = parseFloat(document.getElementById("distanceKM").value) || 1184;
-            const retKmEl = document.getElementById("returnDistanceKM");
-            if (!retKmEl.value || parseFloat(retKmEl.value) === 0) {
-                retKmEl.value = outKm;
-            }
-            const tareVal = parseFloat(document.getElementById("tareWeight").value) || 14;
-            const retGrossEl = document.getElementById("returnGrossWeight");
-            if (!retGrossEl.value || parseFloat(retGrossEl.value) === 0) {
-                retGrossEl.value = tareVal;
-            }
-        }
-    }
-
-    function getSelectedModelProfile() {
-        const modelEl = document.getElementById("vehicleModel");
-        const condEl = document.getElementById("vehicleCondition");
-
-        const key = modelEl ? modelEl.value : "auto_default";
-        const opt = modelEl && modelEl.options[modelEl.selectedIndex] ? modelEl.options[modelEl.selectedIndex] : null;
-        const cond = condEl ? condEl.value : "kabuli";
-
-        const baseAvg = opt ? (parseFloat(opt.dataset.base) || 4.30) : 4.30;
-        const dropPerTon = opt ? (parseFloat(opt.dataset.drop) || 0.025) : 0.025;
-        const rawLabel = opt ? opt.textContent.trim() : "Auto Default";
-        const shortName = rawLabel.split("(")[0].trim();
-        const condLabel = cond === "naya" ? "Naya / Local" : "Purana / Kabuli";
-
-        const isLightMediumNissan = ["nissan_311", "nissan_411", "nissan_cm_cp"].includes(key);
-        let condAdj = 0;
-        if (cond === "kabuli") {
-            condAdj = isLightMediumNissan ? -0.22 : -0.15;
-        } else if (cond === "naya") {
-            condAdj = isLightMediumNissan ? -0.08 : 0.08;
-        }
-
-        return {
-            key,
-            shortName,
-            fullName: rawLabel,
-            condition: cond,
-            condLabel,
-            baseAvg,
-            dropPerTon,
-            condAdj
-        };
-    }
-
-    function calcAutoKMPerL(grossTons, tareTons, routeType) {
-        const profile = getSelectedModelProfile();
-        const netLoad = Math.max(0, grossTons - tareTons);
-
-        let routeFactor = 0.98; // Mix Route
-        if (routeType === "motorway") routeFactor = 1.03;
-        else if (routeType === "gt") routeFactor = 0.94;
-
-        const routeBaseDelta = profile.key === "auto_default"
-            ? (routeType === "motorway" ? 0.25 : routeType === "gt" ? -0.25 : 0)
-            : 0;
-
-        const rawAvg = ((profile.baseAvg + routeBaseDelta + profile.condAdj) - (netLoad * profile.dropPerTon)) * routeFactor;
-        const clamped = Math.max(2.00, Math.min(6.20, rawAvg));
-        return Math.round(clamped * 100) / 100;
-    }
-
-    function calculateModelAverage() {
-        const tareTons = Math.max(0, parseFloat(document.getElementById("tareWeight")?.value) || 14);
-        const grossTons = Math.max(tareTons, parseFloat(document.getElementById("grossWeight")?.value) || tareTons);
-        const routeType = document.getElementById("routeType")?.value || "mix";
-        const customInput = document.getElementById("customAvg");
-        const previewEl = document.getElementById("modelAveragePreview");
-
-        const profile = getSelectedModelProfile();
-        const autoAvg = calcAutoKMPerL(grossTons, tareTons, routeType);
-        const customVal = parseFloat(customInput?.value);
-        const hasCustom = !isNaN(customVal) && customVal > 0;
-
-        if (customInput) {
-            customInput.placeholder = `Auto (${profile.shortName} | ${profile.condLabel}: ${autoAvg.toFixed(2)} KM/L)`;
-        }
-
-        if (previewEl) {
-            const netLoad = Math.max(0, grossTons - tareTons);
-            const activeVal = hasCustom ? customVal.toFixed(2) : autoAvg.toFixed(2);
-            const modeText = hasCustom ? "Custom Override" : "Auto Model + Haalat + Load";
-            previewEl.innerHTML =
-                `Active Average: <strong>${activeVal} KM/L</strong> ` +
-                `<span>(${modeText} | ${profile.shortName} - ${profile.condLabel} | Load: ${netLoad.toFixed(1)}T)</span>`;
-        }
-
-        return hasCustom ? customVal : autoAvg;
-    }
-
-    function getRouteLabel(val) {
-        if (val === "motorway") return "Motorway (M-9 / M-5 / M-2)";
-        if (val === "gt") return "GT Road (N-5)";
-        return "Mix Route (Motorway + GT)";
-    }
-
-    function calculateFuel() {
-        const vehicleNo = (document.getElementById("vehicleNo").value || "N/A").trim() || "N/A";
-        const fromCity = (document.getElementById("fromCity").value || "Origin").trim() || "Origin";
-        const toCity = (document.getElementById("toCity").value || "Destination").trim() || "Destination";
-        const routeType = document.getElementById("routeType").value;
-        const outKM = Math.max(0, parseFloat(document.getElementById("distanceKM").value) || 0);
-        const dieselRate = Math.max(0, parseFloat(document.getElementById("dieselRate").value) || 0);
-        const tareTons = Math.max(0, parseFloat(document.getElementById("tareWeight").value) || 0);
-        const grossTons = Math.max(tareTons, parseFloat(document.getElementById("grossWeight").value) || tareTons);
-        const customAvgVal = parseFloat(document.getElementById("customAvg").value);
-
-        const profile = getSelectedModelProfile();
-        const modelInfoDisplay = `${profile.shortName} (${profile.condLabel})`;
-
-        const outNetTons = Math.max(0, grossTons - tareTons);
-        const outAvg = (!isNaN(customAvgVal) && customAvgVal > 0)
-            ? customAvgVal
-            : calcAutoKMPerL(grossTons, tareTons, routeType);
-        const outLitres = outAvg > 0 ? outKM / outAvg : 0;
-
-        let totalKM = outKM;
-        let totalLitres = outLitres;
-        let totalNetTons = outNetTons;
-        let routeDisplay = `${fromCity} → ${toCity}`;
-        let corridorDisplay = getRouteLabel(routeType);
-        let weightDisplay = `${tareTons}T / ${grossTons}T (Net: ${outNetTons.toFixed(1)}T)`;
-        let avgDisplay = outAvg.toFixed(2);
-
-        const isReturn = document.getElementById("isReturn").checked;
-        if (isReturn) {
-            const retToCity = (document.getElementById("returnToCity").value || fromCity).trim() || fromCity;
-            const retRouteType = document.getElementById("returnRouteType").value;
-            const retKM = Math.max(0, parseFloat(document.getElementById("returnDistanceKM").value) || 0);
-            const retGrossTons = Math.max(tareTons, parseFloat(document.getElementById("returnGrossWeight").value) || tareTons);
-            const retNetTons = Math.max(0, retGrossTons - tareTons);
-
-            const retAvg = (!isNaN(customAvgVal) && customAvgVal > 0)
-                ? customAvgVal
-                : calcAutoKMPerL(retGrossTons, tareTons, retRouteType);
-            const retLitres = retAvg > 0 ? retKM / retAvg : 0;
-
-            totalKM = outKM + retKM;
-            totalLitres = outLitres + retLitres;
-            totalNetTons = outNetTons + retNetTons;
-
-            routeDisplay = `${fromCity} → ${toCity} → ${retToCity}`;
-            corridorDisplay = `Out: ${getRouteLabel(routeType)} | Ret: ${getRouteLabel(retRouteType)}`;
-            weightDisplay = `Out ${grossTons}T / Ret ${retGrossTons}T (Tare ${tareTons}T)`;
-            const blendedAvg = totalLitres > 0 ? totalKM / totalLitres : outAvg;
-            avgDisplay = `${blendedAvg.toFixed(2)} (Out ${outAvg.toFixed(2)} / Ret ${retAvg.toFixed(2)})`;
-        }
-
-        const grandTotal = Math.round(totalLitres * dieselRate);
-        const perTonCost = outNetTons > 0 ? Math.round((outLitres * dieselRate) / outNetTons) : 0;
-
-        const now = new Date();
-        const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-
-        document.getElementById("slipCompanyHeader").textContent = activeCompany.title || "R TECH FLEET & LOGISTICS";
-        document.getElementById("slipPreparedBy").textContent = `Prepared By (${activeCompany.code || "R TECH"})`;
-        document.getElementById("slipDate").textContent = dateStr;
-        document.getElementById("slipVehicle").textContent = vehicleNo;
-        document.getElementById("resModelInfo").textContent = modelInfoDisplay;
-        document.getElementById("resRouteName").textContent = routeDisplay;
-        document.getElementById("resRouteType").textContent = corridorDisplay;
-        document.getElementById("resDist").textContent = totalKM.toLocaleString();
-        document.getElementById("resWeights").textContent = weightDisplay;
-        document.getElementById("resAvg").textContent = avgDisplay;
-        document.getElementById("resRate").textContent = dieselRate.toLocaleString();
-        document.getElementById("resFuel").textContent = totalLitres.toFixed(1);
-        document.getElementById("resGrandTotal").textContent = grandTotal.toLocaleString();
-        document.getElementById("resPerTon").textContent = perTonCost.toLocaleString();
-
-        document.getElementById("resultWrapper").style.display = "block";
-        document.getElementById("resultWrapper").scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-        lastSummaryText =
-            `*${activeCompany.title || "R TECH FLEET & LOGISTICS"}*\n` +
-            `Date: ${dateStr} | Vehicle: *${vehicleNo}*\n` +
-            `Model: ${modelInfoDisplay}\n` +
-            `Route: ${routeDisplay}\n` +
-            `Distance: ${totalKM} KM | Avg: ${avgDisplay} KM/L\n` +
-            `Diesel: ${totalLitres.toFixed(1)} L @ Rs.${dieselRate}/L\n` +
-            `*Total Diesel Cost: Rs. ${grandTotal.toLocaleString()}*`;
-
-        lastExcelRow = [
-            dateStr, vehicleNo, modelInfoDisplay, routeDisplay, corridorDisplay,
-            totalKM, tareTons, grossTons, avgDisplay,
-            totalLitres.toFixed(1), dieselRate, grandTotal
-        ].join("\t");
-    }
-
-    function shareWhatsApp() {
-        if (!lastSummaryText) calculateFuel();
-        const url = "https://wa.me/?text=" + encodeURIComponent(lastSummaryText);
-        window.open(url, "_blank");
-    }
-
-    function copyForExcel() {
-        if (!lastExcelRow) calculateFuel();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(lastExcelRow).then(() => {
-                alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
-            }).catch(() => fallbackCopy(lastExcelRow));
-        } else {
-            fallbackCopy(lastExcelRow);
-        }
-    }
-
-    function fallbackCopy(text) {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        alert("Slip data Excel mein paste karne ke liye copy ho gaya hai!");
-    }
-
-    /* Autocomplete Setup */
-    function attachAutocomplete(inputId) {
-        const inp = document.getElementById(inputId);
-        if (!inp) return;
-        let currentFocus;
-
-        inp.addEventListener("input", function () {
-            const val = this.value.trim().toLowerCase();
-            closeAllLists();
-            currentFocus = -1;
-            if (!val) return;
-
-            const listDiv = document.createElement("div");
-            listDiv.setAttribute("id", this.id + "-autocomplete-list");
-            listDiv.setAttribute("class", "autocomplete-items");
-            this.parentNode.appendChild(listDiv);
-
-            const matches = cityNames.filter(c => c.toLowerCase().includes(val)).slice(0, 12);
-            matches.forEach(item => {
-                const itemDiv = document.createElement("div");
-                itemDiv.textContent = item;
-                itemDiv.addEventListener("click", function () {
-                    inp.value = item;
-                    closeAllLists();
-                    if (inputId === "fromCity") {
-                        syncReturnDefaultCity();
-                        autoCalculateDistance();
-                    } else if (inputId === "toCity") {
-                        autoCalculateDistance();
-                    } else if (inputId === "returnToCity") {
-                        autoCalculateReturnDistance();
-                    }
-                });
-                listDiv.appendChild(itemDiv);
-            });
-        });
-
-        inp.addEventListener("keydown", function (e) {
-            const list = document.getElementById(this.id + "-autocomplete-list");
-            if (!list) return;
-            const items = list.getElementsByTagName("div");
-            if (e.keyCode === 40) {
-                currentFocus++;
-                addActive(items);
-            } else if (e.keyCode === 38) {
-                currentFocus--;
-                addActive(items);
-            } else if (e.keyCode === 13) {
-                if (currentFocus > -1 && items[currentFocus]) {
-                    e.preventDefault();
-                    items[currentFocus].click();
-                }
-            }
-        });
-
-        function addActive(items) {
-            if (!items || !items.length) return;
-            removeActive(items);
-            if (currentFocus >= items.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = items.length - 1;
-            items[currentFocus].classList.add("autocomplete-active");
-        }
-
-        function removeActive(items) {
-            for (let i = 0; i < items.length; i++) {
-                items[i].classList.remove("autocomplete-active");
-            }
-        }
-
-        function closeAllLists(elmnt) {
-            const items = document.getElementsByClassName("autocomplete-items");
-            for (let i = 0; i < items.length; i++) {
-                if (elmnt !== items[i] && elmnt !== inp) {
-                    items[i].parentNode.removeChild(items[i]);
-                }
-            }
-        }
-
-        document.addEventListener("click", function (e) {
-            closeAllLists(e.target);
-        });
-    }
-
-    /* Multi-Company Auth & Sheet Verification */
-    function parseCSVLine(line) {
-        const result = [];
-        let cur = "";
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (ch === '"') {
-                inQuotes = !inQuotes;
-            } else if (ch === "," && !inQuotes) {
-                result.push(cur.trim());
-                cur = "";
-            } else {
-                cur += ch;
-            }
-        }
-        result.push(cur.trim());
-        return result;
-    }
-
-    async function fetchCompaniesFromSheet() {
-        const res = await fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now(), { cache: "no-store" });
-        if (!res.ok) throw new Error("Sheet fetch failed");
-        const text = await res.text();
-        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (lines.length < 2) return [];
-
-        const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
-        const codeIdx = headers.findIndex(h => h.includes("code") || h.includes("company"));
-        const pinIdx = headers.findIndex(h => h.includes("pin") || h.includes("pass"));
-        const titleIdx = headers.findIndex(h => h.includes("title") || h.includes("name"));
-        const wmIdx = headers.findIndex(h => h.includes("watermark"));
-        const expIdx = headers.findIndex(h => h.includes("exp") || h.includes("valid"));
-        const activeIdx = headers.findIndex(h => h.includes("status") || h.includes("active"));
-
-        const companies = [];
-        for (let i = 1; i < lines.length; i++) {
-            const cols = parseCSVLine(lines[i]);
-            const code = (cols[codeIdx >= 0 ? codeIdx : 0] || "").toUpperCase();
-            const pin = (cols[pinIdx >= 0 ? pinIdx : 1] || "");
-            if (!code && !pin) continue;
-            companies.push({
-                code,
-                pin,
-                title: (titleIdx >= 0 && cols[titleIdx]) ? cols[titleIdx] : `${code} FLEET & LOGISTICS`,
-                watermark: (wmIdx >= 0 && cols[wmIdx]) ? cols[wmIdx] : code,
-                expiry: (expIdx >= 0 && cols[expIdx]) ? cols[expIdx] : "",
-                status: (activeIdx >= 0 && cols[activeIdx]) ? cols[activeIdx].toLowerCase() : "active"
-            });
-        }
-        return companies;
-    }
-
-    function applyCompanyBranding(comp) {
-        activeCompany = comp;
-        document.documentElement.style.setProperty("--wm-text", `"${comp.watermark || comp.code || "R TECH"}"`);
-        document.getElementById("slipCompanyHeader").textContent = comp.title || "R TECH FLEET & LOGISTICS";
-        document.getElementById("slipPreparedBy").textContent = `Prepared By (${comp.code || "R TECH"})`;
-    }
-
-    function unlockSessionUI(comp) {
-        applyCompanyBranding(comp);
-        document.getElementById("bcc-lock-overlay").style.display = "none";
-        document.getElementById("bcc-settings-btn").style.display = "block";
-    }
-
-    async function verifyCompanyLogin() {
-        const codeInput = document.getElementById("bcc-company-code");
-        const pinInput = document.getElementById("bcc-login-pin");
-        const errEl = document.getElementById("bcc-login-error");
-        const btn = document.getElementById("bcc-unlock-btn");
-
-        const code = (codeInput.value || "").trim().toUpperCase();
-        const pin = (pinInput.value || "").trim();
-
-        errEl.style.display = "none";
-        if (!code || !pin) {
-            errEl.textContent = "Baraye meharbani Company Code aur PIN dono likhein.";
-            errEl.style.display = "block";
-            return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = "Checking...";
-
-        try {
-            const list = await fetchCompaniesFromSheet();
-            const matched = list.find(c => c.code === code && c.pin === pin);
-
-            if (!matched) {
-                errEl.textContent = "Ghalat Company Code ya PIN! Dobara check karein.";
-                errEl.style.display = "block";
-                return;
-            }
-
-            if (matched.status === "inactive" || matched.status === "disabled" || matched.status === "blocked") {
-                errEl.textContent = "Yeh Company Code is waqt inactive hai.";
-                errEl.style.display = "block";
-                return;
-            }
-
-            if (matched.expiry) {
-                const expDate = new Date(matched.expiry);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                if (!isNaN(expDate.getTime()) && expDate < today) {
-                    errEl.textContent = `Is company ka license (${matched.expiry}) expire ho chuka hai.`;
-                    errEl.style.display = "block";
-                    return;
-                }
-            }
-
-            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(matched));
-            unlockSessionUI(matched);
-        } catch (err) {
-            errEl.textContent = "Internet ya Google Sheet connect karne mein masla aaya. Dobara koshish karein.";
-            errEl.style.display = "block";
-        } finally {
-            btn.disabled = false;
-            btn.textContent = "Unlock Karein";
-        }
-    }
-
-    function openAccountModal() {
-        const info =
-            `<strong>Company:</strong> ${activeCompany.title}<br>` +
-            `<strong>Code:</strong> ${activeCompany.code}<br>` +
-            `<strong>Expiry:</strong> ${activeCompany.expiry || "Active"}`;
-        document.getElementById("activeCompanyInfo").innerHTML = info;
-        document.getElementById("bcc-pin-modal").style.display = "flex";
-    }
-
-    function closeAccountModal() {
-        document.getElementById("bcc-pin-modal").style.display = "none";
-    }
-
-    function lockBccNow() {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        closeAccountModal();
-        document.getElementById("bcc-login-pin").value = "";
-        document.getElementById("bcc-lock-overlay").style.display = "flex";
-        document.getElementById("bcc-settings-btn").style.display = "none";
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-        attachAutocomplete("fromCity");
-        attachAutocomplete("toCity");
-        attachAutocomplete("returnToCity");
-        syncReturnDefaultCity();
-        syncReturnTare();
-        calculateModelAverage();
-
-        try {
-            const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (parsed && parsed.code) {
-                    unlockSessionUI(parsed);
-                }
-            }
-        } catch (e) {}
-
-        // Step 4 (Aakhri PWA Step): Register Service Worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("sw.js")
-                .then(() => console.log("PWA Service Worker Registered"))
-                .catch((err) => console.log("SW Error:", err));
-        }
-    });
-</script>
-</body>
-</html>
+        "Quetta": [30.1798
