@@ -332,6 +332,16 @@
             font-weight: 700;
             color: #166534;
         }
+        .local-card-terrain-note {
+            margin-top: 6px;
+            padding: 5px 8px;
+            background: #f8fafc;
+            border-left: 3px solid #16a34a;
+            border-radius: 4px;
+            font-size: 11.5px;
+            color: #1e293b;
+            line-height: 1.45;
+        }
         .btn-local-remove {
             background: #fee2e2;
             color: #b91c1c;
@@ -866,11 +876,11 @@
         <input type="number" step="any" inputmode="decimal" id="customAvg" placeholder="Auto (Khali: 4.30 | Har Ton & Route ke mutabiq exact KM/L)" onfocus="this.select()" oninput="calculateModelAverage()">
     </div>
 
-    <!-- Multiple Local & Intercity Extra Trips Section (Counted Inside Rawangi & Wapsi) -->
+    <!-- Multiple Local & Intercity Extra Trips Section (With Interchanges & Auto Charhai/Utrai) -->
     <div class="local-box">
         <label class="local-checkbox-label">
             <input type="checkbox" id="hasLocalTrips" onchange="toggleLocalTrips(); calculateModelAverage();">
-            Local / Extra City-to-City Trips shamil karein (Rawangi &amp; Wapsi ke andar count honge)
+            Local / Extra City-to-City Trips shamil karein (Interchange + Charhai/Utrai Auto)
         </label>
 
         <div id="localTripsFields" style="display:none;">
@@ -1608,7 +1618,6 @@
     }
 
     function getTerrainAdjustment(fromName, toName, routeType) {
-        if (routeType === "local") return { factor: 1.0, label: "", elevDelta: 0 };
         const elevFrom = getCityElevation(fromName);
         const elevTo = getCityElevation(toName);
         const elevDelta = (elevFrom !== null && elevTo !== null) ? (elevTo - elevFrom) : 0;
@@ -1616,6 +1625,11 @@
         const touchesBaloch = isBalochistanMountainCity(fromName) || isBalochistanMountainCity(toName);
         const touchesHillKpk = isSaltRangeOrKpkCity(fromName) || isSaltRangeOrKpkCity(toName);
         const touchesCoastal = isCoastalOrMakranCity(fromName) || isCoastalOrMakranCity(toName);
+
+        // If local city-to-city involves hills or significant elevation change, apply terrain; otherwise neutral
+        if (routeType === "local" && !touchesBaloch && !touchesHillKpk && !touchesCoastal && Math.abs(elevDelta) < 200) {
+            return { factor: 1.0, label: "", elevDelta: 0 };
+        }
 
         let factor = 1.0;
         let label = "";
@@ -1777,6 +1791,12 @@
         }
     }
 
+    /* Reusable Interchange Options Helper */
+    function getInterchangeOptionsHTML() {
+        const masterSel = document.getElementById("entryInterchange");
+        return masterSel ? masterSel.innerHTML : '<option value="">-- Koi Interchange Nahi / GT Only --</option>';
+    }
+
     /* Multiple Local & Intercity Extra Trips Management */
     function toggleLocalTrips() {
         const checked = !!document.getElementById("hasLocalTrips")?.checked;
@@ -1790,18 +1810,28 @@
         calculateModelAverage();
     }
 
+    function adjustLocalCardKM(btn, delta) {
+        const card = btn.closest(".local-trip-card");
+        if (!card) return;
+        const kmEl = card.querySelector(".local-km");
+        if (!kmEl) return;
+        const curr = safeFloat(kmEl.value, 0);
+        kmEl.value = Math.max(1, Math.round((curr + delta) * 10) / 10);
+        calculateModelAverage();
+    }
+
     function autoCalculateLocalCardKM(card) {
         if (!card) return;
         const fromVal = card.querySelector(".local-from")?.value || "";
         const toVal = card.querySelector(".local-to")?.value || "";
-        const routeVal = card.querySelector(".local-route")?.value || "local";
+        const routeSel = card.querySelector(".local-route");
+        const routeVal = routeSel?.value || "local";
         const kmEl = card.querySelector(".local-km");
         if (!kmEl) return;
 
         const res = estimateRoadKM(fromVal, toVal, routeVal);
         if (res !== null) {
             kmEl.value = res.km;
-            const routeSel = card.querySelector(".local-route");
             if (res.km > 55 && routeSel && routeSel.value === "local") {
                 routeSel.value = "mix";
             }
@@ -1824,6 +1854,7 @@
 
         const fromInputId = `localFrom_${idx}`;
         const toInputId = `localTo_${idx}`;
+        const icOptions = getInterchangeOptionsHTML();
 
         card.innerHTML = `
             <div class="local-trip-card-header">
@@ -1833,11 +1864,25 @@
             <div class="row">
                 <div class="col form-group autocomplete" style="margin-bottom:8px;">
                     <label>Kahan Se (Shehar / Port / Adda):</label>
-                    <input type="text" id="${fromInputId}" class="local-from" value="${fromDefault}" placeholder="Maslan: Karachi ya Port Qasim" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
+                    <input type="text" id="${fromInputId}" class="local-from" value="${fromDefault}" placeholder="Maslan: Karachi ya Sukkur" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
                 </div>
                 <div class="col form-group autocomplete" style="margin-bottom:8px;">
                     <label>Kahan Tak (Shehar / Godown):</label>
-                    <input type="text" id="${toInputId}" class="local-to" value="${toDefault}" placeholder="Maslan: Hyderabad ya Korangi" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
+                    <input type="text" id="${toInputId}" class="local-to" value="${toDefault}" placeholder="Maslan: Quetta ya Hyderabad" autocomplete="off" oninput="autoCalculateLocalCardKM(this.closest('.local-trip-card'))">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col form-group" style="margin-bottom:8px;">
+                    <label>MW Entry Interchange (In):</label>
+                    <select class="local-entry-ic" onchange="calculateModelAverage()">
+                        ${icOptions}
+                    </select>
+                </div>
+                <div class="col form-group" style="margin-bottom:8px;">
+                    <label>MW Exit Interchange (Out):</label>
+                    <select class="local-exit-ic" onchange="calculateModelAverage()">
+                        ${icOptions}
+                    </select>
                 </div>
             </div>
             <div class="row">
@@ -1853,12 +1898,19 @@
                 <div class="col form-group" style="margin-bottom:4px;">
                     <label>Faasla (KM):</label>
                     <input type="number" step="any" inputmode="decimal" class="local-km" value="${kmDefault}" onfocus="this.select()" oninput="calculateModelAverage()">
+                    <div class="km-adjust-bar">
+                        <button type="button" class="btn-km-adj" onclick="adjustLocalCardKM(this, -10)">-10</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustLocalCardKM(this, -5)">-5</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustLocalCardKM(this, 5)">+5</button>
+                        <button type="button" class="btn-km-adj" onclick="adjustLocalCardKM(this, 10)">+10</button>
+                    </div>
                 </div>
                 <div class="col form-group" style="margin-bottom:4px;">
                     <label>Kul Vazan (Gross Tons):</label>
                     <input type="number" step="any" inputmode="decimal" class="local-gross" value="${initGross}" onfocus="this.select()" oninput="calculateModelAverage()">
                 </div>
             </div>
+            <div class="local-card-terrain-note">Avg: -- KM/L</div>
         `;
 
         listEl.appendChild(card);
@@ -1900,18 +1952,35 @@
 
         cards.forEach((card, index) => {
             const km = Math.max(0, safeFloat(card.querySelector(".local-km")?.value, 0));
-            if (km <= 0) return;
-
             const fromVal = (card.querySelector(".local-from")?.value || "").trim() || `Point ${index + 1}A`;
             const toVal = (card.querySelector(".local-to")?.value || "").trim() || `Point ${index + 1}B`;
             const routeVal = card.querySelector(".local-route")?.value || "local";
+            const entryIC = card.querySelector(".local-entry-ic")?.value || "";
+            const exitIC = card.querySelector(".local-exit-ic")?.value || "";
             const gross = Math.max(tareTons, safeFloat(card.querySelector(".local-gross")?.value, tareTons));
             const netTons = Math.max(0, gross - tareTons);
 
+            const terrain = getTerrainAdjustment(fromVal, toVal, routeVal);
             const avg = hasCustomAvg ? customAvgVal : calcAutoKMPerL(gross, tareTons, routeVal, fromVal, toVal);
-            const litres = avg > 0 ? km / avg : 0;
+            const litres = (avg > 0 && km > 0) ? km / avg : 0;
             const speed = getPakistanTrailerSpeed(routeVal, netTons, fromVal, toVal, isWeakEngine);
-            const hours = speed > 0 ? km / speed : 0;
+            const hours = (speed > 0 && km > 0) ? km / speed : 0;
+            const icSummary = getInterchangeSummary(entryIC, exitIC);
+            const corridorDetail = getCorridorRouteDetail(fromVal, toVal, routeVal, entryIC, exitIC);
+
+            // Live feedback inside each Local/Extra trip card
+            const noteEl = card.querySelector(".local-card-terrain-note");
+            if (noteEl) {
+                const terrainTag = terrain.label
+                    ? ` <span class="rtech-terrain-badge">${terrain.label}</span>`
+                    : ` <span style="color:#15803d;font-weight:600;">(Seedha / Maidan Route)</span>`;
+                const icTag = (entryIC || exitIC) ? ` | 🚦 ${icSummary}` : "";
+                noteEl.innerHTML =
+                    `<strong>Avg: ${avg.toFixed(2)} KM/L</strong> • Diesel: <strong>${litres.toFixed(1)} L</strong>${terrainTag}${icTag}` +
+                    `<div style="color:#475569;margin-top:2px;">🛣️ ${corridorDetail}</div>`;
+            }
+
+            if (km <= 0) return;
 
             totalKM += km;
             totalLitres += litres;
@@ -1923,6 +1992,11 @@
                 from: fromVal,
                 to: toVal,
                 routeType: routeVal,
+                entryIC,
+                exitIC,
+                icSummary,
+                corridorDetail,
+                terrainLabel: terrain.label,
                 km,
                 gross,
                 netTons,
@@ -2325,7 +2399,7 @@
             customInput.placeholder = `Auto (${profile.condLabel}: ${autoAvg.toFixed(2)} KM/L)`;
         }
 
-        // Update Extra / Local Trips Summary Strip
+        // Update Extra / Local Trips Summary Strip & Cards
         const localData = getLocalTripsData(tareTons, hasCustom, customVal, profile.isWeak);
         const localStrip = document.getElementById("localSummaryStrip");
         if (localStrip) {
@@ -2347,7 +2421,11 @@
             let localRoutePreviewHtml = "";
             if (localData.enabled && localData.trips.length > 0) {
                 localPreviewNote = ` | <strong>Extra/Local (${localData.trips.length}):</strong> ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
-                const listDesc = localData.trips.map(t => `#${t.index}: ${t.from} → ${t.to} (${t.km} KM, ${t.gross}T)`).join(" ; ");
+                const listDesc = localData.trips.map(t => {
+                    const tTag = t.terrainLabel ? ` [${t.terrainLabel}]` : "";
+                    const icTag = (t.entryIC || t.exitIC) ? ` (${t.icSummary})` : "";
+                    return `#${t.index}: ${t.from} → ${t.to} (${t.km} KM, ${t.gross}T, ${t.avg.toFixed(2)} KM/L)${tTag}${icTag}`;
+                }).join(" ; ");
                 localRoutePreviewHtml = `<br>🏙️🛣️ <strong>Extra / Local Trips:</strong> ${listDesc}`;
             }
 
@@ -2439,8 +2517,19 @@
 
         if (hasActiveLocals) {
             localSummaryText = localData.trips
-                .map(t => `#${t.index} ${t.from}→${t.to} (${t.km}KM, ${t.gross}T)`)
+                .map(t => {
+                    const icPart = (t.entryIC || t.exitIC) ? `, IC: ${t.icSummary}` : "";
+                    const terrPart = t.terrainLabel ? `, ${t.terrainLabel}` : "";
+                    return `#${t.index} ${t.from}→${t.to} (${t.km}KM, ${t.gross}T, ${t.avg.toFixed(2)}KM/L${icPart}${terrPart})`;
+                })
                 .join(" | ");
+            const localIcList = localData.trips
+                .filter(t => t.entryIC || t.exitIC)
+                .map(t => `Ext#${t.index} (${t.icSummary})`)
+                .join(", ");
+            if (localIcList) {
+                icDisplay = `${icDisplay} | ${localIcList}`;
+            }
             if (localRowEl) localRowEl.style.display = "flex";
             if (localResEl) localResEl.textContent = `${localData.trips.length} Trip(s) • ${localData.totalKM} KM (${localData.totalLitres.toFixed(1)}L)`;
             routeDetailDisplay = `Jaana: ${routeDetailDisplay} | Extra/Local (${localData.trips.length}): ${localSummaryText}`;
