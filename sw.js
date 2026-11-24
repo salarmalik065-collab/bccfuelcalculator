@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rtech-fuel-v2';
+const CACHE_NAME = 'rtech-fuel-v3';
 const ASSETS = [
   '/bccfuelcalculator/',
   '/bccfuelcalculator/index.html',
