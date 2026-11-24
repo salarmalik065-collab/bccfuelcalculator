@@ -80,6 +80,38 @@
             display: none;
         }
 
+        /* In-App Update Available Banner */
+        #rtechUpdateBar {
+            display: none;
+            background: #0f766e;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: 0 3px 8px rgba(15, 118, 110, 0.25);
+        }
+        #rtechUpdateBar span {
+            font-size: 13px;
+            font-weight: 700;
+        }
+        #rtechUpdateBtn {
+            background: #ffffff;
+            color: #0f766e;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #rtechUpdateBtn:hover {
+            background: #f0fdfa;
+        }
+
         /* Saved Vehicles Auto List, Detail View, Delete & Bulk Add Box */
         .rtech-fleet-box {
             margin-bottom: 14px;
@@ -567,7 +599,7 @@
             @page { size: A4 portrait; margin: 10mm; }
             body { background: #fff; padding: 0; margin: 0; }
             body * { visibility: hidden; animation: none !important; }
-            #bcc-settings-btn, #bcc-lock-overlay, #bcc-pin-modal, .rtech-footer-badge { display: none !important; }
+            #bcc-settings-btn, #bcc-lock-overlay, #bcc-pin-modal, .rtech-footer-badge, #rtechUpdateBar { display: none !important; }
             #printableSlip, #printableSlip * { visibility: visible; }
             #printableSlip {
                 position: absolute;
@@ -593,6 +625,12 @@
 
 <div class="container">
     <h2 id="appMainHeading">🚚 R TECH Fuel Calculator</h2>
+
+    <!-- In-App Update Available Banner -->
+    <div id="rtechUpdateBar">
+        <span>🔄 Naya update dastiyab hai</span>
+        <button id="rtechUpdateBtn" type="button">Update Now</button>
+    </div>
 
     <div class="row">
         <div class="col form-group">
@@ -1626,7 +1664,6 @@
         const touchesHillKpk = isSaltRangeOrKpkCity(fromName) || isSaltRangeOrKpkCity(toName);
         const touchesCoastal = isCoastalOrMakranCity(fromName) || isCoastalOrMakranCity(toName);
 
-        // If local city-to-city involves hills or significant elevation change, apply terrain; otherwise neutral
         if (routeType === "local" && !touchesBaloch && !touchesHillKpk && !touchesCoastal && Math.abs(elevDelta) < 200) {
             return { factor: 1.0, label: "", elevDelta: 0 };
         }
@@ -1968,7 +2005,6 @@
             const icSummary = getInterchangeSummary(entryIC, exitIC);
             const corridorDetail = getCorridorRouteDetail(fromVal, toVal, routeVal, entryIC, exitIC);
 
-            // Live feedback inside each Local/Extra trip card
             const noteEl = card.querySelector(".local-card-terrain-note");
             if (noteEl) {
                 const terrainTag = terrain.label
@@ -2399,7 +2435,6 @@
             customInput.placeholder = `Auto (${profile.condLabel}: ${autoAvg.toFixed(2)} KM/L)`;
         }
 
-        // Update Extra / Local Trips Summary Strip & Cards
         const localData = getLocalTripsData(tareTons, hasCustom, customVal, profile.isWeak);
         const localStrip = document.getElementById("localSummaryStrip");
         if (localStrip) {
@@ -2496,7 +2531,6 @@
         const outSpeed = getPakistanTrailerSpeed(routeType, outNetTons, fromCity, toCity, profile.isWeak);
         const outHours = outSpeed > 0 ? outKM / outSpeed : 0;
 
-        // Local & Extra Intercity Trips Calculation
         const localData = getLocalTripsData(tareTons, hasCustomAvg, customAvgVal, profile.isWeak);
         const hasActiveLocals = localData.enabled && localData.trips.length > 0;
 
@@ -2964,11 +2998,48 @@
             }
         } catch (e) {}
 
-        // Register Service Worker
+        // Register Service Worker & Handle In-App Update Button
         if ("serviceWorker" in navigator) {
+            let newWorker;
+            const updateBar = document.getElementById("rtechUpdateBar");
+            const updateBtn = document.getElementById("rtechUpdateBtn");
+
             navigator.serviceWorker.register("sw.js")
-                .then(() => console.log("PWA Service Worker Registered"))
+                .then((reg) => {
+                    if (reg.waiting) {
+                        newWorker = reg.waiting;
+                        if (updateBar) updateBar.style.display = "flex";
+                    }
+
+                    reg.addEventListener("updatefound", () => {
+                        newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.addEventListener("statechange", () => {
+                            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                                if (updateBar) updateBar.style.display = "flex";
+                            }
+                        });
+                    });
+                })
                 .catch((err) => console.log("SW Error:", err));
+
+            if (updateBtn) {
+                updateBtn.addEventListener("click", () => {
+                    if (newWorker) {
+                        newWorker.postMessage({ type: "SKIP_WAITING" });
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            }
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener("controllerchange", () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
         }
     });
 </script>
