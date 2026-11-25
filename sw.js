@@ -1,4 +1,4 @@
-const CACHE_NAME = "rtech-fuel-calc-v4";
+const CACHE_NAME = "rtech-fuel-calc-v5";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
